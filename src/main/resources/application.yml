@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: "Job_Search_Java_25"
+
+server:
+  port: 8888
