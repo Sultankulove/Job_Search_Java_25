@@ -45,7 +45,7 @@ public class EmployerController {
 
     // Поиск всех резюме
     @GetMapping("resume")
-    public ResponseEntity<ResumeDto> allResume() {
+    public ResponseEntity<List<ResumeDto>> allResume() {
         return resumeService.findAllResume();
     }
 
