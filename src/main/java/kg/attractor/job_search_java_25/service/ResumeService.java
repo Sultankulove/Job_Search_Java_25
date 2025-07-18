@@ -8,8 +8,7 @@ import java.util.List;
 public interface ResumeService {
     ResponseEntity<List<ResumeDto>> findResumeCategory(String name);
 
-    ResponseEntity<ResumeDto> findAllResume();
-
+    ResponseEntity<List<ResumeDto>> findAllResume();
     void createResume(ResumeDto resumeDto);
 
     void deleteResume(long id);
