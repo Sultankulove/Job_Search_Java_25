@@ -14,7 +14,7 @@ import java.util.List;
 public class VacancyServiceImpl implements VacancyService {
 
     @Override
-    public void editById(long id, VacancyDto vacancyDto) {
+    public void editVacancyById(long id, VacancyDto vacancyDto) {
         // TODO редактируем вакансию. Находим по id и перезаписываем его.
     }
 
@@ -31,6 +31,11 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
+    public ResponseEntity<List<VacancyDto>> getVacancyByCategoryName(String name) {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<List<VacancyDto>> getVacancyCategory(String name) {
         // TODO Возвращаем список вакансий по категории
         return null;
@@ -40,6 +45,21 @@ public class VacancyServiceImpl implements VacancyService {
     public ResponseEntity<List<ApplicantDto>> getApplicantResponded() {
         // TODO Возвращаем список откика на вакансии
 
+        return null;
+    }
+
+    @Override
+    public void createVacancy(VacancyDto vacancyDto) {
+
+    }
+
+    @Override
+    public ResponseEntity<List<VacancyDto>> getVacancyByCategoryId(Long id) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<List<VacancyDto>> getVacancySortBySalary() {
         return null;
     }
 }
