@@ -27,7 +27,7 @@ public class ContactsInfoDao {
         Map<String, Object> params = Map.of(
                 "typeId", contact.getTypeId(),
                 "resumeId", contact.getResumeId(),
-                "contact_value", contact.getValue()
+                "contact_value", contact.getContactValue()
         );
         jdbc.update(sql, params);
     }

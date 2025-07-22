@@ -7,13 +7,19 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface VacancyService {
-    void editById(long id, VacancyDto vacancyDto);
+    void editVacancyById(long id, VacancyDto vacancyDto);
 
     void deleteById(long id);
 
     ResponseEntity<List<VacancyDto>> getActiveVacancies();
 
-    ResponseEntity<List<VacancyDto>> getVacancyCategory(String name);
+    ResponseEntity<List<VacancyDto>> getVacancyByCategoryName(String name);
 
     ResponseEntity<List<ApplicantDto>> getApplicantResponded();
+
+    void createVacancy(VacancyDto vacancyDto);
+
+    ResponseEntity<List<VacancyDto>> getVacancyByCategoryId(Long id);
+
+    ResponseEntity<List<VacancyDto>> getVacancySortBySalary();
 }
