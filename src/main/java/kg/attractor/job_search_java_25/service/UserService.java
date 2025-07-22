@@ -23,21 +23,7 @@ public interface UserService {
 
     @SneakyThrows
     default String saveUploadedFile(MultipartFile file, String subDir) {
-        String uuidFile = UUID.randomUUID().toString();
-        String fileName = uuidFile + "_" + file.getOriginalFilename();
-
-        Path pathDir = Paths.get("data/" + subDir);
-        Files.createDirectories(pathDir);
-
-        Path filePath = Paths.get(pathDir + "/" + fileName);
-        if (!Files.exists(filePath)) Files.createFile(filePath);
-
-        try (OutputStream outputStream = Files.newOutputStream(filePath)) {
-            outputStream.write(file.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileName;
+        return null;
     }
 
     default ResponseEntity<?> downloadAvatar(String fileName, String subDir, MediaType mediaType) {

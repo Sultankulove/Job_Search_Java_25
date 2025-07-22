@@ -58,7 +58,6 @@ public class VacancyController {
         return vacancyService.getVacancySortBySalary();
     }
 
-    // Отклик на вакансию для соискателя
     @GetMapping("applicant/responded")
     public ResponseEntity<List<ApplicantDto>> getApplicantResponded() {
         return vacancyService.getApplicantResponded();

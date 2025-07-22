@@ -27,7 +27,7 @@ public class ResumeController {
         return ResponseEntity.ok().body(resumeDto);
     }
 
-    @PutMapping("resume/{id}")
+    @PutMapping("resume/{id}/update")
     public ResponseEntity<ResumeDto> updateResume(@PathVariable long id, @RequestBody ResumeDto resumeDto) {
         resumeService.updateResume(id, resumeDto);
         // Обновляет только update_time

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public interface RespondedApplicantService {
     ResponseEntity<List<RespondedApplicantDto>> getVacancyRespondedApplicant(Long vacancyId);
 }

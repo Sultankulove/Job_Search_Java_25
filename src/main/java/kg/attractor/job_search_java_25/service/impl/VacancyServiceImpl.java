@@ -35,11 +35,6 @@ public class VacancyServiceImpl implements VacancyService {
         return null;
     }
 
-    @Override
-    public ResponseEntity<List<VacancyDto>> getVacancyCategory(String name) {
-        // TODO Возвращаем список вакансий по категории
-        return null;
-    }
 
     @Override
     public ResponseEntity<List<ApplicantDto>> getApplicantResponded() {
