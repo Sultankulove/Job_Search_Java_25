@@ -18,5 +18,5 @@ public class Vacancy {
     private Boolean isActive;
     private Long authorId;
     private Timestamp createdDate;
-    private Timestamp updatedDate;
+    private Timestamp updateTime;
 }

@@ -20,7 +20,7 @@ public class VacancyMapper implements RowMapper<Vacancy> {
         vacancy.setIsActive(rs.getBoolean("is_active"));
         vacancy.setAuthorId(rs.getLong("author_id"));
         vacancy.setCreatedDate(rs.getTimestamp("created_date"));
-        vacancy.setUpdatedDate(rs.getTimestamp("update_date"));
+        vacancy.setUpdateTime(rs.getTimestamp("update_time"));
         return vacancy;
     }
 }
