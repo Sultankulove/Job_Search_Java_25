@@ -13,7 +13,7 @@ public class SwaggerConfig {
                 .info(
                         new Info()
                                 .title("Job Search Java 25")
-                                .version("1.1")
+                                .version("1.2")
                 );
     }
 }

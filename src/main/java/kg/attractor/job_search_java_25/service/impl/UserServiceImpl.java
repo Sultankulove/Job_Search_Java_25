@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.service.impl;
 
 import kg.attractor.job_search_java_25.dto.AvatarDto;
+import kg.attractor.job_search_java_25.dto.UserDto;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -11,15 +12,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+
     @Override
-    public ResponseEntity<?> getImageById(String filename) {
-        return downloadAvatar(filename, "avatar", MediaType.IMAGE_JPEG);
+    public void createUser() {
+
     }
 
     @Override
-    public void addImage(AvatarDto avatarDto) {
+    public void editUser(Long id, UserDto userDto) {
 
-        String filename = saveUploadedFile(avatarDto.getFile(), "avatar");
-        System.out.println(filename);
+    }
+
+    @Override
+    public void updateUser(Long id, UserDto userDto) {
+
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+
     }
 }
