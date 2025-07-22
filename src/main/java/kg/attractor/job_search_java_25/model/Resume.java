@@ -15,5 +15,5 @@ public class Resume {
     private Double salary;
     private Boolean isActive;
     private Timestamp createdDate;
-    private Timestamp updateDate;
+    private Timestamp updateTime;
 }

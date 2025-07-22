@@ -56,14 +56,14 @@ public class ResumeController {
 
 
     // OK
-    @GetMapping("resume/categories/{name}")
+    @GetMapping("resume/categoriesByName/{name}")
     public ResponseEntity<List<ResumeDto>> findResumeByCategoryName(@PathVariable String name) {
         resumeService.findResumeByCategoryName(name);
         return ResponseEntity.ok().body(resumeService.findResumeByCategoryName(name));
     }
 
     // OK
-    @GetMapping("resume/categories/{id}")
+    @GetMapping("resume/categoriesById/{id}")
     public ResponseEntity<List<ResumeDto>> findResumeByCategoryId(@PathVariable long id) {
         resumeService.findResumeByCategoryId(id);
         return ResponseEntity.ok().body(resumeService.findResumeByCategoryId(id));

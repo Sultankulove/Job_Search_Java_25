@@ -27,7 +27,7 @@ public class ResumeServiceImpl implements ResumeService {
                         .salary(e.getSalary())
                         .isActive(e.getIsActive())
                         .createdDate(e.getCreatedDate().toLocalDateTime())
-                        .updatedTime(e.getUpdateDate().toLocalDateTime())
+                        .updatedTime(e.getUpdateTime().toLocalDateTime())
                         .build())
                 .toList();
     }
@@ -44,7 +44,7 @@ public class ResumeServiceImpl implements ResumeService {
                         .salary(e.getSalary())
                         .isActive(e.getIsActive())
                         .createdDate(e.getCreatedDate().toLocalDateTime())
-                        .updatedTime(e.getUpdateDate().toLocalDateTime())
+                        .updatedTime(e.getUpdateTime().toLocalDateTime())
                         .build())
                         .toList();
     }
@@ -88,7 +88,7 @@ public class ResumeServiceImpl implements ResumeService {
                         .salary(e.getSalary())
                         .isActive(e.getIsActive())
                         .createdDate(e.getCreatedDate().toLocalDateTime())
-                        .updatedTime(e.getUpdateDate().toLocalDateTime())
+                        .updatedTime(e.getUpdateTime().toLocalDateTime())
                         .build())
                 .toList();
     }

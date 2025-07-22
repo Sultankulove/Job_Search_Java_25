@@ -25,7 +25,7 @@ public class ResumeDao {
         String sql = "SELECT * FROM resumes WHERE applicant_id = :applicantId";
         return namedParameterJdbcTemplate.query(
                 sql,
-                Map.of("applicant_Id", applicantId),
+                Map.of("applicantId", applicantId),
                 new ResumeMapper()
         );
     }
@@ -39,7 +39,7 @@ public class ResumeDao {
         String sql = "SELECT * FROM resumes WHERE category_id = :categoryId";
         return namedParameterJdbcTemplate.query(
                 sql,
-                Map.of("category_Id", categoryId),
+                Map.of("categoryId", categoryId),
                 new ResumeMapper()
         );
     }

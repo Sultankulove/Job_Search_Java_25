@@ -17,7 +17,7 @@ public class ResumeMapper implements RowMapper<Resume> {
         resume.setSalary(rs.getDouble("salary"));
         resume.setIsActive(rs.getBoolean("is_active"));
         resume.setCreatedDate(rs.getTimestamp("created_date"));
-        resume.setUpdateDate(rs.getTimestamp("update_date"));
+        resume.setUpdateTime(rs.getTimestamp("update_time"));
         return resume;
     }
 }
