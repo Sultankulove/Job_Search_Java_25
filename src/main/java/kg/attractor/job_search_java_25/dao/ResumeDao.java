@@ -4,7 +4,8 @@ import kg.attractor.job_search_java_25.dao.mappers.ResumeMapper;
 import kg.attractor.job_search_java_25.dto.ResumeDto;
 import kg.attractor.job_search_java_25.model.Resume;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,11 +13,13 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class ResumeDao {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     public List<Resume> findByApplicantId(int applicantId) {
         String sql = "SELECT * FROM resumes WHERE applicant_id = :applicantId";
@@ -36,7 +39,7 @@ public class ResumeDao {
         String sql = "SELECT * FROM resumes WHERE category_id = :categoryId";
         return namedParameterJdbcTemplate.query(
                 sql,
-                Map.of("categoryId", categoryId),
+                Map.of("category_Id", categoryId),
                 new ResumeMapper()
         );
     }
@@ -52,6 +55,12 @@ public class ResumeDao {
                 Map.of("name", name),
                 new ResumeMapper()
         );
+    }
+
+    public Optional<Resume> getResumeById(Long resumeId) {
+        String sql = "SELECT * FROM RESUMES WHERE id = ?";
+        List<Resume> results = jdbcTemplate.query(sql, new ResumeMapper(), resumeId);
+        return Optional.ofNullable(DataAccessUtils.singleResult(results));
     }
 
     public void createResume(ResumeDto resumeDto) {
