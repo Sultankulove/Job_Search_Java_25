@@ -39,7 +39,8 @@ public class VacancyController {
 
     @GetMapping("vacancy")
     public ResponseEntity<List<VacancyDto>> getVacancy() {
-        return vacancyService.getActiveVacancies();
+        vacancyService.getAllVacancies();
+        return new ResponseEntity<>(vacancyService.getAllVacancies(), HttpStatus.OK);
     }
 
     @GetMapping("vacancy/categories/{name}")

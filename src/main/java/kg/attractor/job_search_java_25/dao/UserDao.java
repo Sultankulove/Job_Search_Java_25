@@ -62,7 +62,7 @@ public class UserDao {
         namedParameterJdbcTemplate.update(sql, params);
     }
 
-    public void deleteById(int id) {
+    public void deleteById(Long id) {
         String sql = "DELETE FROM users WHERE id = :id";
         namedParameterJdbcTemplate.update(sql, Map.of("id", id));
     }

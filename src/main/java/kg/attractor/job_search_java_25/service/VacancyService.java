@@ -22,4 +22,6 @@ public interface VacancyService {
     ResponseEntity<List<VacancyDto>> getVacancyByCategoryId(Long id);
 
     ResponseEntity<List<VacancyDto>> getVacancySortBySalary();
+
+    List<VacancyDto> getAllVacancies();
 }

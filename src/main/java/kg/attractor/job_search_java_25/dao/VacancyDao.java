@@ -1,5 +1,7 @@
 package kg.attractor.job_search_java_25.dao;
 
+import kg.attractor.job_search_java_25.dao.mappers.VacancyMapper;
+import kg.attractor.job_search_java_25.dto.VacancyDto;
 import kg.attractor.job_search_java_25.model.Vacancy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -17,6 +19,11 @@ public class VacancyDao {
     public List<Vacancy> findAllActiveVacancies() {
         String sql = "SELECT * FROM vacancies WHERE is_active = true";
         return namedParameterJdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Vacancy.class));
+    }
+
+    public List<Vacancy> findAllVacancies() {
+        String sql = "SELECT * FROM vacancies";
+        return namedParameterJdbcTemplate.query(sql, new VacancyMapper());
     }
     public List<Vacancy> findByCategoryId(int categoryId) {
         String sql = "SELECT * FROM vacancies WHERE category_id = :categoryId";
@@ -58,7 +65,7 @@ public class VacancyDao {
                 "isActive", vacancy.getIsActive(),
                 "authorId", vacancy.getAuthorId(),
                 "createdDate", vacancy.getCreatedDate(),
-                "updateTime", vacancy.getUpdatedDate()
+                "updateTime", vacancy.getUpdateTime()
         );
         namedParameterJdbcTemplate.update(sql, params);
     }
@@ -85,7 +92,7 @@ public class VacancyDao {
                 "expFrom", vacancy.getExpFrom(),
                 "expTo", vacancy.getExpTo(),
                 "isActive", vacancy.getIsActive(),
-                "updateTime", vacancy.getUpdatedDate()
+                "updateTime", vacancy.getUpdateTime()
         );
         namedParameterJdbcTemplate.update(sql, params);
     }
