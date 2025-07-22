@@ -20,10 +20,10 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public ResponseEntity<ResumeDto> findAllResume() {
-        // TODO Должен возвращать весь список резюме
+    public ResponseEntity<List<ResumeDto>> findAllResume() {
         return null;
     }
+
 
     @Override
     public void createResume(ResumeDto resumeDto) {
