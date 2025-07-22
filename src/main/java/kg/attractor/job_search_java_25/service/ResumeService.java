@@ -7,20 +7,21 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface ResumeService {
-    ResponseEntity<List<ResumeDto>> findResumeCategory(String name);
 
-    ResponseEntity<List<ResumeDto>> findAllResume();
+
+    List<ResumeDto> findResumeByCategoryId(Long categoryId);
+
+    List<ResumeDto> findAllResume();
     void createResume(ResumeDto resumeDto);
 
-    void deleteResume(long id);
+    void deleteResume(Long id);
 
-    void editResume(long id, ResumeDto resumeDto);
+    void editResume(Long id, ResumeDto resumeDto);
 
-    void updateResume(long id, ResumeDto resumeDto);
+    void updateResume(Long id, ResumeDto resumeDto);
 
     ResponseEntity<List<ResumeListDto>> listOfCreatedResume(long applicantId);
 
-    ResponseEntity<List<ResumeDto>> findResumeByCategoryName(String name);
+    List<ResumeDto> findResumeByCategoryName(String name);
 
-    ResponseEntity<List<ResumeDto>> findResumeByCategoryId(long id);
 }

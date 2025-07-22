@@ -15,6 +15,7 @@ import java.util.List;
 public class ResumeController {
     private final ResumeService resumeService;
 
+    // OK
     @PostMapping("resume")
     public ResponseEntity<ResumeDto> createResume(@RequestBody ResumeDto resumeDto) {
         resumeService.createResume(resumeDto);
@@ -40,9 +41,11 @@ public class ResumeController {
         return HttpStatus.OK;
     }
 
+    // OK
     @GetMapping("resume")
     public ResponseEntity<List<ResumeDto>> allResume() {
-        return resumeService.findAllResume();
+        resumeService.findAllResume();
+        return ResponseEntity.ok().body(resumeService.findAllResume());
     }
 
     @GetMapping("resume/{applicantId}")
@@ -51,13 +54,18 @@ public class ResumeController {
 
     }
 
+
+    // OK
     @GetMapping("resume/categories/{name}")
     public ResponseEntity<List<ResumeDto>> findResumeByCategoryName(@PathVariable String name) {
-        return resumeService.findResumeByCategoryName(name);
+        resumeService.findResumeByCategoryName(name);
+        return ResponseEntity.ok().body(resumeService.findResumeByCategoryName(name));
     }
 
+    // OK
     @GetMapping("resume/categories/{id}")
     public ResponseEntity<List<ResumeDto>> findResumeByCategoryId(@PathVariable long id) {
-        return resumeService.findResumeByCategoryId(id);
+        resumeService.findResumeByCategoryId(id);
+        return ResponseEntity.ok().body(resumeService.findResumeByCategoryId(id));
     }
 }

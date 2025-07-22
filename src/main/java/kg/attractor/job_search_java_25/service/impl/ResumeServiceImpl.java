@@ -1,7 +1,9 @@
 package kg.attractor.job_search_java_25.service.impl;
 
+import kg.attractor.job_search_java_25.dao.ResumeDao;
 import kg.attractor.job_search_java_25.dto.ResumeDto;
 import kg.attractor.job_search_java_25.dto.ResumeListDto;
+import kg.attractor.job_search_java_25.model.Resume;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,36 +14,60 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ResumeServiceImpl implements ResumeService {
-
+    private final ResumeDao resumeDao;
     @Override
-    public ResponseEntity<List<ResumeDto>> findResumeCategory(String name) {
-        // TODO Должен возвращать список резюме по категории (категорию находим по имени)
-        return null;
+    public List<ResumeDto> findResumeByCategoryId(Long categoryId) {
+        List<Resume> list = resumeDao.findByCategoryId(categoryId);
+        return list.stream()
+                .map(e -> ResumeDto.builder()
+                        .id(e.getId())
+                        .applicantId(e.getApplicantId())
+                        .name(e.getName())
+                        .categoryId(e.getCategoryId())
+                        .salary(e.getSalary())
+                        .isActive(e.getIsActive())
+                        .createdDate(e.getCreatedDate().toLocalDateTime())
+                        .updatedTime(e.getUpdateDate().toLocalDateTime())
+                        .build())
+                .toList();
     }
 
     @Override
-    public ResponseEntity<List<ResumeDto>> findAllResume() {
-        return null;
+    public List<ResumeDto> findAllResume() {
+        List<Resume> list = resumeDao.findAll();
+        return list.stream()
+                .map(e -> ResumeDto.builder()
+                        .id(e.getId())
+                        .applicantId(e.getApplicantId())
+                        .name(e.getName())
+                        .categoryId(e.getCategoryId())
+                        .salary(e.getSalary())
+                        .isActive(e.getIsActive())
+                        .createdDate(e.getCreatedDate().toLocalDateTime())
+                        .updatedTime(e.getUpdateDate().toLocalDateTime())
+                        .build())
+                        .toList();
     }
 
 
     @Override
     public void createResume(ResumeDto resumeDto) {
-        // TODO Создаем новое резюме по входным данным
+        resumeDao.createResume(resumeDto);
+    }
+
+
+    @Override
+    public void deleteResume(Long id) {
+        resumeDao.deleteById(id);
     }
 
     @Override
-    public void deleteResume(long id) {
-        // TODO Удалить резюме по id
+    public void editResume(Long id, ResumeDto resumeDto) {
+        resumeDao.edit(id, resumeDto);
     }
 
     @Override
-    public void editResume(long id, ResumeDto resumeDto) {
-        // TODO Редактировать резюме. Находим нужный резюме по id. И перезаписываем его.
-    }
-
-    @Override
-    public void updateResume(long id, ResumeDto resumeDto) {
+    public void updateResume(Long id, ResumeDto resumeDto) {
 
     }
 
@@ -51,12 +77,21 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public ResponseEntity<List<ResumeDto>> findResumeByCategoryName(String name) {
-        return null;
+    public List<ResumeDto> findResumeByCategoryName(String name) {
+        List<Resume> list = resumeDao.findByCategoryName(name);
+        return list.stream()
+                .map(e -> ResumeDto.builder()
+                        .id(e.getId())
+                        .applicantId(e.getApplicantId())
+                        .name(e.getName())
+                        .categoryId(e.getCategoryId())
+                        .salary(e.getSalary())
+                        .isActive(e.getIsActive())
+                        .createdDate(e.getCreatedDate().toLocalDateTime())
+                        .updatedTime(e.getUpdateDate().toLocalDateTime())
+                        .build())
+                .toList();
     }
 
-    @Override
-    public ResponseEntity<List<ResumeDto>> findResumeByCategoryId(long id) {
-        return null;
-    }
+
 }

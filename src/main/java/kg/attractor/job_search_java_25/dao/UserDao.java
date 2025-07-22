@@ -1,5 +1,6 @@
 package kg.attractor.job_search_java_25.dao;
 
+import kg.attractor.job_search_java_25.dao.mappers.UserMapper;
 import kg.attractor.job_search_java_25.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -18,25 +19,25 @@ public class UserDao {
 
     public List<User> findAll() {
         String sql = "SELECT * FROM users";
-        return namedParameterJdbcTemplate.query(sql, new BeanPropertyRowMapper<>(User.class));
+        return namedParameterJdbcTemplate.query(sql, new UserMapper());
     }
 
 
     public User findByName(String name) {
         String sql = "select * from users where name = :name";
         return namedParameterJdbcTemplate.queryForObject(sql,
-                Map.of("name", name), new BeanPropertyRowMapper<>(User.class));
+                Map.of("name", name), new UserMapper());
     }
 
     public User findByPhoneNumber(String phoneNumber) {
         String sql = "select * from users where phone_number = :phoneNumber";
         return namedParameterJdbcTemplate.queryForObject(sql,
-                Map.of("phoneNumber", phoneNumber), new BeanPropertyRowMapper<>(User.class));
+                Map.of("phoneNumber", phoneNumber), new UserMapper());
     }
 
     public User findByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = :email";
-        return namedParameterJdbcTemplate.queryForObject(sql, Map.of("email", email), new BeanPropertyRowMapper<>(User.class));
+        return namedParameterJdbcTemplate.queryForObject(sql, Map.of("email", email), new UserMapper());
     }
 
 
@@ -54,9 +55,9 @@ public class UserDao {
                 "age", user.getAge(),
                 "email", user.getEmail(),
                 "password", user.getPassword(),
-                "phone", user.getPhoneNumber(),
+                "phone_number", user.getPhoneNumber(),
                 "avatar", user.getAvatar(),
-                "type", user.getAccountType()
+                "account_type", user.getAccountType()
         );
         namedParameterJdbcTemplate.update(sql, params);
     }
