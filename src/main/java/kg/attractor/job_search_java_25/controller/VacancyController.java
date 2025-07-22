@@ -3,7 +3,6 @@ package kg.attractor.job_search_java_25.controller;
 import kg.attractor.job_search_java_25.dto.ApplicantDto;
 import kg.attractor.job_search_java_25.dto.RespondedApplicantDto;
 import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.service.RespondedApplicantService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,7 @@ public class VacancyController {
     }
 
     @DeleteMapping("vacancy/{id}")
-    public ResponseEntity<?> deleteVacancy(@PathVariable long id) {
+    public ResponseEntity<VacancyDto> deleteVacancy(@PathVariable long id) {
         vacancyService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }

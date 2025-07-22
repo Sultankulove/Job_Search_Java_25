@@ -1,8 +1,6 @@
 package kg.attractor.job_search_java_25.controller;
 
-import kg.attractor.job_search_java_25.dto.ApplicantDto;
 import kg.attractor.job_search_java_25.dto.AvatarDto;
-import kg.attractor.job_search_java_25.dto.EmployerDto;
 import kg.attractor.job_search_java_25.dto.UserDto;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +29,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("id")
+    @PutMapping("{id}/update")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
         userService.updateUser(id, userDto);
         return ResponseEntity.ok().build();
@@ -41,18 +39,5 @@ public class UserController {
     public ResponseEntity<UserDto> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok().build();
-    }
-
-
-    /// ///////////
-    @GetMapping("avatar")
-    public ResponseEntity<?> getImage(@RequestParam(name = "filename") String filename) {
-        return userService.getImageById(filename);
-    }
-
-    @PostMapping("avatar")
-    public HttpStatus addImage(AvatarDto avatarDto) {
-        userService.addImage(avatarDto);
-        return HttpStatus.CREATED;
     }
 }

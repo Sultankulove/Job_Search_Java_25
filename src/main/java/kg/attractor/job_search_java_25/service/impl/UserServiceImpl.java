@@ -12,17 +12,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Override
-    public ResponseEntity<?> getImageById(String filename) {
-        return downloadAvatar(filename, "avatar", MediaType.IMAGE_JPEG);
-    }
-
-    @Override
-    public void addImage(AvatarDto avatarDto) {
-
-        String filename = saveUploadedFile(avatarDto.getFile(), "avatar");
-        System.out.println(filename);
-    }
 
     @Override
     public void createUser() {
