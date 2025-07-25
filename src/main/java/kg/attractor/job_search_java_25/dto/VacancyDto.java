@@ -1,5 +1,6 @@
 package kg.attractor.job_search_java_25.dto;
 
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -16,7 +17,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class VacancyDto {
-    private Long id;
 
     @NotBlank(message = "Название вакансии обязательно")
     private String name;
