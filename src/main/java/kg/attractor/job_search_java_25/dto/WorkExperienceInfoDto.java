@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class WorkExperienceInfoDto {
-    private Long id;
     private Long resumeId;
     private Long years;
     private String companyName;

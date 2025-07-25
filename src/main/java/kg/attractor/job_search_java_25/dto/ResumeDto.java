@@ -1,9 +1,9 @@
 package kg.attractor.job_search_java_25.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,11 +14,20 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ResumeDto {
-    private Long id;
+
+    @NotNull(message = "ID Соискателя оюязателен")
     private Long applicantId;
+
+    @NotBlank(message = "Название резюме обязательно")
     private String name;
+
+    @NotNull(message = "Выбери категорию")
     private Long categoryId;
+
+    @NotNull
+    @DecimalMin(value = "0.0", inclusive = false, message = "Зарплата должна быть положительной")
     private Double salary;
+
     private Boolean isActive;
     private LocalDateTime createdDate;
     private LocalDateTime updatedTime;

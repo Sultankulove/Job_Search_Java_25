@@ -1,7 +1,9 @@
 package kg.attractor.job_search_java_25.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.AvatarDto;
 import kg.attractor.job_search_java_25.dto.UserDto;
+import kg.attractor.job_search_java_25.model.User;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,9 +20,8 @@ public class UserController {
 
 
     @PostMapping("create")
-    public ResponseEntity<UserDto> createUser() {
-        userService.createUser();
-        return ResponseEntity.ok().build();
+    public User createUser(@RequestBody @Valid UserDto userDto) {
+        return userService.createUser(userDto);
     }
 
     @PutMapping("{id}")

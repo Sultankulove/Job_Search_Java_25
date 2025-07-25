@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class RespondedApplicants {
-    private Long id;
     private Long resumeId;
     private Long vacancyId;
     private Boolean confirmation;

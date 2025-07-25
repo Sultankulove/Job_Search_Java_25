@@ -20,7 +20,6 @@ public class ResumeServiceImpl implements ResumeService {
         List<Resume> list = resumeDao.findByCategoryId(categoryId);
         return list.stream()
                 .map(e -> ResumeDto.builder()
-                        .id(e.getId())
                         .applicantId(e.getApplicantId())
                         .name(e.getName())
                         .categoryId(e.getCategoryId())
@@ -37,7 +36,6 @@ public class ResumeServiceImpl implements ResumeService {
         List<Resume> list = resumeDao.findAll();
         return list.stream()
                 .map(e -> ResumeDto.builder()
-                        .id(e.getId())
                         .applicantId(e.getApplicantId())
                         .name(e.getName())
                         .categoryId(e.getCategoryId())
@@ -81,7 +79,6 @@ public class ResumeServiceImpl implements ResumeService {
         List<Resume> list = resumeDao.findByCategoryName(name);
         return list.stream()
                 .map(e -> ResumeDto.builder()
-                        .id(e.getId())
                         .applicantId(e.getApplicantId())
                         .name(e.getName())
                         .categoryId(e.getCategoryId())
