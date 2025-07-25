@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -48,8 +50,21 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public void createVacancy(VacancyDto vacancyDto) {
+    public Vacancy createVacancy(VacancyDto vacancyDto) {
+        Vacancy vacancy = new Vacancy();
+        vacancy.setName(vacancyDto.getName());
+        vacancy.setDescription(vacancyDto.getDescription());
+        vacancy.setCategoryId(vacancyDto.getCategoryId());
+        vacancy.setSalary(vacancyDto.getSalary());
+        vacancy.setExpFrom(vacancyDto.getExpFrom());
+        vacancy.setExpTo(vacancyDto.getExpTo());
+        vacancy.setIsActive(true);
+        vacancy.setAuthorId(vacancyDto.getAuthorId());
+        vacancy.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
+        vacancy.setUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
 
+        vacancyDao.save(vacancy);
+        return vacancy;
     }
 
     @Override

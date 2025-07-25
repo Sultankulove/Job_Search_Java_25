@@ -2,6 +2,7 @@ package kg.attractor.job_search_java_25.service;
 
 import kg.attractor.job_search_java_25.dto.ApplicantDto;
 import kg.attractor.job_search_java_25.dto.VacancyDto;
+import kg.attractor.job_search_java_25.model.Vacancy;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface VacancyService {
 
     ResponseEntity<List<ApplicantDto>> getApplicantResponded();
 
-    void createVacancy(VacancyDto vacancyDto);
+    Vacancy createVacancy(VacancyDto vacancyDto);
 
     ResponseEntity<List<VacancyDto>> getVacancyByCategoryId(Long id);
 

@@ -3,6 +3,7 @@ package kg.attractor.job_search_java_25.controller;
 import kg.attractor.job_search_java_25.dto.ApplicantDto;
 import kg.attractor.job_search_java_25.dto.RespondedApplicantDto;
 import kg.attractor.job_search_java_25.dto.VacancyDto;
+import kg.attractor.job_search_java_25.model.Vacancy;
 import kg.attractor.job_search_java_25.service.RespondedApplicantService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,8 @@ public class VacancyController {
     private final RespondedApplicantService respondedApplicantService;
 
     @PostMapping("vacancy")
-    public HttpStatus createVacancy(@RequestBody VacancyDto vacancyDto) {
-        vacancyService.createVacancy(vacancyDto);
-        return HttpStatus.CREATED;
+    public Vacancy createVacancy(@RequestBody VacancyDto vacancyDto) {
+        return vacancyService.createVacancy(vacancyDto);
     }
 
     @PutMapping("vacancy/{id}")
