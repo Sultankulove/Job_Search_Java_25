@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,18 +56,18 @@ public class VacancyDao {
                 :createdDate, :updateTime
             )
         """;
-        Map<String, Object> params = Map.of(
-                "name", vacancy.getName(),
-                "description", vacancy.getDescription(),
-                "category_Id", vacancy.getCategoryId(),
-                "salary", vacancy.getSalary(),
-                "expFrom", vacancy.getExpFrom(),
-                "expTo", vacancy.getExpTo(),
-                "isActive", vacancy.getIsActive(),
-                "authorId", vacancy.getAuthorId(),
-                "createdDate", vacancy.getCreatedDate(),
-                "updateTime", vacancy.getUpdateTime()
-        );
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", vacancy.getName());
+        params.put("description", vacancy.getDescription());
+        params.put("categoryId", vacancy.getCategoryId());
+        params.put("salary", vacancy.getSalary());
+        params.put("expFrom", vacancy.getExpFrom());
+        params.put("expTo", vacancy.getExpTo());
+        params.put("isActive", vacancy.getIsActive());
+        params.put("authorId", vacancy.getAuthorId());
+        params.put("createdDate", vacancy.getCreatedDate());
+        params.put("updateTime", vacancy.getUpdateTime());
+
         namedParameterJdbcTemplate.update(sql, params);
     }
 
