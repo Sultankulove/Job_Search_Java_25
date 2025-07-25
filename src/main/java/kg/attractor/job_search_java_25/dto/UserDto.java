@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserDto {
-    private Long id;
 
     @NotBlank(message = "Имя не должно быть пустым")
     private String name;
@@ -26,9 +25,18 @@ public class UserDto {
     @Email(message = "Неверный формат email")
     private String email;
 
+    @NotBlank
+    @Size(min = 3, max = 24, message = "Length must be >= 4 and <= 24")
+    @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-z]).+$"
+            , message = "Должно содержать хотя бы одну заглавную букву и одну цифру")
+    private String password;
+
+
     @NotBlank(message = "Номер телефона обязателен")
     private String phoneNumber;
 
     private String avatar;
+
+    @NotBlank(message = "Кто вы? Укажите: Соискатель либо Работодатель")
     private String accountType;
 }
