@@ -67,7 +67,6 @@ public class VacancyServiceImpl implements VacancyService {
         List<Vacancy> list = vacancyDao.findAllVacancies();
         return list.stream()
                 .map(e -> VacancyDto.builder()
-                        .id(e.getId())
                         .name(e.getName())
                         .description(e.getDescription())
                         .categoryId(e.getCategoryId())
