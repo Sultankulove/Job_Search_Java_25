@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,16 +50,15 @@ public class UserDao {
 
     public void save(User user) {
         String sql = "INSERT INTO users (name, surname, age, email, password, phone_number, avatar, account_type) VALUES (:name, :surname, :age, :email, :password, :phone, :avatar, :type)";
-        Map<String, Object> params = Map.of(
-                "name", user.getName(),
-                "surname", user.getSurname(),
-                "age", user.getAge(),
-                "email", user.getEmail(),
-                "password", user.getPassword(),
-                "phone_number", user.getPhoneNumber(),
-                "avatar", user.getAvatar(),
-                "account_type", user.getAccountType()
-        );
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", user.getName());
+        params.put("surname", user.getSurname());
+        params.put("age", user.getAge());
+        params.put("email", user.getEmail());
+        params.put("password", user.getPassword());
+        params.put("phone", user.getPhoneNumber());
+        params.put("avatar", user.getAvatar());
+        params.put("type", user.getAccountType());
         namedParameterJdbcTemplate.update(sql, params);
     }
 
