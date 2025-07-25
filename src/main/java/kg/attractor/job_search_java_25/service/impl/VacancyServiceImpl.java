@@ -19,14 +19,27 @@ public class VacancyServiceImpl implements VacancyService {
     private final VacancyDao vacancyDao;
 
     @Override
-    public void editVacancyById(long id, VacancyDto vacancyDto) {
+    public Vacancy editVacancyById(Long id, VacancyDto vacancyDto) {
+        Vacancy vacancy = new Vacancy();
+        vacancy.setId(id);
+        vacancy.setName(vacancyDto.getName());
+        vacancy.setDescription(vacancyDto.getDescription());
+        vacancy.setCategoryId(vacancyDto.getCategoryId());
+        vacancy.setSalary(vacancyDto.getSalary());
+        vacancy.setExpFrom(vacancyDto.getExpFrom());
+        vacancy.setExpTo(vacancyDto.getExpTo());
+        vacancy.setIsActive(vacancyDto.getIsActive());
+        vacancy.setAuthorId(vacancyDto.getAuthorId());
+        vacancy.setUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
+
+        vacancyDao.edit(id, vacancy);
+        return vacancy;
         // TODO редактируем вакансию. Находим по id и перезаписываем его.
     }
 
     @Override
-    public void deleteById(long id) {
-        // TODO удаляем вакансию по id.
-
+    public void deleteById(Long id) {
+        vacancyDao.delete(id);
     }
 
     @Override

@@ -71,7 +71,7 @@ public class VacancyDao {
         namedParameterJdbcTemplate.update(sql, params);
     }
 
-    public void update(Vacancy vacancy) {
+    public void edit(Long id, Vacancy vacancy) {
         String sql = """
             UPDATE vacancies SET
                 name = :name,
@@ -84,21 +84,21 @@ public class VacancyDao {
                 update_time = :updateTime
             WHERE id = :id
         """;
-        Map<String, Object> params = Map.of(
-                "id", vacancy.getId(),
-                "name", vacancy.getName(),
-                "description", vacancy.getDescription(),
-                "categoryId", vacancy.getCategoryId(),
-                "salary", vacancy.getSalary(),
-                "expFrom", vacancy.getExpFrom(),
-                "expTo", vacancy.getExpTo(),
-                "isActive", vacancy.getIsActive(),
-                "updateTime", vacancy.getUpdateTime()
-        );
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        params.put("name", vacancy.getName());
+        params.put("description", vacancy.getDescription());
+        params.put("categoryId", vacancy.getCategoryId());
+        params.put("salary", vacancy.getSalary());
+        params.put("expFrom", vacancy.getExpFrom());
+        params.put("expTo", vacancy.getExpTo());
+        params.put("isActive", vacancy.getIsActive());
+        params.put("updateTime", vacancy.getUpdateTime());
+
         namedParameterJdbcTemplate.update(sql, params);
     }
 
-    public void delete(int id) {
+    public void delete(Long id) {
         String sql = "DELETE FROM vacancies WHERE id = :id";
         namedParameterJdbcTemplate.update(sql, Map.of("id", id));
     }

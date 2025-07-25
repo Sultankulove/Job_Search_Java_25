@@ -25,14 +25,13 @@ public class VacancyController {
     }
 
     @PutMapping("vacancy/{id}")
-    public ResponseEntity<VacancyDto> editVacancy(@PathVariable long id, @RequestBody VacancyDto vacancyDto) {
+    public ResponseEntity<VacancyDto> editVacancy(@PathVariable Long id, @RequestBody VacancyDto vacancyDto) {
         vacancyService.editVacancyById(id, vacancyDto);
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(vacancyDto, HttpStatus.OK);
     }
 
     @DeleteMapping("vacancy/{id}")
-    public ResponseEntity<VacancyDto> deleteVacancy(@PathVariable long id) {
+    public ResponseEntity<Void> deleteVacancy(@PathVariable Long id) {
         vacancyService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface VacancyService {
-    void editVacancyById(long id, VacancyDto vacancyDto);
+    Vacancy editVacancyById(Long id, VacancyDto vacancyDto);
 
-    void deleteById(long id);
+    void deleteById(Long id);
 
     ResponseEntity<List<VacancyDto>> getActiveVacancies();
 
