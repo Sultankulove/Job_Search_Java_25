@@ -17,17 +17,14 @@ public class UserController {
 
     public final UserService userService;
 
-
-
     @PostMapping("create")
     public User createUser(@RequestBody @Valid UserDto userDto) {
         return userService.createUser(userDto);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<UserDto> editUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        userService.editUser(id, userDto);
-        return ResponseEntity.ok().build();
+    public User editUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        return userService.editUser(id, userDto);
     }
 
     @PutMapping("{id}/update")
@@ -37,8 +34,8 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<UserDto> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
