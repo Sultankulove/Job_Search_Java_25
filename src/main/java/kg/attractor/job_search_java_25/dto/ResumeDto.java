@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ResumeDto {
-    private Long id;
 
     @NotNull(message = "ID Соискателя оюязателен")
     private Long applicantId;
