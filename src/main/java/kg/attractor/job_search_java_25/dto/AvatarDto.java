@@ -8,5 +8,5 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 public class AvatarDto {
     private MultipartFile file;
-    private long avatarId;
+    private Long userId;
 }

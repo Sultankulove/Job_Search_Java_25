@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.dao;
 
 import kg.attractor.job_search_java_25.dao.mappers.UserMapper;
+import kg.attractor.job_search_java_25.exceptions.EntityNotFoundException;
 import kg.attractor.job_search_java_25.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -81,15 +82,32 @@ public class UserDao {
     }
 
     public Optional<User> findById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Параметр 'id' не может быть null");
+        }
+
         String sql = "SELECT * FROM users WHERE id = :id";
         try {
             return Optional.ofNullable(
-                    namedParameterJdbcTemplate.queryForObject(sql, Map.of("id", id), new UserMapper())
-            );
+                    namedParameterJdbcTemplate.queryForObject(sql, Map.of("id", id), new UserMapper()));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
+
+    public void updateAvatar(Long userId, String avatarFilename) {
+        String sql = "UPDATE users SET avatar = :avatar WHERE id = :id";
+
+        int updated = namedParameterJdbcTemplate.update(sql, Map.of(
+                "avatar", avatarFilename,
+                "id", userId
+        ));
+
+        if (updated == 0) {
+            throw new EntityNotFoundException(User.class, userId);
+        }
+    }
+
 
     public void delete(User user) {
         String sql = "DELETE FROM users WHERE id = :id";
