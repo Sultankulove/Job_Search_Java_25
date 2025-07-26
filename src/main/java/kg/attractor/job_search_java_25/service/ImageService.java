@@ -4,7 +4,7 @@ import kg.attractor.job_search_java_25.dto.AvatarDto;
 import org.springframework.http.ResponseEntity;
 
 public interface ImageService {
-    ResponseEntity<?> getImageById(String filename);
+    ResponseEntity<?> getImageById(String filename, String folderName);
 
     void addImage(AvatarDto avatarDto);
 }

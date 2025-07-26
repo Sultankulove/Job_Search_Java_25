@@ -1,9 +1,13 @@
 package kg.attractor.job_search_java_25.service.impl;
 
+import kg.attractor.job_search_java_25.dao.UserDao;
 import kg.attractor.job_search_java_25.dto.AvatarDto;
+import kg.attractor.job_search_java_25.exceptions.EntityNotFoundException;
+import kg.attractor.job_search_java_25.model.User;
 import kg.attractor.job_search_java_25.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -20,53 +24,44 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import static kg.attractor.job_search_java_25.util.FileUtil.downloadImage;
+import static kg.attractor.job_search_java_25.util.FileUtil.saveUploadedFile;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ImageServiceImpl implements ImageService {
+
+    private final UserDao userDao;
     @Override
-    public ResponseEntity<?> getImageById(String filename) {
-        return downloadAvatar(filename, "avatar", MediaType.IMAGE_JPEG);
+    public ResponseEntity<?> getImageById(String filename, String folderName) {
+        return downloadImage(filename, folderName);
     }
 
     @Override
     public void addImage(AvatarDto avatarDto) {
+        Long userId = avatarDto.getUserId();
+        if (userId == null) {
+            throw new IllegalArgumentException("userId обязателен");
+        }
+
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(User.class, userId));
+
+        String oldAvatar = user.getAvatar();
+        if (oldAvatar != null && !oldAvatar.isBlank()) {
+            Path oldAvatarPath = Paths.get("data/avatar").resolve(oldAvatar);
+            try {
+                Files.deleteIfExists(oldAvatarPath);
+                log.info("Удалён старый аватар: {}", oldAvatarPath);
+            } catch (IOException e) {
+                log.warn("Не удалось удалить старый аватар: {}", oldAvatarPath, e);
+            }
+        }
 
         String filename = saveUploadedFile(avatarDto.getFile(), "avatar");
-        System.out.println(filename);
-    }
 
-    @SneakyThrows
-    private String saveUploadedFile(MultipartFile file, String subDir) {
-        String uuidFile = UUID.randomUUID().toString();
-        String filename = uuidFile + "_" + file.getOriginalFilename();
-
-        Path pathDir = Paths.get("data/" + subDir);
-        Files.createDirectories(pathDir);
-
-        Path filePath = Paths.get(pathDir + "/" + filename);
-        if (!Files.exists(filePath)) Files.createFile(filePath);
-
-        try (OutputStream outputStream = Files.newOutputStream(filePath)) {
-            outputStream.write(file.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return filename;
-    }
-
-    private ResponseEntity<?> downloadAvatar(String fileName, String subDir, MediaType mediaType) {
-        try {
-            byte[] image = Files.readAllBytes(Paths.get("data/" + subDir + "/" + fileName));
-
-            Resource resource = new ByteArrayResource(image);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                    .contentLength(resource.contentLength())
-                    .contentType(mediaType)
-                    .body(resource);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Image not found");
-        }
+        userDao.updateAvatar(userId, filename);
+        log.info("Пользователю ID {} установлен аватар: {}", userId, filename);
     }
 }
