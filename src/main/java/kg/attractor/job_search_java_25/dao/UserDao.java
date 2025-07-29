@@ -5,7 +5,7 @@ import kg.attractor.job_search_java_25.exceptions.EntityNotFoundException;
 import kg.attractor.job_search_java_25.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -39,10 +39,10 @@ public class UserDao {
                 Map.of("phoneNumber", phoneNumber), new UserMapper());
     }
 
-    public User findByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = :email";
-        return namedParameterJdbcTemplate.queryForObject(sql, Map.of("email", email), new UserMapper());
-    }
+        List<User> users = namedParameterJdbcTemplate.query(sql, Map.of("email", email), new UserMapper());
+        return users.stream().findFirst();    }
 
 
     public boolean existsByEmail(String email) {
@@ -65,7 +65,7 @@ public class UserDao {
         namedParameterJdbcTemplate.update(sql, params);
     }
 
-    public void edit(Long id ,User user) {
+    public void edit(Optional<Long> id , User user) {
         String sql = "update users set name = :name, surname = :surname, age = :age, email = :email, password = :password, phone_number = :phone, avatar = :avatar, account_type = :type WHERE id = :id";
         Map<String, Object> params = new HashMap<>();
         params.put("id", id); //
@@ -120,5 +120,11 @@ public class UserDao {
     public void deleteById(Long id) {
         String sql = "DELETE FROM users WHERE id = :id";
         namedParameterJdbcTemplate.update(sql, Map.of("id", id));
+    }
+
+    public Optional<Long> getUserIdByEmail(String email) {
+        String sql = "SELECT id FROM users WHERE email = ?";
+        List<Long> result = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("id"), email);
+        return Optional.ofNullable(DataAccessUtils.singleResult(result));
     }
 }

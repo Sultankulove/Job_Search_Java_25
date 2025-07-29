@@ -14,18 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("user")
 @RequiredArgsConstructor
 public class UserController {
+    private final UserService userService;
 
-    public final UserService userService;
 
-    @PostMapping("create")
-    public User createUser(@RequestBody @Valid UserDto userDto) {
-        return userService.createUser(userDto);
-    }
-
-    @PutMapping("{id}")
-    public User editUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        return userService.editUser(id, userDto);
-    }
 
     @PutMapping("{id}/update")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {

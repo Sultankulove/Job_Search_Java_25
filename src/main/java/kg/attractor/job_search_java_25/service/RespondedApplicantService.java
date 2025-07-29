@@ -6,5 +6,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface RespondedApplicantService {
+    void respondToVacancy(String email, Long resumeId, Long vacancyId);
     ResponseEntity<List<RespondedApplicantDto>> getVacancyRespondedApplicant(Long vacancyId);
 }

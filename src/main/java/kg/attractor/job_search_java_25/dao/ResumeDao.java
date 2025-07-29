@@ -63,6 +63,12 @@ public class ResumeDao {
         return Optional.ofNullable(DataAccessUtils.singleResult(results));
     }
 
+    public Optional<Resume> getResumeByIdAndUserId(Long resumeId, Optional<Long> userId) {
+        String sql = "SELECT * FROM resumes WHERE id = ? AND RESUMES.APPLICANT_ID = ?";
+        List<Resume> results = jdbcTemplate.query(sql, new ResumeMapper(), resumeId, userId);
+        return Optional.ofNullable(DataAccessUtils.singleResult(results));
+    }
+
     public void createResume(ResumeDto resumeDto) {
         String sql = """
             INSERT INTO resumes (applicant_id, name, category_id, salary, is_active, created_date, update_time)
