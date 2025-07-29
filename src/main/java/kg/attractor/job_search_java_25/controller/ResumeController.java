@@ -15,38 +15,50 @@ import java.util.List;
 public class ResumeController {
     private final ResumeService resumeService;
 
-    // OK
-    @PostMapping("resume")
+    // Список всех резюме
+    @GetMapping("resumes")
+    public ResponseEntity<List<ResumeDto>> allResume() {
+        resumeService.findAllResume();
+        return ResponseEntity.ok().body(resumeService.findAllResume());
+    }
+
+    // Конкретное резюме
+    @GetMapping("resumes/{id}")
+    public ResponseEntity<ResumeDto> getResume(@PathVariable Long id) {
+//        return ResponseEntity.ok(resumeService.getResumeById(id));
+        return ResponseEntity.ok(resumeService.getResumeById(id).getBody());
+    }
+
+    // Создать резюме. ОК
+    @PostMapping("resumes")
     public ResponseEntity<ResumeDto> createResume(@RequestBody ResumeDto resumeDto) {
         resumeService.createResume(resumeDto);
         return ResponseEntity.ok().body(resumeDto);
     }
 
-    @PutMapping("resume/{id}")
+    // редактировать резюме
+    @PutMapping("resumes/{id}")
     public ResponseEntity<ResumeDto> editResume(@PathVariable long id, @RequestBody ResumeDto resumeDto) {
         resumeService.editResume(id, resumeDto);
         return ResponseEntity.ok().body(resumeDto);
     }
 
-    @PutMapping("resume/{id}/update")
+    // обновляет резюме(только время)
+    @PutMapping("resumes/{id}/update")
     public ResponseEntity<ResumeDto> updateResume(@PathVariable long id, @RequestBody ResumeDto resumeDto) {
         resumeService.updateResume(id, resumeDto);
         // Обновляет только update_time
         return ResponseEntity.ok().body(resumeDto);
     }
 
-    @DeleteMapping("resume/{id}")
+    // удаляет резюме
+    @DeleteMapping("resumes/{id}")
     public HttpStatus deleteResume(@PathVariable long id) {
         resumeService.deleteResume(id);
         return HttpStatus.OK;
     }
 
-    // OK
-    @GetMapping("resume")
-    public ResponseEntity<List<ResumeDto>> allResume() {
-        resumeService.findAllResume();
-        return ResponseEntity.ok().body(resumeService.findAllResume());
-    }
+    /// /////////
 
     @GetMapping("resume/{applicantId}")
     public ResponseEntity<List<ResumeListDto>> listOfCreatedResume(@PathVariable long applicantId) {
