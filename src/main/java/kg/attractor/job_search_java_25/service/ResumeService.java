@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ResumeService {
 
-
+    ResponseEntity<ResumeDto> getResumeById(Long id);
     List<ResumeDto> findResumeByCategoryId(Long categoryId);
 
     List<ResumeDto> findAllResume();
