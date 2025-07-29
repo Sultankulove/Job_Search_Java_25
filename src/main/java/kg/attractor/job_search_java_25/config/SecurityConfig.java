@@ -40,9 +40,28 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/profile/avatar").hasRole("ADMIN")
-                                .anyRequest().permitAll()
-                        );
+                                .requestMatchers(HttpMethod.POST, "/profile/avatar").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/profile/avatar").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/profile").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/profile").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/resumes/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/resumes/**").hasRole("APPLICANT")
+                        .requestMatchers(HttpMethod.PUT, "/resumes/**").hasRole("APPLICANT")
+                        .requestMatchers(HttpMethod.DELETE, "/resumes/**").hasRole("APPLICANT")
+
+                        .requestMatchers(HttpMethod.GET, "/vacancies/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/vacancies/**").hasRole("EMPLOYER")
+                        .requestMatchers(HttpMethod.PUT, "/vacancies/**").hasRole("EMPLOYER")
+                        .requestMatchers(HttpMethod.DELETE, "/vacancies/**").hasRole("EMPLOYER")
+
+                        .requestMatchers(HttpMethod.POST, "/vacancies/*/respond").hasRole("APPLICANT")
+
+                        .requestMatchers(HttpMethod.GET, "/vacancies/*/responses").hasRole("EMPLOYER")
+                        .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                        .anyRequest().denyAll()
+                );
 
         return http.build();
     }

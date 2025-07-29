@@ -1,21 +1,27 @@
 package kg.attractor.job_search_java_25.dao;
 
+import kg.attractor.job_search_java_25.dao.mappers.ResumeMapper;
 import kg.attractor.job_search_java_25.dao.mappers.VacancyMapper;
 import kg.attractor.job_search_java_25.dto.VacancyDto;
+import kg.attractor.job_search_java_25.model.Resume;
 import kg.attractor.job_search_java_25.model.Vacancy;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class VacancyDao {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     public List<Vacancy> findAllActiveVacancies() {
         String sql = "SELECT * FROM vacancies WHERE is_active = true";
@@ -101,6 +107,12 @@ public class VacancyDao {
     public void delete(Long id) {
         String sql = "DELETE FROM vacancies WHERE id = :id";
         namedParameterJdbcTemplate.update(sql, Map.of("id", id));
+    }
+
+    public Optional<Vacancy> getVacancyById(Long vacancyId) {
+        String sql = "SELECT * FROM VACANCIES WHERE id = ?";
+        List<Vacancy> results = jdbcTemplate.query(sql, new VacancyMapper(), vacancyId);
+        return Optional.ofNullable(DataAccessUtils.singleResult(results));
     }
 
 
