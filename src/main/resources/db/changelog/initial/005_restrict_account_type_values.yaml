@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005_restrict_account_type_values
+      author: Elturan_Sultankulov
+      changes:
+        - sql:
+            sql: >
+              UPDATE users
+              SET account_type = UPPER(account_type);
+
+        - sql:
+            sql: >
+              ALTER TABLE users
+              ADD CONSTRAINT chk_account_type
+              CHECK (account_type IN ('APPLICANT', 'EMPLOYER', 'ADMIN'));
