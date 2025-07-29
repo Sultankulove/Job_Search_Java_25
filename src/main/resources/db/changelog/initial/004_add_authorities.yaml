@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011_alter_users_for_security
+      author: Elturan_Sultankulov
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: enabled
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+        - addNotNullConstraint:
+            tableName: users
+            columnName: email
+            columnDataType: varchar(100)
+  - changeSet:
+      id: 012_create_authorities_table
+      author: Elturan_Sultankulov
+      changes:
+        - createTable:
+            tableName: authorities
+            columns:
+              - column:
+                  name: email
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: authority
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: authorities
+            baseColumnNames: email
+            constraintName: fk_authorities_user_email
+            referencedTableName: users
+            referencedColumnNames: email

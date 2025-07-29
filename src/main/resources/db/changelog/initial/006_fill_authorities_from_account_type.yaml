@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006_fill_authorities_from_account_type
+      author: Elturan_Sultankulov
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO authorities (email, authority)
+              SELECT email, 'ROLE_' || account_type
+              FROM users
+              WHERE account_type IN ('APPLICANT', 'EMPLOYER', 'ADMIN')
+              AND NOT EXISTS (
+              SELECT 1 FROM authorities a
+              WHERE a.email = users.email AND a.authority = 'ROLE_' || users.account_type);
