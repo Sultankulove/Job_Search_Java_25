@@ -39,4 +39,5 @@ public class UserDto {
 
     @NotBlank(message = "Кто вы? Укажите: Соискатель либо Работодатель")
     private String accountType;
+
 }
