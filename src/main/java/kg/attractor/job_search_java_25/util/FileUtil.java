@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.util;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,10 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+@Slf4j
 public class FileUtil {
     @SneakyThrows
     public static String saveUploadedFile(MultipartFile file, String subDir) {
@@ -38,10 +41,13 @@ public class FileUtil {
 
         try (OutputStream outputStream = Files.newOutputStream(filePath)) {
             outputStream.write(file.getBytes());
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
         return filename;
     }
 
+    @SneakyThrows
     public static ResponseEntity<?> downloadImage(String fileName, String subDir) {
         try {
             Path basePath = Paths.get("data").toAbsolutePath().normalize();
@@ -69,9 +75,9 @@ public class FileUtil {
                     .contentLength(resource.contentLength())
                     .contentType(MediaType.parseMediaType(contentType))
                     .body(resource);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при загрузке файла");
+        } catch (NoSuchFileException e) {
+            log.error("No file found!", e);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Image not found!");
         }
     }
 }
