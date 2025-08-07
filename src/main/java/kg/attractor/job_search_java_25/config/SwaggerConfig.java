@@ -7,13 +7,15 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
+
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(
                         new Info()
-                                .title("Job Search Java 25")
-                                .version("1.4.0")
+                                .title("Job Search")
+                                .description("project \"Job Search\" - group attractor.kg Java-25")
+                                .version("1.6.1 restart")
                 );
     }
 }
