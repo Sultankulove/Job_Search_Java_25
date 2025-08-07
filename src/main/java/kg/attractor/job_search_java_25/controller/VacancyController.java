@@ -1,34 +1,47 @@
 package kg.attractor.job_search_java_25.controller;
 
+import kg.attractor.job_search_java_25.dto.VacancyShortDto;
+import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api")
+@RequestMapping("api/vacancies")
 public class VacancyController {
-    @GetMapping("vacancies/list")
-    public String listOfCreatedVacancies() {
+    private final VacancyService vacancyService;
+
+    @GetMapping
+    public ResponseEntity<List<VacancyShortDto>> listOfCreatedVacancies() {
         // Видны только владельцу профиля
-        // Вывод: List {Название резюме и Дата обновления ваканции.}
-        return "OK";
+        // Вывод: List {Название вакансий и Дата обновления вакансий.}
+
+
+        // Должен получить user(id) владельца профиля и передать
+        var shortVacanciesList = vacancyService.getShortVacanciesList(Long employerId);
+
+        return ResponseEntity.ok(shortVacanciesList);
     }
 
-    @PatchMapping("vacancies/{id}")
+    @PatchMapping("{id}")
     public String updateVacanciesById(@PathVariable Long id) {
 
         // Обновить (Только его дату обновления)
         return "OK";
     }
 
-    @PutMapping("vacancies/{id}")
+    @PutMapping("{id}")
     public String editVacanciesById(@PathVariable Long id) {
 
         // Редактировать
         return "OK";
     }
 
-    @PatchMapping("vacancies/{id}/published")
+    @PatchMapping("{id}/published")
     public String vacanciesIsActiveById(@PathVariable Long id) {
 
         // Опубликован или не опубликован вакансия
@@ -36,7 +49,7 @@ public class VacancyController {
         return "OK";
     }
 
-    @PostMapping("vacancies")
+    @PostMapping
     public String createVacancy() {
 
         // Создать вакансию:
@@ -46,4 +59,27 @@ public class VacancyController {
 
         return "OK";
     }
+
+    @GetMapping("{id}")
+    public String getVacancyById(@PathVariable Long id) {
+        // Получение одной вакансии по id
+        return "OK";
+    }
+
+
+    @DeleteMapping("{id}")
+    public String deleteVacancyById(@PathVariable Long id) {
+        // Удаление вакансии
+        return "OK";
+    }
+
+
+    @GetMapping("search")
+    public String searchVacancies(@RequestParam Map<String, String> params) {
+        // Поиск вакансий с фильтрами/сортировкой
+        return "OK";
+    }
+
+
+
 }
