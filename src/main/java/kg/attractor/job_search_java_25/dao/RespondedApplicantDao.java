@@ -22,6 +22,10 @@ public class RespondedApplicantDao {
 
         String sql = "select * from responded_applicants where resume_id = in (" + inSql + ")";
 
+        return getRespondedApplicants(resumeIds, sql);
+    }
+
+    private List<RespondedApplicant> getRespondedApplicants(List<Long> resumeIds, String sql) {
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, resumeIds.toArray());
         List<RespondedApplicant> respondedApplicants = new ArrayList<>();
         for (Map<String, Object> map : list) {
@@ -42,20 +46,7 @@ public class RespondedApplicantDao {
 
         String sql = "select * from responded_applicants where vacancy_id in (" + inSql + ")";
 
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, vacancyIds.toArray());
-
-
-        List<RespondedApplicant> respondedApplicants = new ArrayList<>();
-        for (Map<String, Object> map : list) {
-            RespondedApplicant respondedApplicant = new RespondedApplicant();
-            respondedApplicant.setId(((Number) map.get("id")).longValue());
-            respondedApplicant.setResumeId(((Number) map.get("resume_id")).longValue());
-            respondedApplicant.setVacancyId(((Number) map.get("vacancy_id")).longValue());
-            respondedApplicant.setConfirmation((Boolean) map.get("confirmation"));
-            respondedApplicants.add(respondedApplicant);
-
-        }
-        return respondedApplicants;
+        return getRespondedApplicants(vacancyIds, sql);
     }
 
     public void save(RespondedApplicant respondedApplicant) {
@@ -80,4 +71,5 @@ public class RespondedApplicantDao {
         }
         return respondedApplicants;
     }
+
 }
