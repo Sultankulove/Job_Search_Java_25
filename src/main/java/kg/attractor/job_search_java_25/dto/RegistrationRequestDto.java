@@ -17,9 +17,16 @@ public class RegistrationRequestDto {
     @NotBlank
     private String name;
 
+    private String surname;
+
+    private Byte age;
+
     @NotBlank
     @Email
     private String email;
+
+    @NotBlank
+    private String password;
 
     @NotBlank
     private String phoneNumber;
@@ -27,5 +34,5 @@ public class RegistrationRequestDto {
     private String avatar;
 
     @NotNull
-    private Role role;
+    private AccountType accountType;
 }
