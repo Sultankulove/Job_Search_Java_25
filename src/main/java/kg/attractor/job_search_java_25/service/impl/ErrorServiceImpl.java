@@ -5,29 +5,32 @@ import kg.attractor.job_search_java_25.service.ErrorService;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ErrorServiceImpl implements ErrorService {
+    @Override
+    public ErrorResponseBody fromBindingResult(BindingResult br) {
+        Map<String, List<String>> reasons = new LinkedHashMap<>();
+        br.getFieldErrors().forEach(err -> {
+            if (err.getDefaultMessage() == null) return;
+            reasons.computeIfAbsent(err.getField(), k -> new ArrayList<>())
+                    .add(err.getDefaultMessage());
+        });
+        return ErrorResponseBody.builder()
+                .title("Validation errors")
+                .response(reasons.isEmpty()
+                        ? Map.of("errors", List.of("Invalid request"))
+                        : reasons)
+                .build();
+    }
 
     @Override
-    public ErrorResponseBody makeResponse(BindingResult bindingResult) {
-        Map<String, List<String>> reasons = new HashMap<>();
-
-        bindingResult.getFieldErrors().stream().filter(e -> e.getDefaultMessage() != null)
-                .forEach(e -> {
-                    List<String> errors = new ArrayList<>();
-                    errors.add(e.getDefaultMessage());
-                    if (!reasons.containsKey(e.getField())) {
-                        reasons.put(e.getField(), errors);
-                    }
-                });
-        return ErrorResponseBody.builder().
-                title("Validation errors")
-                .response(reasons)
+    public ErrorResponseBody fromException(Throwable e) {
+        String msg = Optional.ofNullable(e.getMessage()).orElse(e.getClass().getSimpleName());
+        return ErrorResponseBody.builder()
+                .title(msg)
+                .response(Map.of("errors", List.of(msg)))
                 .build();
     }
 }

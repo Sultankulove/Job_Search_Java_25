@@ -1,143 +1,205 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import kg.attractor.job_search_java_25.dao.RespondedApplicantDao;
 import kg.attractor.job_search_java_25.dao.VacancyDao;
-import kg.attractor.job_search_java_25.dto.ApplicantDto;
-import kg.attractor.job_search_java_25.dto.ResumeDto;
-import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.model.Resume;
+import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
+import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
+import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.model.Vacancy;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VacancyServiceImpl implements VacancyService {
     private final VacancyDao vacancyDao;
+    private final RespondedApplicantDao respondedApplicantDao;
+
+    @Override
+    public List<VacancyShortDto>getShortVacanciesList(Long employerId) {
+        log.debug("VacancyService.getShortVacanciesList(employerId={})", employerId);
+        List<VacancyShortDto> shortVacancies;
+        shortVacancies = vacancyDao.getAllVacanciesById(employerId)
+                .stream()
+                .map(v -> new VacancyShortDto(v.getName(), v.getUpdateTime()))
+                .toList();
+        log.info("Вакансии: короткий список size={}", shortVacancies.size());
+        return shortVacancies;
+    }
+
+    @Override
+    public ResponseEntity<Void> updateTime(Long id) {
+        log.info("Вакансии: обновление времени id={}", id);
+        vacancyDao.updateTime(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public void editVacancy(VacancyEditDto editVacancyEditDto, Long vacancyId, Long userId) {
+        log.info("Вакансии: редактирование id={}, authorId={}", vacancyId, userId);
+        Vacancy vacancy = new Vacancy();
+        vacancy.setName(editVacancyEditDto.getName());
+        vacancy.setDescription(editVacancyEditDto.getDescription());
+        vacancy.setCategoryId(editVacancyEditDto.getCategoryId());
+        vacancy.setSalary(editVacancyEditDto.getSalary());
+        vacancy.setExpFrom(editVacancyEditDto.getExpFrom());
+        vacancy.setExpTo(editVacancyEditDto.getExpTo());
+        vacancy.setIsActive(editVacancyEditDto.getIsActive());
+
+
+        vacancyDao.editVacancy(vacancy, vacancyId, userId);
+        log.debug("Вакансии: отредактировано id={}", vacancyId);
+    }
+
+    @Override
+    public void vacancyIsActiveById(Long vacancyId, VacancyIsActiveDto vacancyIsActiveDto) {
+
+        boolean isActive = vacancyIsActiveDto.getIsActive();
+        log.info("Вакансии: публикация id={}, isActive={}", vacancyId, isActive);
+        vacancyDao.vacancyIsActive(vacancyId, isActive);
+    }
+
+    @Override
+    public VacancyDto createVacancies(Long authorId, VacancyEditDto createVacancyEditDto) {
+        log.info("Вакансии: создание authorId={}", authorId);
+        Vacancy v = new Vacancy();
+        v.setName(createVacancyEditDto.getName());
+        v.setDescription(createVacancyEditDto.getDescription());
+        v.setCategoryId(createVacancyEditDto.getCategoryId());
+        v.setSalary(createVacancyEditDto.getSalary());
+        v.setExpFrom(createVacancyEditDto.getExpFrom());
+        v.setExpTo(createVacancyEditDto.getExpTo());
+        v.setIsActive(createVacancyEditDto.getIsActive());
+        v.setAuthorId(authorId);
+
+        long id = vacancyDao.createVacancy(v);
+        v.setId(id);
+
+        log.debug("Вакансии: создано (name={}, categoryId={})", v.getName(), v.getCategoryId());
+        return VacancyDto.builder()
+                .id(v.getId())
+                .name(v.getName())
+                .description(v.getDescription())
+                .categoryId(v.getCategoryId())
+                .salary(v.getSalary())
+                .expFrom(v.getExpFrom())
+                .expTo(v.getExpTo())
+                .isActive(v.getIsActive())
+                .authorId(v.getAuthorId())
+                .createdDate(v.getCreatedDate())
+                .updateDate(v.getUpdateTime())
+                .build();
+    }
 
     @Override
     public ResponseEntity<VacancyDto> getVacancyById(Long id) {
-        Optional<Vacancy> optionalVacancy = vacancyDao.getVacancyById(id);
+        Optional<Vacancy> vacancy = vacancyDao.getVacancyById(id);
+        if (vacancy.isPresent()) {
+            log.info("Вакансии: найдено id={}", id);
+            VacancyDto dto = new VacancyDto();
+            dto.setId(vacancy.get().getId());
+            dto.setName(vacancy.get().getName());
+            dto.setDescription(vacancy.get().getDescription());
+            dto.setCategoryId(vacancy.get().getCategoryId());
+            dto.setSalary(vacancy.get().getSalary());
+            dto.setExpFrom(vacancy.get().getExpFrom());
+            dto.setExpTo(vacancy.get().getExpTo());
+            dto.setIsActive(vacancy.get().getIsActive());
+            dto.setAuthorId(vacancy.get().getAuthorId());
+            dto.setCreatedDate(vacancy.get().getCreatedDate());
+            dto.setUpdateDate(vacancy.get().getUpdateTime());
 
-        if (optionalVacancy.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(dto);
+        } else {
+            log.warn("Вакансии: не найдено id={}", id);
+            throw new NotFoundException("Vacancy with id=" + id + " not found");
         }
-
-        Vacancy vacancy = optionalVacancy.get();
-        VacancyDto dto = new VacancyDto();
-        dto.setName(vacancy.getName());
-        dto.setDescription(vacancy.getDescription());
-        dto.setCategoryId(vacancy.getCategoryId());
-        dto.setSalary(vacancy.getSalary());
-        dto.setExpFrom(vacancy.getExpFrom());
-        dto.setExpTo(vacancy.getExpTo());
-        dto.setIsActive(vacancy.getIsActive());
-        dto.setAuthorId(vacancy.getAuthorId());
-
-        dto.setCreatedDate(vacancy.getCreatedDate().toLocalDateTime());
-        dto.setUpdateTime(vacancy.getUpdateTime().toLocalDateTime());
-
-        return ResponseEntity.ok(dto);
     }
 
     @Override
-    public Vacancy editVacancyById(Long id, VacancyDto vacancyDto) {
-        Vacancy vacancy = new Vacancy();
-        vacancy.setId(id);
-        vacancy.setName(vacancyDto.getName());
-        vacancy.setDescription(vacancyDto.getDescription());
-        vacancy.setCategoryId(vacancyDto.getCategoryId());
-        vacancy.setSalary(vacancyDto.getSalary());
-        vacancy.setExpFrom(vacancyDto.getExpFrom());
-        vacancy.setExpTo(vacancyDto.getExpTo());
-        vacancy.setIsActive(vacancyDto.getIsActive());
-        vacancy.setAuthorId(vacancyDto.getAuthorId());
-        vacancy.setUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
-
-        vacancyDao.edit(id, vacancy);
-        return vacancy;
-        // TODO редактируем вакансию. Находим по id и перезаписываем его.
+    public void deleteVacancyById(Long id) {
+        log.warn("Вакансии: удаление id={}", id);
+        vacancyDao.deleteVacancyById(id);
     }
 
     @Override
-    public void deleteById(Long id) {
-        vacancyDao.delete(id);
+    public void respondToVacancy(ResponseDto dto, Long userId) {
+        log.info("Отклик: vacancyId={}, resumeId={}, userId={}", dto.getVacancyId(), dto.getResumeId(), userId);
+        RespondedApplicant respondedApplicant = new RespondedApplicant();
+        respondedApplicant.setResumeId(dto.getResumeId());
+        respondedApplicant.setVacancyId(dto.getVacancyId());
+        respondedApplicant.setConfirmation(false);
+        respondedApplicantDao.save(respondedApplicant);
+        log.debug("Отклик: сохранён");
     }
 
     @Override
-    public ResponseEntity<List<VacancyDto>> getActiveVacancies() {
+    public ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(Long vacancyId) {
+        log.debug("Отклики: запрос списка по vacancyId={}", vacancyId);
+        List<RespondedApplicant> responded = respondedApplicantDao.getResponsesByVacancy(vacancyId);
 
-        // TODO Возвращаем список всех активных вакансий
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<List<VacancyDto>> getVacancyByCategoryName(String name) {
-        return null;
-    }
-
-
-    @Override
-    public ResponseEntity<List<ApplicantDto>> getApplicantResponded() {
-        // TODO Возвращаем список моих откликов на вакансии
-
-        return null;
-    }
-
-    @Override
-    public Vacancy createVacancy(VacancyDto vacancyDto) {
-        Vacancy vacancy = new Vacancy();
-        vacancy.setName(vacancyDto.getName());
-        vacancy.setDescription(vacancyDto.getDescription());
-        vacancy.setCategoryId(vacancyDto.getCategoryId());
-        vacancy.setSalary(vacancyDto.getSalary());
-        vacancy.setExpFrom(vacancyDto.getExpFrom());
-        vacancy.setExpTo(vacancyDto.getExpTo());
-        vacancy.setIsActive(true);
-        vacancy.setAuthorId(vacancyDto.getAuthorId());
-        vacancy.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
-        vacancy.setUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
-
-        vacancyDao.save(vacancy);
-        return vacancy;
-    }
-
-    @Override
-    public ResponseEntity<List<VacancyDto>> getVacancyByCategoryId(Long id) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<List<VacancyDto>> getVacancySortBySalary() {
-        return null;
-    }
-
-    @Override
-    public List<VacancyDto> getAllVacancies() {
-        List<Vacancy> list = vacancyDao.findAllVacancies();
-        return list.stream()
-                .map(e -> VacancyDto.builder()
-                        .name(e.getName())
-                        .description(e.getDescription())
-                        .categoryId(e.getCategoryId())
-                        .salary(e.getSalary())
-                        .expFrom(e.getExpFrom())
-                        .expTo(e.getExpTo())
-                        .isActive(e.getIsActive())
-                        .authorId(e.getAuthorId())
-                        .createdDate(e.getCreatedDate().toLocalDateTime())
-                        .updateTime(e.getUpdateTime().toLocalDateTime())
+        List<RespondedApplicantDto> dtos = responded.stream()
+                .map(entity -> RespondedApplicantDto.builder()
+                        .id(entity.getId())
+                        .resumeId(entity.getResumeId())
+                        .vacancyId(entity.getVacancyId())
+                        .confirmation(entity.getConfirmation())
                         .build())
                 .toList();
+        log.info("Отклики: найдено {}", dtos.size());
+        return ResponseEntity.ok(dtos);
     }
+
+
+    @Override
+    public List<VacancyShortDto> getPublicShortVacancies() {
+        var list = vacancyDao.getActiveShortVacancies();
+        log.info("Публичные вакансии: {}", list.size());
+        return list;
+    }
+
+
+    @Override
+    public void editVacancyOwned(VacancyEditDto dto, Long vacancyId, Long employerId) {
+        log.debug("editVacancyOwned(vacancyId={}, employerId={})", vacancyId, employerId);
+        requireVacancyOwner(vacancyId, employerId);
+
+        Vacancy v = new Vacancy();
+        v.setName(dto.getName());
+        v.setDescription(dto.getDescription());
+        v.setCategoryId(dto.getCategoryId());
+        v.setSalary(dto.getSalary());
+        v.setExpFrom(dto.getExpFrom());
+        v.setExpTo(dto.getExpTo());
+        v.setIsActive(dto.getIsActive());
+
+        vacancyDao.editVacancy(v, vacancyId, employerId);
+        log.info("Вакансия {} отредактирована работодателем {}", vacancyId, employerId);
+    }
+
+    @Override
+    public void vacancyIsActiveOwned(Long vacancyId, VacancyIsActiveDto dto, Long employerId) {
+        log.debug("vacancyIsActiveOwned(vacancyId={}, employerId={})", vacancyId, employerId);
+        requireVacancyOwner(vacancyId, employerId);
+        vacancyDao.vacancyIsActive(vacancyId, dto.getIsActive());
+        log.info("Статус активности вакансии {} изменён работодателем {} на {}", vacancyId, employerId, dto.getIsActive());
+    }
+
+    private void requireVacancyOwner(Long vacancyId, Long employerId) {
+        Long ownerId = vacancyDao.getOwnerId(vacancyId);
+        if (!ownerId.equals(employerId)) throw new ForbiddenException("Not your vacancy");
+    }
+
+
+
+
 }

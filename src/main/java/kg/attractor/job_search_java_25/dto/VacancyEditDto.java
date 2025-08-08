@@ -6,19 +6,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ResumeDto {
+@AllArgsConstructor
+public class VacancyEditDto {
     private Long id;
-    private Long applicantId;
 
     @NotBlank
-    @Size(max = 64)
+    @Size(max = 100)
     private String name;
+
+    @NotBlank
+    @Size(max = 500)
+    private String description;
 
     @NotNull
     @Positive
@@ -27,8 +28,12 @@ public class ResumeDto {
     @PositiveOrZero
     private Float salary;
 
+    @PositiveOrZero
+    private Integer expFrom;
+
+    @PositiveOrZero
+    private Integer expTo;
+
     @NotNull
     private Boolean isActive;
-    private LocalDateTime createdDate;
-    private LocalDateTime updateTime;
 }

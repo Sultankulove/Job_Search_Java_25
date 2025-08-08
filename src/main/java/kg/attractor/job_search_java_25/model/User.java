@@ -9,7 +9,7 @@ public class User {
     private Long id;
     private String name;
     private String surname;
-    private Short age;
+    private Byte age;
     private String email;
     private String password;
     private String phoneNumber;

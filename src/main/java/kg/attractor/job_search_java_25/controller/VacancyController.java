@@ -1,69 +1,104 @@
 package kg.attractor.job_search_java_25.controller;
 
-import kg.attractor.job_search_java_25.dto.ApplicantDto;
-import kg.attractor.job_search_java_25.dto.RespondedApplicantDto;
+import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.model.Vacancy;
-import kg.attractor.job_search_java_25.service.RespondedApplicantService;
+import kg.attractor.job_search_java_25.dto.VacancyEditDto;
+import kg.attractor.job_search_java_25.dto.VacancyIsActiveDto;
+import kg.attractor.job_search_java_25.dto.VacancyShortDto;
+import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
+@RequestMapping("api/vacancies")
 public class VacancyController {
     private final VacancyService vacancyService;
+    private final UserService userService;
 
-    // Список вакансий
-    @GetMapping("vacancies")
-    public ResponseEntity<List<VacancyDto>> getListVacancy() {
-        vacancyService.getAllVacancies();
-        return new ResponseEntity<>(vacancyService.getAllVacancies(), HttpStatus.OK);
+
+    @GetMapping
+    public ResponseEntity<List<VacancyShortDto>> list() {
+        var list = vacancyService.getPublicShortVacancies();
+        return ResponseEntity.ok(list);
     }
 
-    // Конкретная вакансия
-    @GetMapping("vacancies/{id}")
-    public ResponseEntity<VacancyDto> getVacancy(@PathVariable Long id) {
+    @PatchMapping("{vacancyId}")
+    public ResponseEntity<Void> updateVacanciesById(@PathVariable Long vacancyId) {
+
+        log.info("PATCH /api/vacancies/{} — обновление времени", vacancyId);
+        vacancyService.updateTime(vacancyId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("{vacancyId}")
+    public ResponseEntity<VacancyEditDto> editVacanciesById(@PathVariable Long vacancyId, @RequestBody @Valid VacancyEditDto editVacancyEditDto, Authentication authentication) {
+        Long authorId = userService.findUserIdByEmail(authentication.getName());
+
+        log.info("PUT /api/vacancies/{} — редактирование вакансии, authorId={}", vacancyId, authorId);
+
+        vacancyService.editVacancy(editVacancyEditDto, vacancyId, authorId);
+        vacancyService.editVacancyOwned(editVacancyEditDto, vacancyId, authorId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("{vacancyId}/status")
+    public ResponseEntity<VacancyIsActiveDto> vacanciesIsActiveById(@PathVariable Long vacancyId, @RequestBody @Valid VacancyIsActiveDto vacancyIsActiveDto, Authentication authentication) {
+        Long authorId = userService.findUserIdByEmail(authentication.getName());
+        // проверять владение вакансией authorId
+        // Продумать надо...
+        log.info("PATCH /api/vacancies/{}/status — публикация={}", vacancyId, vacancyIsActiveDto.getIsActive());
+        vacancyService.vacancyIsActiveById(vacancyId, vacancyIsActiveDto);
+        vacancyService.vacancyIsActiveOwned(vacancyId, vacancyIsActiveDto, authorId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<VacancyDto> createVacancy(@RequestBody @Valid VacancyEditDto createVacancyEditDto, Authentication authentication) {
+        Long authorId = userService.findUserIdByEmail(authentication.getName());
+        log.info("POST /api/vacancies — создание вакансии, authorId={}", authorId);
+        VacancyDto saved = vacancyService.createVacancies(authorId, createVacancyEditDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+
+
+    @GetMapping("{id}")
+    public ResponseEntity<VacancyDto> getVacancyById(@PathVariable Long id) {
+
+        log.debug("GET /api/vacancies/{} — получить вакансию", id);
+
         return vacancyService.getVacancyById(id);
     }
 
-    // Создать вакансию
-    @PostMapping("vacancies")
-    public Vacancy createVacancy(@RequestBody VacancyDto vacancyDto) {
-        return vacancyService.createVacancy(vacancyDto);
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteVacancyById(@PathVariable Long id) {
+
+        log.warn("DELETE /api/vacancies/{} — удаление вакансии", id);
+
+        vacancyService.deleteVacancyById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    // Редактировать вакансию
-    @PutMapping("vacancies/{id}")
-    public ResponseEntity<VacancyDto> editVacancy(@PathVariable Long id, @RequestBody VacancyDto vacancyDto) {
-        vacancyService.editVacancyById(id, vacancyDto);
-        return new ResponseEntity<>(vacancyDto, HttpStatus.OK);
-    }
 
-    // Удалить вакансию
-    @DeleteMapping("vacancies/{id}")
-    public ResponseEntity<Void> deleteVacancy(@PathVariable Long id) {
-        vacancyService.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    @GetMapping("search")
+    public String searchVacancies(@RequestParam Map<String, String> params) {
 
-    @GetMapping("vacancies/categories/{name}")
-    public ResponseEntity<List<VacancyDto>> getVacancyByCategoryName(@PathVariable String name) {
-        return vacancyService.getVacancyByCategoryName(name);
-    }
+        // Поиск вакансий с фильтрами/сортировкой
 
-    @GetMapping("vacancies/categories/{id}")
-    public ResponseEntity<List<VacancyDto>> getVacancyByCategoryId(@PathVariable Long id) {
-        return vacancyService.getVacancyByCategoryId(id);
-    }
-
-    @GetMapping("vacancies/salary")
-    public ResponseEntity<List<VacancyDto>> getVacancySortBySalary() {
-        return vacancyService.getVacancySortBySalary();
+        log.debug("GET /api/vacancies/search — фильтры={}", params);
+        return "OK";
     }
 
 }

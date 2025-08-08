@@ -1,83 +1,94 @@
 package kg.attractor.job_search_java_25.controller;
 
-import kg.attractor.job_search_java_25.dto.ResumeDto;
-import kg.attractor.job_search_java_25.dto.ResumeListDto;
+import jakarta.validation.Valid;
+import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.service.ResumeService;
+import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
+@RequestMapping("api/resumes")
 public class ResumeController {
     private final ResumeService resumeService;
+    private final UserService userService;
 
-    // Список всех резюме
-    @GetMapping("resumes")
-    public ResponseEntity<List<ResumeDto>> allResume() {
-        resumeService.findAllResume();
-        return ResponseEntity.ok().body(resumeService.findAllResume());
+    @PatchMapping("{Id}")
+    public ResponseEntity<Void> updateResumeById(@PathVariable Long id, Authentication authentication) {
+        Long applicantId = userService.findUserIdByEmail(authentication.getName());
+        log.info("PATCH /api/resumes/{} — обновление времени", id);
+        resumeService.updateTime(id);
+        resumeService.updateTimeOwned(id, applicantId);
+        return ResponseEntity.noContent().build();
     }
 
-    // Конкретное резюме
-    @GetMapping("resumes/{id}")
-    public ResponseEntity<ResumeDto> getResume(@PathVariable Long id) {
-//        return ResponseEntity.ok(resumeService.getResumeById(id));
-        return ResponseEntity.ok(resumeService.getResumeById(id).getBody());
+    @PutMapping("{resumeId}")
+    public ResponseEntity<ResumeEditDto> editResumeById(@PathVariable Long resumeId, @RequestBody @Valid ResumeEditDto resumeEditDto, Authentication authentication) {
+        Long applicantId = userService.findUserIdByEmail(authentication.getName());
+
+        log.info("PUT /api/resumes/{} — редактирование резюме, applicantId={}", resumeId, applicantId);
+
+        resumeService.editResume(resumeEditDto, resumeId, applicantId);
+        resumeService.editResumeOwned(resumeEditDto, resumeId, applicantId);
+        return ResponseEntity.ok().build();
     }
 
-    // Создать резюме. ОК
-    @PostMapping("resumes")
-    public ResponseEntity<ResumeDto> createResume(@RequestBody ResumeDto resumeDto) {
-        resumeService.createResume(resumeDto);
-        return ResponseEntity.ok().body(resumeDto);
+    @PatchMapping("{resumeId}/status")
+    public ResponseEntity<ResumeIsActiveDto> resumesIsActiveById(@PathVariable Long resumeId, @RequestBody @Valid ResumeIsActiveDto resumeIsActiveDto, Authentication authentication) {
+        Long applicantId = userService.findUserIdByEmail(authentication.getName());
+
+        log.info("PATCH /api/resumes/{}/status — публикация={}, запрос", resumeId, resumeIsActiveDto.getIsActive());
+
+        resumeService.resumeIsActiveById(resumeId, resumeIsActiveDto);
+        resumeService.resumeIsActiveOwned(resumeId, resumeIsActiveDto, applicantId);
+        return ResponseEntity.ok().build();
     }
 
-    // редактировать резюме
-    @PutMapping("resumes/{id}")
-    public ResponseEntity<ResumeDto> editResume(@PathVariable long id, @RequestBody ResumeDto resumeDto) {
-        resumeService.editResume(id, resumeDto);
-        return ResponseEntity.ok().body(resumeDto);
-    }
+    @PostMapping
+    public ResponseEntity<ResumeEditDto> createResume(@RequestBody @Valid ResumeEditDto resumeEditDto,  Authentication authentication) {
+        Long applicantId = userService.findUserIdByEmail(authentication.getName());
 
-    // обновляет резюме(только время)
-    @PutMapping("resumes/{id}/update")
-    public ResponseEntity<ResumeDto> updateResume(@PathVariable long id, @RequestBody ResumeDto resumeDto) {
-        resumeService.updateResume(id, resumeDto);
-        // Обновляет только update_time
-        return ResponseEntity.ok().body(resumeDto);
-    }
+        log.info("POST /api/resumes — создание резюме, applicantId={}", applicantId);
 
-    // удаляет резюме
-    @DeleteMapping("resumes/{id}")
-    public HttpStatus deleteResume(@PathVariable long id) {
-        resumeService.deleteResume(id);
-        return HttpStatus.OK;
-    }
-
-    /// /////////
-
-    @GetMapping("resume/{applicantId}")
-    public ResponseEntity<List<ResumeListDto>> listOfCreatedResume(@PathVariable long applicantId) {
-        return resumeService.listOfCreatedResume(applicantId);
+        ResumeEditDto saved = resumeService.createResume(applicantId, resumeEditDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<ResumeDto> getResumeById(@PathVariable Long id) {
+        log.debug("GET /api/resumes/{} — получить резюме", id);
 
-    // OK
-    @GetMapping("resume/categoriesByName/{name}")
-    public ResponseEntity<List<ResumeDto>> findResumeByCategoryName(@PathVariable String name) {
-        resumeService.findResumeByCategoryName(name);
-        return ResponseEntity.ok().body(resumeService.findResumeByCategoryName(name));
+        return resumeService.getResumeById(id);
     }
 
-    // OK
-    @GetMapping("resume/categoriesById/{id}")
-    public ResponseEntity<List<ResumeDto>> findResumeByCategoryId(@PathVariable long id) {
-        resumeService.findResumeByCategoryId(id);
-        return ResponseEntity.ok().body(resumeService.findResumeByCategoryId(id));
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteResumeById(@PathVariable Long id) {
+
+        log.warn("DELETE /api/resumes/{} — удаление резюме", id);
+        resumeService.deleteResumeById(id);
+        return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/search")
+    public String searchResumes(@RequestParam Map<String, String> params) {
+
+        // Поиск резюме по фильтрам (для работодателя)
+
+        log.debug("GET /api/resumes/search — фильтры={}", params);
+        return "OK";
+    }
+
+
+
 }

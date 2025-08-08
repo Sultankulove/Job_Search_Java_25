@@ -14,13 +14,13 @@ public class VacancyMapper implements RowMapper<Vacancy> {
         vacancy.setName(rs.getString("name"));
         vacancy.setDescription(rs.getString("description"));
         vacancy.setCategoryId(rs.getLong("category_id"));
-        vacancy.setSalary(rs.getDouble("salary"));
-        vacancy.setExpFrom(rs.getLong("exp_from"));
-        vacancy.setExpTo(rs.getLong("exp_to"));
+        vacancy.setSalary(rs.getFloat("salary"));
+        vacancy.setExpFrom(rs.getInt("exp_from"));
+        vacancy.setExpTo(rs.getInt("exp_to"));
         vacancy.setIsActive(rs.getBoolean("is_active"));
         vacancy.setAuthorId(rs.getLong("author_id"));
-        vacancy.setCreatedDate(rs.getTimestamp("created_date"));
-        vacancy.setUpdateTime(rs.getTimestamp("update_time"));
+        vacancy.setCreatedDate(rs.getTimestamp("created_date").toLocalDateTime());
+        vacancy.setUpdateTime(rs.getTimestamp("update_time").toLocalDateTime());
         return vacancy;
     }
 }

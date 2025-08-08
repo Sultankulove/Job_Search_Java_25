@@ -1,30 +1,34 @@
 package kg.attractor.job_search_java_25.service;
 
-import kg.attractor.job_search_java_25.dto.ApplicantDto;
-import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.model.Vacancy;
+import jakarta.validation.Valid;
+import kg.attractor.job_search_java_25.dto.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface VacancyService {
 
+    List<VacancyShortDto> getShortVacanciesList(Long employerId);
+
+    ResponseEntity<Void> updateTime(Long id);
+
+    void editVacancy(VacancyEditDto editVacancyEditDto, Long id, Long userId);
+
+    void vacancyIsActiveById(Long vacancyId, VacancyIsActiveDto vacancyIsActiveDto);
+
+    VacancyDto createVacancies(Long authorId, VacancyEditDto createVacancyEditDto);
+
     ResponseEntity<VacancyDto> getVacancyById(Long id);
-    Vacancy editVacancyById(Long id, VacancyDto vacancyDto);
 
-    void deleteById(Long id);
+    void deleteVacancyById(Long id);
 
-    ResponseEntity<List<VacancyDto>> getActiveVacancies();
+    void respondToVacancy(ResponseDto dto, Long userId);
 
-    ResponseEntity<List<VacancyDto>> getVacancyByCategoryName(String name);
+    ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(Long vacancyId);
 
-    ResponseEntity<List<ApplicantDto>> getApplicantResponded();
+    List<VacancyShortDto> getPublicShortVacancies();
 
-    Vacancy createVacancy(VacancyDto vacancyDto);
+    void editVacancyOwned(@Valid VacancyEditDto editVacancyEditDto, Long vacancyId, Long authorId);
 
-    ResponseEntity<List<VacancyDto>> getVacancyByCategoryId(Long id);
-
-    ResponseEntity<List<VacancyDto>> getVacancySortBySalary();
-
-    List<VacancyDto> getAllVacancies();
+    void vacancyIsActiveOwned(Long vacancyId, @Valid VacancyIsActiveDto vacancyIsActiveDto, Long authorId);
 }

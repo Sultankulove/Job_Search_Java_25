@@ -1,118 +1,110 @@
 package kg.attractor.job_search_java_25.dao;
 
 import kg.attractor.job_search_java_25.dao.mappers.ResumeMapper;
-import kg.attractor.job_search_java_25.dto.ResumeDto;
 import kg.attractor.job_search_java_25.model.Resume;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class ResumeDao {
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
+    public List<Resume> getAllResumesById(Long applicantId) {
+        String sql = "select * from resumes where applicant_id=?";
+        return jdbcTemplate.query(sql, new ResumeMapper(), applicantId);
+    }
 
-    public List<Resume> findByApplicantId(int applicantId) {
-        String sql = "SELECT * FROM resumes WHERE applicant_id = :applicantId";
-        return namedParameterJdbcTemplate.query(
-                sql,
-                Map.of("applicantId", applicantId),
-                new ResumeMapper()
+    public void createResume(Resume resume) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(
+                connection -> {
+                    PreparedStatement ps = connection.prepareStatement(
+                            "insert into resumes (applicant_id, name, category_id, salary, is_active, created_date, update_time) values (?,?,?,?,?,?,?);",
+                            Statement.RETURN_GENERATED_KEYS
+                    );
+                    ps.setLong(1, resume.getApplicantId());
+                    ps.setString(2, resume.getName());
+                    ps.setLong(3, resume.getCategoryId());
+                    ps.setDouble(4, resume.getSalary());
+                    ps.setBoolean(5, resume.getIsActive());
+                    ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                    ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+                    return ps;
+                }, keyHolder
         );
     }
 
-    public List<Resume> findAll(){
-        String sql = "SELECT * FROM resumes";
-        return namedParameterJdbcTemplate.query(sql, new ResumeMapper());
+    public void updateTime(Long resumeId) {
+        String sql = "update resumes set update_time=? where id=?";
+        jdbcTemplate.update(sql, new Timestamp(System.currentTimeMillis()), resumeId);
     }
 
-    public List<Resume> findByCategoryId(Long categoryId) {
-        String sql = "SELECT * FROM resumes WHERE category_id = :categoryId";
-        return namedParameterJdbcTemplate.query(
-                sql,
-                Map.of("categoryId", categoryId),
-                new ResumeMapper()
+    public void editResume(Resume resume, Long resumeId, Long applicantId) {
+        String sql = "update resumes set " +
+                "name = ?, " +
+                "category_id = ?, " +
+                "salary = ?, " +
+                "is_active = ?, " +
+                "update_time = ? " +
+                "where id = ? AND applicant_id = ?";
+
+        jdbcTemplate.update(sql,
+                resume.getName(),
+                resume.getCategoryId(),
+                resume.getSalary(),
+                resume.getIsActive(),
+                new Timestamp(System.currentTimeMillis()),
+                resumeId, applicantId
         );
     }
 
-    public List<Resume> findByCategoryName(String name) {
-        String sql = """
-        SELECT r.* FROM resumes r
-        JOIN categories c ON r.category_id = c.id
-        WHERE c.name = :name
-        """;
-        return namedParameterJdbcTemplate.query(
-                sql,
-                Map.of("name", name),
-                new ResumeMapper()
-        );
+    public void resumeIsActive(Long resumeId, Boolean isActive) {
+        String sql = "update resumes set is_active=? where id=?";
+        jdbcTemplate.update(sql, isActive, resumeId);
     }
 
-    public Optional<Resume> getResumeById(Long resumeId) {
-        String sql = "SELECT * FROM RESUMES WHERE id = ?";
-        List<Resume> results = jdbcTemplate.query(sql, new ResumeMapper(), resumeId);
-        return Optional.ofNullable(DataAccessUtils.singleResult(results));
+
+    public Optional<Resume> getResumeById(Long id) {
+        String sql = "select * from resumes where id=? limit 1";
+        try {
+            Resume resume = jdbcTemplate.queryForObject(sql, new ResumeMapper(), id);
+            return Optional.ofNullable(resume);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
-    public Optional<Resume> getResumeByIdAndUserId(Long resumeId, Optional<Long> userId) {
-        String sql = "SELECT * FROM resumes WHERE id = ? AND RESUMES.APPLICANT_ID = ?";
-        List<Resume> results = jdbcTemplate.query(sql, new ResumeMapper(), resumeId, userId);
-        return Optional.ofNullable(DataAccessUtils.singleResult(results));
+    public void deleteResumeById(Long id) {
+        String sql = "delete from resumes where id=?";
+        jdbcTemplate.update(sql, id);
     }
 
-    public void createResume(ResumeDto resumeDto) {
-        String sql = """
-            INSERT INTO resumes (applicant_id, name, category_id, salary, is_active, created_date, update_time)
-            VALUES (:applicantId, :name, :categoryId, :salary, :isActive, :createdDate, :updateTime)""";
-        namedParameterJdbcTemplate.update(
-                sql,
-        new MapSqlParameterSource()
-                .addValue("applicant_id", resumeDto.getApplicantId())
-                .addValue("name", resumeDto.getName())
-                .addValue("category_id", resumeDto.getCategoryId())
-                .addValue("salary", resumeDto.getSalary())
-                .addValue("is_active", resumeDto.getIsActive())
-                .addValue("created_date", LocalDateTime.now())
-                .addValue("update_date", LocalDateTime.now())
-        );
+    public Long getOwnerId(Long resumeId) {
+        String sql = "select applicant_id from resumes where id = ?";
+        return jdbcTemplate.query(sql, (rs, i) -> rs.getLong(1), resumeId)
+                .stream().findFirst()
+                .orElseThrow(() -> new EmptyResultDataAccessException(1));
     }
 
-    public void edit(Long id ,ResumeDto resumeDto) {
-        String sql = """
-            UPDATE resumes SET
-                applicant_id = :applicantId,
-                name = :name,
-                category_id = :categoryId,
-                salary = :salary,
-                is_active = :isActive,
-                update_time = :updateTime
-            WHERE id = :id
-        """;
-
-        namedParameterJdbcTemplate.update(sql,
-                new MapSqlParameterSource()
-                        .addValue("id", id)
-                        .addValue("applicantId", resumeDto.getApplicantId())
-                        .addValue("name", resumeDto.getName())
-                        .addValue("categoryId", resumeDto.getCategoryId())
-                        .addValue("salary", resumeDto.getSalary())
-                        .addValue("isActive", resumeDto.getIsActive())
-                        .addValue("updatedTime", System.currentTimeMillis())
-        );
+    public List<Resume> getShortResumesByApplicantId(Long applicantId) {
+        String sql = "SELECT id, name, update_time FROM resumes WHERE applicant_id = ?";
+        return jdbcTemplate.query(sql, (rs, i) -> {
+            Resume r = new Resume();
+            r.setId(rs.getLong("id"));
+            r.setName(rs.getString("name"));
+            r.setUpdateTime(rs.getTimestamp("update_time").toLocalDateTime());
+            return r;
+        }, applicantId);
     }
-
-    public void deleteById(Long id) {
-        String sql = "DELETE FROM resumes WHERE id = :id";
-        namedParameterJdbcTemplate.update(sql, Map.of("id", id));
-    }
-
 }

@@ -1,27 +1,32 @@
 package kg.attractor.job_search_java_25.service;
 
+import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.ResumeDto;
-import kg.attractor.job_search_java_25.dto.ResumeListDto;
+import kg.attractor.job_search_java_25.dto.ResumeEditDto;
+import kg.attractor.job_search_java_25.dto.ResumeIsActiveDto;
+import kg.attractor.job_search_java_25.dto.ResumeShortDto;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface ResumeService {
+    List<ResumeShortDto> getShortResumesList(Long applicantId);
+
+    ResponseEntity<Void> updateTime(Long resumeId);
+
+    void editResume(ResumeEditDto resumeEditDto, Long resumeId, Long applicantId);
+
+    void resumeIsActiveById(Long resumeId, ResumeIsActiveDto resumeIsActiveDto);
+
+    ResumeEditDto createResume(Long applicantId, ResumeEditDto resumeEditDto);
 
     ResponseEntity<ResumeDto> getResumeById(Long id);
-    List<ResumeDto> findResumeByCategoryId(Long categoryId);
 
-    List<ResumeDto> findAllResume();
-    void createResume(ResumeDto resumeDto);
+    void deleteResumeById(Long id);
 
-    void deleteResume(Long id);
+    void updateTimeOwned(Long id, Long applicantId);
 
-    void editResume(Long id, ResumeDto resumeDto);
+    void editResumeOwned(@Valid ResumeEditDto resumeEditDto, Long resumeId, Long applicantId);
 
-    void updateResume(Long id, ResumeDto resumeDto);
-
-    ResponseEntity<List<ResumeListDto>> listOfCreatedResume(long applicantId);
-
-    List<ResumeDto> findResumeByCategoryName(String name);
-
+    void resumeIsActiveOwned(Long resumeId, @Valid ResumeIsActiveDto resumeIsActiveDto, Long applicantId);
 }

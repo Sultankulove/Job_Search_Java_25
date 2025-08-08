@@ -12,4 +12,3 @@ public class ErrorResponseBody {
     private String title;
     private Map<String, List<String>> response;
 }
-

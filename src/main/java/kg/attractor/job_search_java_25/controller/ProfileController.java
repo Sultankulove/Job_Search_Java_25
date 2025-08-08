@@ -1,55 +1,93 @@
 package kg.attractor.job_search_java_25.controller;
 
-import kg.attractor.job_search_java_25.dao.UserDao;
-import kg.attractor.job_search_java_25.dto.AvatarDto;
-import kg.attractor.job_search_java_25.dto.UserDto;
-import kg.attractor.job_search_java_25.model.User;
-import kg.attractor.job_search_java_25.service.ImageService;
+import jakarta.validation.Valid;
+import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.service.ProfileService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.security.Principal;
+import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("profile")
+@RequestMapping("api/profile")
 public class ProfileController {
-    private final ImageService imageService;
+    private final ProfileService profileService;
     private final UserService userService;
 
-    private final UserDao userDao;
+    @GetMapping("resumes")
+    public ResponseEntity<List<ResumeShortDto>> myResumes(Authentication authentication) {
+        Long userId = userService.findUserIdByEmail(authentication.getName());
+        var list = profileService.getMyShortResumes(userId);
 
-//    // Получить текущий профиль
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("vacancies")
+    public ResponseEntity<List<VacancyShortDto>> myVacancies(Authentication authentication) {
+        Long userId = userService.findUserIdByEmail(authentication.getName());
+        var list = profileService.getMyShortVacancies(userId);
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping
-    public UserDto getProfile(Principal principal) {
-        return userService.getUserByEmail(principal.getName());
+    public ResponseEntity<MyProfileDto> getMyProfile(Authentication authentication) {
+        Long authId = userService.findUserIdByEmail(authentication.getName());
+        log.debug("GET /api/profile/{} — получить профиль", authentication.getName());
+        return profileService.getMyProfile(authId);
     }
 
-    // Редактировать профиль
     @PutMapping
-    @PreAuthorize("isAuthenticated()")
-    public User editUser(Principal principal, @RequestBody UserDto userDto) {
-        return userService.editUser(principal.getName(), userDto);
+    public ResponseEntity<MyProfileDto> editProfile(@RequestBody @Valid EditProfileDto epd, Authentication authentication) {
+        Long authId = userService.findUserIdByEmail(authentication.getName());
+        log.info("PUT /api/profile — редактирование профиля userId={}", authId);
+
+        MyProfileDto update = profileService.editProfile(epd, authId);
+        return ResponseEntity.ok(update);
     }
 
-    // Скачать аватар по filename
-    @GetMapping("avatar")
-    public ResponseEntity<?> getImage(@RequestParam(name = "filename") String filename) {
-        return imageService.getImageById(filename, "avatar");
-//        при сохранении аватарка перезаписывает старую
-    }
-
-    // Загрузить/обновить аватар
     @PostMapping("avatar")
-    public ResponseEntity<?> addImage(AvatarDto avatarDto) {
-        imageService.addImage(avatarDto);
-//        Примечание: может сохранить любой файл, надо исправить
-        return ResponseEntity.ok("Аватар успешно загружен");
+    public HttpStatus uploadAvatar(@RequestPart("avatar")MultipartFile avatar, Authentication authentication) {
+        Long authId = userService.findUserIdByEmail(authentication.getName());
+        AvatarDto avatarDto = new AvatarDto();
+        avatarDto.setUserId(authId);
+        avatarDto.setAvatar(avatar);
+
+        log.info("POST /api/profile/avatar — загрузка аватара пользователем");
+        profileService.addAvatar(avatarDto);
+        return HttpStatus.CREATED;
+    }
+
+    @GetMapping("avatar")
+    public ResponseEntity<?> getAvatar(Authentication authentication) {
+        Long authId = userService.findUserIdByEmail(authentication.getName());
+        log.debug("GET /api/profile/avatar?userId={} — получение аватара", authId);
+        return profileService.getAvatarByUserId(authId);
+    }
+
+
+    // Получить свои отклики (для соискателя)
+    @GetMapping("responses")
+    public ResponseEntity<List<RespondedApplicantDto>> getMyResponses(Authentication authentication) {
+        Long authId = userService.findUserIdByEmail(authentication.getName());
+        log.debug("GET /api/profile/responses — список моих откликов, userId={}", authId);
+        return profileService.getMyResponses(authId);
+    }
+
+    // Получить отклики на мои вакансии (для работодателя)
+    @GetMapping("/vacancy-responses")
+    public ResponseEntity<List<RespondedApplicantDto>> getVacancyResponses(Authentication authentication) {
+        Long employerId = userService.findUserIdByEmail(authentication.getName());
+        // Вернуть список откликов на вакансии, созданные этим работодателем
+
+        log.debug("GET /api/profile/vacancy-responses — отклики на мои вакансии, employerId={}", employerId);
+        return profileService.getMyVacanciesResponses(employerId);
     }
 }

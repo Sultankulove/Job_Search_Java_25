@@ -6,16 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ResumeDto {
-    private Long id;
-    private Long applicantId;
-
+@AllArgsConstructor
+public class ResumeEditDto {
     @NotBlank
     @Size(max = 64)
     private String name;
@@ -29,6 +24,4 @@ public class ResumeDto {
 
     @NotNull
     private Boolean isActive;
-    private LocalDateTime createdDate;
-    private LocalDateTime updateTime;
 }

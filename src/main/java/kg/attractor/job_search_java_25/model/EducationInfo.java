@@ -3,7 +3,7 @@ package kg.attractor.job_search_java_25.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.sql.Date;
 
 @Getter
 @Setter
