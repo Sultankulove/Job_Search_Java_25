@@ -5,9 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @Data
 @Builder
 @NoArgsConstructor
-//@AllArgsConstructor
+@AllArgsConstructor
 public class MessageDto {
+    private Long id;
+    private Long respondedApplicants;
+    private String content;
+    private Timestamp timestamp;
 }
