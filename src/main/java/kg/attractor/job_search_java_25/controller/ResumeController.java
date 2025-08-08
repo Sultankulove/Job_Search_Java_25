@@ -1,69 +1,85 @@
 package kg.attractor.job_search_java_25.controller;
 
+import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.service.ResumeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/resumes")
 public class ResumeController {
+    private final ResumeService resumeService;
 
     @GetMapping
-    public String listOfCreatedResumes() {
+    public ResponseEntity<List<ResumeShortDto>> listOfCreatedResumes() {
         // Видны только владельцу профиля
         // Вывод: List {Название резюме и Дата обновления резюме.}
-        return "OK";
+
+        Long applicantId = 1L; // Хард-код
+        // Должен получить user(id) владельца профиля и передать
+        var shortResumesList = resumeService.getShortResumesList(applicantId);
+        return ResponseEntity.ok(shortResumesList);
     }
 
     @PatchMapping("{id}")
-    public String updateResumeById(@PathVariable Long id) {
-
+    public ResponseEntity<Void> updateResumeById(@PathVariable Long resumeId) {
         // Обновить (Только его дату обновления)
-        return "OK";
+        resumeService.updateTime(resumeId);
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("{id}")
-    public String editResumeById(@PathVariable Long id) {
-
+    @PutMapping("{resumeId}")
+    public ResponseEntity<ResumeEditDto> editResumeById(@PathVariable Long resumeId, @RequestBody ResumeEditDto resumeEditDto) {
         // Редактировать
-        return "OK";
+
+        // Нужно взять id пользователя(auth) и передать как applicant_id
+        Long applicantId = 1L; // хард-код
+
+        resumeService.editResume(resumeEditDto, resumeId, applicantId);
+        return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("{id}/published")
-    public String resumesIsActiveById(@PathVariable Long id) {
-
+    @PatchMapping("{resumeId}/status")
+    public ResponseEntity<ResumeIsActiveDto> resumesIsActiveById(@PathVariable Long resumeId, @RequestBody ResumeIsActiveDto resumeIsActiveDto) {
         // Опубликован или не опубликован резюме
         // Продумать надо
-        return "OK";
+
+        resumeService.resumeIsActiveById(resumeId, resumeIsActiveDto);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping
-    public String createResume() {
+    public ResponseEntity<ResumeEditDto> createResume(@RequestBody ResumeEditDto resumeEditDto) {
 
         // Создать резюме:
         // applicantId передает через authentication
         // name, category(categoryId), salary, isActive
-        // contactsInfo (value) <- contactTypes(type)
-        // workExperienceInfo
-        // educationInfo
 
 
-        return "OK";
+        Long applicantId = 1L;
+        ResumeEditDto saved = resumeService.createResume(applicantId, resumeEditDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+
     }
 
     @GetMapping("{id}")
-    public String getResumeById(@PathVariable Long id) {
+    public ResponseEntity<ResumeDto> getResumeById(@PathVariable Long id) {
         // Получение одного резюме по id
-        return "OK";
+        return resumeService.getResumeById(id);
     }
 
 
     @DeleteMapping("{id}")
-    public String deleteResumeById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteResumeById(@PathVariable Long id) {
         // Удаление резюме
-        return "OK";
+        resumeService.deleteResumeById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
