@@ -1,28 +1,32 @@
 package kg.attractor.job_search_java_25.controller;
 
-import kg.attractor.job_search_java_25.dto.AvatarDto;
-import kg.attractor.job_search_java_25.dto.EditProfileDto;
+import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/profile")
 public class ProfileController {
     private final ProfileService profileService;
-    @GetMapping
-    public String getMyProfile() {
+
+    @GetMapping("{auth}")
+    public ResponseEntity<MyProfileDto> getMyProfile(@PathVariable Long auth) {
         // Вернуть информацию о пользователе (по JWT или сессии)
-        return "OK";
+//        Long auth = 1L;
+        return profileService.getMyProfile(auth);
     }
 
     @PutMapping
-    public String editProfile(@RequestBody EditProfileDto epd) {
+    public ResponseEntity<Void> editProfile(@RequestBody EditProfileDto epd) {
         // Логика обновления профиля
-        return "OK";
+        Long auth = 1L;
+        return profileService.editProfile(epd, auth);
     }
 
     @PostMapping("avatar")
@@ -41,15 +45,18 @@ public class ProfileController {
 
     // Получить свои отклики (для соискателя)
     @GetMapping("responses")
-    public String getMyResponses() {
+    public ResponseEntity<List<RespondedApplicantDto>> getMyResponses() {
         // Вернуть список откликов пользователя
-        return "OK";
+
+        Long auth = 1L;
+        return profileService.getMyResponses(auth);
     }
 
     // Получить отклики на мои вакансии (для работодателя)
     @GetMapping("/vacancy-responses")
-    public String getVacancyResponses() {
+    public ResponseEntity<List<RespondedApplicantDto>> getVacancyResponses() {
         // Вернуть список откликов на вакансии, созданные этим работодателем
-        return "OK";
+        Long auth = 1L;
+        return profileService.getMyVacanciesResponses(auth);
     }
 }
