@@ -3,11 +3,13 @@ package kg.attractor.job_search_java_25.dao;
 import kg.attractor.job_search_java_25.dao.mappers.UserMapper;
 import kg.attractor.job_search_java_25.model.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -26,24 +28,26 @@ public class UserDao {
     }
 
     public void uploadAvatar(String avatar, Long userId) {
-        // найти по id юзера и avatar записать на строку avatar
+        String sql = "UPDATE users SET avatar = ? WHERE id = ?";
+        jdbcTemplate.update(sql, avatar, userId);
     }
 
     public String getAvatarByUserId(Long userId) {
-        // По userId находит юзера и берет у него avatar
-
-        String avatar = "";
-        return avatar;
+        String sql = "SELECT avatar FROM users WHERE id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, userId);
     }
 
     public User getMyProfile(Long auth) {
         String sql = "select * from users where id = ?";
-        return jdbcTemplate.queryForObject(sql, new UserMapper(), auth);
+        return jdbcTemplate.query(sql, new UserMapper(), auth)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new EmptyResultDataAccessException(1));
     }
 
-    public void editProfile(User user, Long id) {
-        String sql = "update users set" +
-                "name = ?, " +
+    public int editProfile(User user, Long id) {
+        String sql = "update users " +
+                "SET name = ?, " +
                 "surname = ?, " +
                 "age = ?, " +
                 "email = ?, " +
@@ -51,7 +55,7 @@ public class UserDao {
                 "phone_number = ?" +
                 "where id = ?";
 
-        jdbcTemplate.update(sql,
+        return jdbcTemplate.update(sql,
                 user.getName(),
                 user.getSurname(),
                 user.getAge(),
@@ -77,4 +81,31 @@ public class UserDao {
                 user.getAccountType()
         );
     }
+
+    public Optional<Long> findUserIdByEmail(String email) {
+        String sql = "select id from users where email = ?";
+        return jdbcTemplate.query(sql, (rs, i) -> rs.getLong("id"), email)
+                .stream()
+                .findFirst();
+    }
+
+
+    public boolean existsByEmail(String email) {
+        String sql = "select count(1) from users where email = ?";
+        Integer c = jdbcTemplate.queryForObject(sql, Integer.class, email);
+        return c != null && c > 0;
+    }
+    public boolean existsByPhone(String phone) {
+        String sql = "select count(1) from users where phone_number = ?";
+        Integer c = jdbcTemplate.queryForObject(sql, Integer.class, phone);
+        return c != null && c > 0;
+    }
+
+    public Optional<User> findByEmail(String email) {
+        String sql = "select id, name, surname, age, email, password, phone_number, avatar, account_type " +
+                "from users where email = ?";
+        return jdbcTemplate.query(sql, new UserMapper(), email).stream().findFirst();
+    }
+
+
 }
