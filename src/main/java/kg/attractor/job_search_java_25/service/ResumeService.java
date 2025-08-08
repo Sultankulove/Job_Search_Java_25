@@ -1,5 +1,6 @@
 package kg.attractor.job_search_java_25.service;
 
+import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.ResumeDto;
 import kg.attractor.job_search_java_25.dto.ResumeEditDto;
 import kg.attractor.job_search_java_25.dto.ResumeIsActiveDto;
@@ -22,4 +23,10 @@ public interface ResumeService {
     ResponseEntity<ResumeDto> getResumeById(Long id);
 
     void deleteResumeById(Long id);
+
+    void updateTimeOwned(Long id, Long applicantId);
+
+    void editResumeOwned(@Valid ResumeEditDto resumeEditDto, Long resumeId, Long applicantId);
+
+    void resumeIsActiveOwned(Long resumeId, @Valid ResumeIsActiveDto resumeIsActiveDto, Long applicantId);
 }

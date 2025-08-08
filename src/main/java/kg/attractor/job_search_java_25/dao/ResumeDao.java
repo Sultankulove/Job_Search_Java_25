@@ -1,9 +1,7 @@
 package kg.attractor.job_search_java_25.dao;
 
 import kg.attractor.job_search_java_25.dao.mappers.ResumeMapper;
-import kg.attractor.job_search_java_25.dao.mappers.VacancyMapper;
 import kg.attractor.job_search_java_25.model.Resume;
-import kg.attractor.job_search_java_25.model.Vacancy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,4 +90,21 @@ public class ResumeDao {
         jdbcTemplate.update(sql, id);
     }
 
+    public Long getOwnerId(Long resumeId) {
+        String sql = "select applicant_id from resumes where id = ?";
+        return jdbcTemplate.query(sql, (rs, i) -> rs.getLong(1), resumeId)
+                .stream().findFirst()
+                .orElseThrow(() -> new EmptyResultDataAccessException(1));
+    }
+
+    public List<Resume> getShortResumesByApplicantId(Long applicantId) {
+        String sql = "SELECT id, name, update_time FROM resumes WHERE applicant_id = ?";
+        return jdbcTemplate.query(sql, (rs, i) -> {
+            Resume r = new Resume();
+            r.setId(rs.getLong("id"));
+            r.setName(rs.getString("name"));
+            r.setUpdateTime(rs.getTimestamp("update_time").toLocalDateTime());
+            return r;
+        }, applicantId);
+    }
 }
