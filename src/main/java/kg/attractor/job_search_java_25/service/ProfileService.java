@@ -12,9 +12,13 @@ public interface ProfileService {
 
     ResponseEntity<MyProfileDto> getMyProfile(Long auth);
 
-    ResponseEntity<Void> editProfile(EditProfileDto epd, Long auth);
+    MyProfileDto editProfile(EditProfileDto epd, Long auth);
 
     ResponseEntity<List<RespondedApplicantDto>> getMyResponses(Long auth);
 
     ResponseEntity<List<RespondedApplicantDto>> getMyVacanciesResponses(Long auth);
+
+    List<VacancyShortDto> getMyShortVacancies(Long userId);
+
+    List<ResumeShortDto> getMyShortResumes(Long userId);
 }
