@@ -1,5 +1,6 @@
 package kg.attractor.job_search_java_25.service;
 
+import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.*;
 import org.springframework.http.ResponseEntity;
 
@@ -15,7 +16,7 @@ public interface VacancyService {
 
     void vacancyIsActiveById(Long vacancyId, VacancyIsActiveDto vacancyIsActiveDto);
 
-    VacancyEditDto createVacancies(Long authorId, VacancyEditDto createVacancyEditDto);
+    VacancyDto createVacancies(Long authorId, VacancyEditDto createVacancyEditDto);
 
     ResponseEntity<VacancyDto> getVacancyById(Long id);
 
@@ -24,4 +25,10 @@ public interface VacancyService {
     void respondToVacancy(ResponseDto dto, Long userId);
 
     ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(Long vacancyId);
+
+    List<VacancyShortDto> getPublicShortVacancies();
+
+    void editVacancyOwned(@Valid VacancyEditDto editVacancyEditDto, Long vacancyId, Long authorId);
+
+    void vacancyIsActiveOwned(Long vacancyId, @Valid VacancyIsActiveDto vacancyIsActiveDto, Long authorId);
 }
