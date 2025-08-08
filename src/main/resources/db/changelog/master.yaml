@@ -4,5 +4,5 @@ databaseChangeLog:
 #     Dropping tables in the database
 
 
-#  - includeAll:
-#      path: db/changelog/migrations
+  - includeAll:
+      path: db/changelog/migrations
