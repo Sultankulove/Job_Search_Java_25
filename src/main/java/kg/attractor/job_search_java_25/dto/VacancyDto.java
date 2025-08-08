@@ -1,13 +1,17 @@
-package kg.attractor.job_search_java_25.model;
+package kg.attractor.job_search_java_25.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-public class Vacancy {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class VacancyDto {
     private Long id;
     private String name;
     private String description;
@@ -18,5 +22,5 @@ public class Vacancy {
     private Boolean isActive;
     private Long authorId;
     private LocalDateTime createdDate;
-    private LocalDateTime updateTime;
+    private LocalDateTime updateDate;
 }
