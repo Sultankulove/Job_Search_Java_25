@@ -1,0 +1,364 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001_create
+      author: Elturan_Sultankulov
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(64)
+              - column:
+                  name: surname
+                  type: varchar(64)
+              - column:
+                  name: age
+                  type: smallint
+              - column:
+                  name: email
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone_number
+                  type: varchar(55)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: avatar
+                  type: varchar(255)
+              - column:
+                  name: account_type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    checkConstraint: "account_type IN ('ADMIN', 'EMPLOYER', 'APPLICANT')"
+              - column:
+                  name: enabled
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+
+        - createTable:
+            tableName: categories
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(128)
+                  constraints:
+                    unique: true
+              - column:
+                  name: parent_id
+                  type: bigint
+                  constraints:
+                    referencedTableName: categories
+                    referencedColumnNames: id
+                    foreignKeyName: fk_categories_id
+                    deleteCascade: true
+
+
+        - createTable:
+            tableName: resumes
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: applicant_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: users
+                    referencedColumnNames: id
+                    foreignKeyName: fk_resumes_applicant
+                    deleteCascade: true
+              - column:
+                  name: name
+                  type: varchar(64)
+              - column:
+                  name: category_id
+                  type: bigint
+                  constraints:
+                    referencedTableName: categories
+                    referencedColumnNames: id
+                    foreignKeyName: fk_resumes_categories
+                    onDelete: SET NULL
+              - column:
+                  name: salary
+                  type: real
+              - column:
+                  name: is_active
+                  type: bigint
+                  defaultValueBoolean: true
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+              - column:
+                  name: update_time
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+
+
+
+        - createTable:
+            tableName: contact_type
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: type
+                  type: varchar(64)
+                  constraints:
+                    unique: true
+
+
+        - createTable:
+            tableName: work_experience_info
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+
+              - column:
+                  name: resume_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: resumes
+                    referencedColumnNames: id
+                    foreignKeyName: fk_resumes_work_experience_info
+                    deleteCascade: true
+              - column:
+                  name: years
+                  type: int
+              - column:
+                  name: company_name
+                  type: varchar(128)
+              - column:
+                  name: position
+                  type: varchar(128)
+              - column:
+                  name: responsibilities
+                  type: varchar(128)
+
+
+
+        - createTable:
+            tableName: education_info
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: resume_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: resumes
+                    referencedColumnNames: id
+                    foreignKeyName: fk_resume_education_info
+                    deleteCascade: true
+              - column:
+                  name: institution
+                  type: varchar(128)
+              - column:
+                  name: program
+                  type: varchar(128)
+              - column:
+                  name: start_date
+                  type: date
+              - column:
+                  name: end_date
+                  type: date
+              - column:
+                  name: degree
+                  type: varchar(64)
+
+
+        - createTable:
+            tableName: contacts_info
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: type_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: contact_type
+                    referencedColumnNames: id
+                    foreignKeyName: fk_contacts_info_types
+                    deleteCascade: true
+              - column:
+                  name: resume_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: resumes
+                    referencedColumnNames: id
+                    foreignKeyName: fk_resumes_contacts_info
+                    deleteCascade: true
+              - column:
+                  name: contact_value
+                  type: varchar(128)
+
+        - createTable:
+            tableName: vacancies
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(64)
+              - column:
+                  name: description
+                  type: varchar(512)
+              - column:
+                  name: category_id
+                  type: BIGINT
+                  constraints:
+                    referencedTableName: categories
+                    referencedColumnNames: id
+                    foreignKeyName: fk_vacancies_category
+                    onDelete: SET NULL
+              - column:
+                  name: salary
+                  type: float
+              - column:
+                  name: exp_from
+                  type: integer
+              - column:
+                  name: exp_to
+                  type: integer
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValueBoolean: true
+
+              - column:
+                  name: author_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: users
+                    referencedColumnNames: id
+                    foreignKeyName: fk_vacancies_author
+                    deleteCascade: true
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+              - column:
+                  name: update_time
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+
+
+
+
+        - createTable:
+            tableName: responded_applicants
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: resume_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: resumes
+                    referencedColumnNames: id
+                    foreignKeyName: fk_resumes_responded_applicants
+                    deleteCascade: true
+              - column:
+                  name: vacancy_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: vacancies
+                    referencedColumnNames: id
+                    foreignKeyName: fk_vacancies_responded_applicants
+                    deleteCascade: true
+
+              - column:
+                  name: confirmation
+                  type: boolean
+                  defaultValueBoolean: false
+
+        - createTable:
+            tableName: messages
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: responded_applicants
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    referencedTableName: responded_applicants
+                    referencedColumnNames: id
+                    foreignKeyName: fk_message_responded_applicants
+                    deleteCascade: true
+              - column:
+                  name: content
+                  type: varchar(2048)
+              - column:
+                  name: timestamp
+                  type: timestamp
+                  defaultValue: current_timestamp()
