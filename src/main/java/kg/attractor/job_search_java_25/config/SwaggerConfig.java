@@ -15,7 +15,7 @@ public class SwaggerConfig {
                         new Info()
                                 .title("Job Search")
                                 .description("project \"Job Search\" - group attractor.kg Java-25")
-                                .version("1.6.3 restart")
+                                .version("1.6.3 main")
                 );
     }
 }
