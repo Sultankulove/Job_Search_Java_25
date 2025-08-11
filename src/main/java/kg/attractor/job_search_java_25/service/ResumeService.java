@@ -1,10 +1,7 @@
 package kg.attractor.job_search_java_25.service;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.ResumeDto;
-import kg.attractor.job_search_java_25.dto.ResumeEditDto;
-import kg.attractor.job_search_java_25.dto.ResumeIsActiveDto;
-import kg.attractor.job_search_java_25.dto.ResumeShortDto;
+import kg.attractor.job_search_java_25.dto.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -12,7 +9,7 @@ import java.util.List;
 public interface ResumeService {
     List<ResumeShortDto> getShortResumesList(Long applicantId);
 
-    ResponseEntity<Void> updateTime(Long resumeId);
+    ResponseEntity<?> updateTime(Long resumeId);
 
     void editResume(ResumeEditDto resumeEditDto, Long resumeId, Long applicantId);
 
@@ -20,7 +17,7 @@ public interface ResumeService {
 
     ResumeEditDto createResume(Long applicantId, ResumeEditDto resumeEditDto);
 
-    ResponseEntity<ResumeDto> getResumeById(Long id);
+    ResponseEntity<?> getResumeById(Long id);
 
     void deleteResumeById(Long id);
 
@@ -29,4 +26,6 @@ public interface ResumeService {
     void editResumeOwned(@Valid ResumeEditDto resumeEditDto, Long resumeId, Long applicantId);
 
     void resumeIsActiveOwned(Long resumeId, @Valid ResumeIsActiveDto resumeIsActiveDto, Long applicantId);
+
+    List<ResumeDto> searchResumes(ResumeSearchDto criteria);
 }

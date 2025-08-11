@@ -25,7 +25,7 @@ public class VacancyServiceImpl implements VacancyService {
     private final RespondedApplicantDao respondedApplicantDao;
 
     @Override
-    public List<VacancyShortDto>getShortVacanciesList(Long employerId) {
+    public List<VacancyShortDto> getShortVacanciesList(Long employerId) {
         log.debug("VacancyService.getShortVacanciesList(employerId={})", employerId);
         List<VacancyShortDto> shortVacancies;
         shortVacancies = vacancyDao.getAllVacanciesById(employerId)
@@ -37,7 +37,7 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public ResponseEntity<Void> updateTime(Long id) {
+    public ResponseEntity<?> updateTime(Long id) {
         log.info("Вакансии: обновление времени id={}", id);
         vacancyDao.updateTime(id);
         return ResponseEntity.noContent().build();
@@ -55,14 +55,12 @@ public class VacancyServiceImpl implements VacancyService {
         vacancy.setExpTo(editVacancyEditDto.getExpTo());
         vacancy.setIsActive(editVacancyEditDto.getIsActive());
 
-
         vacancyDao.editVacancy(vacancy, vacancyId, userId);
         log.debug("Вакансии: отредактировано id={}", vacancyId);
     }
 
     @Override
     public void vacancyIsActiveById(Long vacancyId, VacancyIsActiveDto vacancyIsActiveDto) {
-
         boolean isActive = vacancyIsActiveDto.getIsActive();
         log.info("Вакансии: публикация id={}, isActive={}", vacancyId, isActive);
         vacancyDao.vacancyIsActive(vacancyId, isActive);
@@ -101,7 +99,7 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public ResponseEntity<VacancyDto> getVacancyById(Long id) {
+    public ResponseEntity<?> getVacancyById(Long id) {
         Optional<Vacancy> vacancy = vacancyDao.getVacancyById(id);
         if (vacancy.isPresent()) {
             log.info("Вакансии: найдено id={}", id);
@@ -117,7 +115,6 @@ public class VacancyServiceImpl implements VacancyService {
             dto.setAuthorId(vacancy.get().getAuthorId());
             dto.setCreatedDate(vacancy.get().getCreatedDate());
             dto.setUpdateDate(vacancy.get().getUpdateTime());
-
             return ResponseEntity.ok(dto);
         } else {
             log.warn("Вакансии: не найдено id={}", id);
@@ -146,7 +143,6 @@ public class VacancyServiceImpl implements VacancyService {
     public ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(Long vacancyId) {
         log.debug("Отклики: запрос списка по vacancyId={}", vacancyId);
         List<RespondedApplicant> responded = respondedApplicantDao.getResponsesByVacancy(vacancyId);
-
         List<RespondedApplicantDto> dtos = responded.stream()
                 .map(entity -> RespondedApplicantDto.builder()
                         .id(entity.getId())
@@ -159,7 +155,6 @@ public class VacancyServiceImpl implements VacancyService {
         return ResponseEntity.ok(dtos);
     }
 
-
     @Override
     public List<VacancyShortDto> getPublicShortVacancies() {
         var list = vacancyDao.getActiveShortVacancies();
@@ -167,12 +162,10 @@ public class VacancyServiceImpl implements VacancyService {
         return list;
     }
 
-
     @Override
     public void editVacancyOwned(VacancyEditDto dto, Long vacancyId, Long employerId) {
         log.debug("editVacancyOwned(vacancyId={}, employerId={})", vacancyId, employerId);
         requireVacancyOwner(vacancyId, employerId);
-
         Vacancy v = new Vacancy();
         v.setName(dto.getName());
         v.setDescription(dto.getDescription());
@@ -181,7 +174,6 @@ public class VacancyServiceImpl implements VacancyService {
         v.setExpFrom(dto.getExpFrom());
         v.setExpTo(dto.getExpTo());
         v.setIsActive(dto.getIsActive());
-
         vacancyDao.editVacancy(v, vacancyId, employerId);
         log.info("Вакансия {} отредактирована работодателем {}", vacancyId, employerId);
     }
@@ -199,7 +191,24 @@ public class VacancyServiceImpl implements VacancyService {
         if (!ownerId.equals(employerId)) throw new ForbiddenException("Not your vacancy");
     }
 
-
-
-
+    @Override
+    public List<VacancyDto> searchVacancies(VacancySearchDto criteria) {
+        log.debug("VacancyService.searchVacancies(criteria={})", criteria);
+        List<Vacancy> found = vacancyDao.searchVacancies(criteria);
+        return found.stream().map(v -> {
+            VacancyDto dto = new VacancyDto();
+            dto.setId(v.getId());
+            dto.setName(v.getName());
+            dto.setDescription(v.getDescription());
+            dto.setCategoryId(v.getCategoryId());
+            dto.setSalary(v.getSalary());
+            dto.setExpFrom(v.getExpFrom());
+            dto.setExpTo(v.getExpTo());
+            dto.setIsActive(v.getIsActive());
+            dto.setAuthorId(v.getAuthorId());
+            dto.setCreatedDate(v.getCreatedDate());
+            dto.setUpdateDate(v.getUpdateTime());
+            return dto;
+        }).toList();
+    }
 }
