@@ -1,4 +1,4 @@
-package kg.attractor.job_search_java_25.controller;
+package kg.attractor.job_search_java_25.controller.api;
 
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.RegistrationRequestDto;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("api/profile")
-public class AuthController {
+public class AuthControllerApi {
     private final UserService userService;
 
     @PostMapping("register")

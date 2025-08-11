@@ -1,10 +1,7 @@
-package kg.attractor.job_search_java_25.controller;
+package kg.attractor.job_search_java_25.controller.api;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.dto.VacancyEditDto;
-import kg.attractor.job_search_java_25.dto.VacancyIsActiveDto;
-import kg.attractor.job_search_java_25.dto.VacancyShortDto;
+import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -74,7 +71,7 @@ public class VacancyController {
 
 
     @GetMapping("{id}")
-    public ResponseEntity<VacancyDto> getVacancyById(@PathVariable Long id) {
+    public ResponseEntity<?> getVacancyById(@PathVariable Long id) {
 
         log.debug("GET /api/vacancies/{} — получить вакансию", id);
 
@@ -93,12 +90,10 @@ public class VacancyController {
 
 
     @GetMapping("search")
-    public String searchVacancies(@RequestParam Map<String, String> params) {
-
-        // Поиск вакансий с фильтрами/сортировкой
-
-        log.debug("GET /api/vacancies/search — фильтры={}", params);
-        return "OK";
+    public ResponseEntity<List<VacancyDto>> searchVacancies(@ModelAttribute VacancySearchDto criteria) {
+        log.debug("GET /api/vacancies/search — критерии={}", criteria);
+        List<VacancyDto> results = vacancyService.searchVacancies(criteria);
+        return ResponseEntity.ok(results);
     }
 
 }

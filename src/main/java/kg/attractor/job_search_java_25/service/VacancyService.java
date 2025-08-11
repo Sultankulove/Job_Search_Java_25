@@ -10,7 +10,7 @@ public interface VacancyService {
 
     List<VacancyShortDto> getShortVacanciesList(Long employerId);
 
-    ResponseEntity<Void> updateTime(Long id);
+    ResponseEntity<?> updateTime(Long id);
 
     void editVacancy(VacancyEditDto editVacancyEditDto, Long id, Long userId);
 
@@ -18,7 +18,7 @@ public interface VacancyService {
 
     VacancyDto createVacancies(Long authorId, VacancyEditDto createVacancyEditDto);
 
-    ResponseEntity<VacancyDto> getVacancyById(Long id);
+    ResponseEntity<?> getVacancyById(Long id);
 
     void deleteVacancyById(Long id);
 
@@ -31,4 +31,6 @@ public interface VacancyService {
     void editVacancyOwned(@Valid VacancyEditDto editVacancyEditDto, Long vacancyId, Long authorId);
 
     void vacancyIsActiveOwned(Long vacancyId, @Valid VacancyIsActiveDto vacancyIsActiveDto, Long authorId);
+
+    List<VacancyDto> searchVacancies(VacancySearchDto criteria);
 }
