@@ -1,4 +1,4 @@
-package kg.attractor.job_search_java_25.controller;
+package kg.attractor.job_search_java_25.controller.api;
 
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.MessageDto;
