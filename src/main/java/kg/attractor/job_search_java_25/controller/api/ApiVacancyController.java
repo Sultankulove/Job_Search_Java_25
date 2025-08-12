@@ -18,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("api/vacancies")
-public class VacancyController {
+public class ApiVacancyController {
     private final VacancyService vacancyService;
     private final UserService userService;
 

@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("api")
-public class ChatController {
+public class ApiChatController {
     private final VacancyService vacancyService;
     private final ChatService chatService;
     private final UserService userService;
