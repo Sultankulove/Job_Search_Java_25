@@ -4,12 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -79,34 +76,30 @@ public class SecurityConfig {
         return jdbc;
     }
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/profile/register").permitAll()
+                        .requestMatchers("/", "/auth/**", "/error").permitAll()
+                        .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
-                .requestMatchers(HttpMethod.GET,  "/api/vacancies/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/vacancies/**").hasRole("EMPLOYER")
-                .requestMatchers(HttpMethod.PUT,  "/api/vacancies/**").hasRole("EMPLOYER")
-                .requestMatchers(HttpMethod.PATCH,"/api/vacancies/**").hasRole("EMPLOYER")
-                .requestMatchers(HttpMethod.DELETE,"/api/vacancies/**").hasRole("EMPLOYER")
+                        .anyRequest().permitAll()
+                )
 
-
-                .requestMatchers(HttpMethod.GET,  "/api/resumes/search").hasRole("EMPLOYER")
-                .requestMatchers(HttpMethod.GET,  "/api/resumes/{id}").hasRole("EMPLOYER")
-                .requestMatchers(HttpMethod.POST, "/api/resumes/**").hasRole("APPLICANT")
-                .requestMatchers(HttpMethod.PUT,  "/api/resumes/**").hasRole("APPLICANT")
-                .requestMatchers(HttpMethod.PATCH,"/api/resumes/**").hasRole("APPLICANT")
-                .requestMatchers(HttpMethod.DELETE,"/api/resumes/**").hasRole("APPLICANT")
-
-
-                .requestMatchers("/api/profile/**").authenticated()
-                .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults());
+                .formLogin(form -> form
+                        .loginPage("/auth/login").loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/auth/login?error")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .permitAll()
+                );
 
         return http.build();
     }
