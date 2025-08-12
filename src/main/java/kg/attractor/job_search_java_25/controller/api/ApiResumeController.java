@@ -12,13 +12,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("api/resumes")
-public class ResumeController {
+public class ApiResumeController {
     private final ResumeService resumeService;
     private final UserService userService;
 

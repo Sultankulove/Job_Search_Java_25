@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("api/profile")
-public class ProfileController {
+public class ApiProfileController {
     private final ProfileService profileService;
     private final UserService userService;
 

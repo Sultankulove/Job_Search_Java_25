@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("api/profile")
-public class AuthControllerApi {
+public class ApiAuthController {
     private final UserService userService;
 
     @PostMapping("register")
