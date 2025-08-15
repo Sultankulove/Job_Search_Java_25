@@ -1,4 +1,7 @@
-<#import "spring.ftl" as spring>
+<#import "../layout.ftlh" as main>
+
+<@main.layout ; spring>
+
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -25,7 +28,7 @@
     <h1 style="margin:0 0 8px">Регистрация</h1>
     <p style="margin-top:0;color:#555">Заполните поля ниже. Поле с фото — необязательно.</p>
 
-    <#assign br = .data_model["org.springframework.validation.BindingResult.dto"]?if_exists />
+    <#assign br = .data_model["org.springframework.validation.BindingResult.dto"]! />
 
     <#if br?? && br.globalErrors?has_content>
         <div class="alert">
@@ -41,12 +44,8 @@
         <div class="row">
             <label for="accountType">Тип аккаунта</label>
             <select id="accountType" name="accountType" required>
-                <#list accountTypes![] as t>
-                    <option value="${t}" <#if dto?has_content && (dto.accountType?string == t?string)>selected</#if>>
-
-                        <#if t?string?lower_case?contains("employer")>Работодатель<#else>Соискатель</#if>
-                    </option>
-                </#list>
+                <option value="APPLICANT">Соискатель</option>
+                <option value="EMPLOYER">Работодатель</option>
             </select>
             <#if br?? && br.hasFieldErrors("accountType")>
                 <div class="error"><#list br.getFieldErrors("accountType") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
@@ -55,11 +54,12 @@
 
         <div class="row">
             <label id="nameLabel" for="name">
-                <#if dto?has_content && (dto.accountType?string?lower_case?contains("employer"))>
-                    Имя компании
-                <#else>
-                    Имя пользователя
-                </#if>
+<#--                <#if dto?has_content && (dto.accountType?string?lower_case?contains("EMPLOYER"))>-->
+<#--                    Имя компании-->
+<#--                <#else>-->
+<#--                    Имя пользователя-->
+<#--                </#if>-->
+                Имя
             </label>
             <input id="name" name="name" type="text" value="${(dto.name)!}" required>
             <#if br?? && br.hasFieldErrors("name")>
@@ -75,11 +75,12 @@
             </#if>
         </div>
 
+
         <div class="row">
-            <label for="phone">Телефон</label>
-            <input id="phone" name="phone" type="tel" value="${(dto.phoneNumber)!}" required>
+            <label for="phoneNumber">Телефон</label>
+            <input id="phoneNumber" name="phoneNumber" type="tel" value="${(dto.phoneNumber)!}" required>
             <#if br?? && br.hasFieldErrors("phone")>
-                <div class="error"><#list br.getFieldErrors("phone") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
+                <div class="error"><#list br.getFieldErrors("phoneNumber") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
             </#if>
         </div>
 
@@ -100,10 +101,10 @@
         </div>
 
         <div class="row">
-            <label for="photo">Фото профиля (необязательно)</label>
-            <input id="photo" name="photo" type="file" accept="image/*">
-            <#if br?? && br.hasFieldErrors("photo")>
-                <div class="error"><#list br.getFieldErrors("photo") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
+            <label for="avatar">Фото профиля (необязательно)</label>
+            <input id="avatar" name="avatar" type="file" accept="image/*">
+            <#if br?? && br.hasFieldErrors("avatar")>
+                <div class="error"><#list br.getFieldErrors("avatar") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
             </#if>
         </div>
 
@@ -117,3 +118,4 @@
 </body>
 </html>
 
+</@main.layout>

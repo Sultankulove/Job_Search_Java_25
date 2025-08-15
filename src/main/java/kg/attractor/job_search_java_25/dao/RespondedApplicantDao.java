@@ -31,8 +31,8 @@ public class RespondedApplicantDao {
         for (Map<String, Object> map : list) {
             RespondedApplicant respondedApplicant = new RespondedApplicant();
             respondedApplicant.setId(((Number) map.get("id")).longValue());
-            respondedApplicant.setResumeId(((Number) map.get("resume_id")).longValue());
-            respondedApplicant.setVacancyId(((Number) map.get("vacancy_id")).longValue());
+            respondedApplicant.getResume().setId(((Number) map.get("resume_id")).longValue());
+            respondedApplicant.getVacancy().setId(((Number) map.get("vacancy_id")).longValue());
             respondedApplicant.setConfirmation((Boolean) map.get("confirmation"));
             respondedApplicants.add(respondedApplicant);
         }
@@ -52,8 +52,8 @@ public class RespondedApplicantDao {
     public void save(RespondedApplicant respondedApplicant) {
         String sql = "insert into responded_applicants (resume_id, vacancy_id, confirmation) values (?, ?, ?)";
         jdbcTemplate.update(sql,
-                respondedApplicant.getResumeId(),
-                respondedApplicant.getVacancyId(),
+                respondedApplicant.getResume().getId(),
+                respondedApplicant.getVacancy().getId(),
                 respondedApplicant.getConfirmation()
         );
     }
@@ -65,7 +65,7 @@ public class RespondedApplicantDao {
         for (Map<String, Object> map : list) {
             RespondedApplicant respondedApplicant = new RespondedApplicant();
             respondedApplicant.setId(((Number) map.get("id")).longValue());
-            respondedApplicant.setResumeId(((Number) map.get("resume_id")).longValue());
+            respondedApplicant.getResume().setId(((Number) map.get("resume_id")).longValue());
             respondedApplicant.setConfirmation((Boolean) map.get("confirmation"));
             respondedApplicants.add(respondedApplicant);
         }

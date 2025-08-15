@@ -14,9 +14,9 @@ public class ResumeMapper implements RowMapper<Resume> {
     public Resume mapRow(ResultSet rs, int rowNum) throws SQLException {
         Resume resume = new Resume();
         resume.setId(rs.getLong("id"));
-        resume.setApplicantId(rs.getLong("applicant_id"));
+        resume.getApplicant().setId(rs.getLong("applicant_id"));
         resume.setName(rs.getString("name"));
-        resume.setCategoryId(rs.getLong("category_id"));
+        resume.getCategory().setId(rs.getLong("category_id"));
         resume.setSalary(rs.getFloat("salary"));
         resume.setIsActive(rs.getBoolean("is_active"));
         resume.setCreatedDate(rs.getTimestamp("created_date").toLocalDateTime());

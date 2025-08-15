@@ -35,12 +35,12 @@ public class VacancyDao {
             );
             ps.setString(1, vacancy.getName());
             ps.setString(2, vacancy.getDescription());
-            ps.setLong(3, vacancy.getCategoryId());
+            ps.setLong(3, vacancy.getCategory().getId());
             ps.setDouble(4, vacancy.getSalary());
             ps.setLong(5, vacancy.getExpFrom());
             ps.setLong(6, vacancy.getExpTo());
             ps.setBoolean(7, vacancy.getIsActive());
-            ps.setLong(8, vacancy.getAuthorId());
+            ps.setLong(8, vacancy.getAuthor().getId());
             return ps;
         }, keyHolder);
 
@@ -68,7 +68,7 @@ public class VacancyDao {
         jdbcTemplate.update(sql,
                 vacancy.getName(),
                 vacancy.getDescription(),
-                vacancy.getCategoryId(),
+                vacancy.getCategory().getId(),
                 vacancy.getSalary(),
                 vacancy.getExpFrom(),
                 vacancy.getExpTo(),

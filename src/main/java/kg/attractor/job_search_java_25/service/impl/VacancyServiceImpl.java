@@ -49,7 +49,7 @@ public class VacancyServiceImpl implements VacancyService {
         Vacancy vacancy = new Vacancy();
         vacancy.setName(editVacancyEditDto.getName());
         vacancy.setDescription(editVacancyEditDto.getDescription());
-        vacancy.setCategoryId(editVacancyEditDto.getCategoryId());
+        vacancy.getCategory().setId(editVacancyEditDto.getCategoryId());
         vacancy.setSalary(editVacancyEditDto.getSalary());
         vacancy.setExpFrom(editVacancyEditDto.getExpFrom());
         vacancy.setExpTo(editVacancyEditDto.getExpTo());
@@ -72,27 +72,27 @@ public class VacancyServiceImpl implements VacancyService {
         Vacancy v = new Vacancy();
         v.setName(createVacancyEditDto.getName());
         v.setDescription(createVacancyEditDto.getDescription());
-        v.setCategoryId(createVacancyEditDto.getCategoryId());
+        v.getCategory().setId(createVacancyEditDto.getCategoryId());
         v.setSalary(createVacancyEditDto.getSalary());
         v.setExpFrom(createVacancyEditDto.getExpFrom());
         v.setExpTo(createVacancyEditDto.getExpTo());
         v.setIsActive(createVacancyEditDto.getIsActive());
-        v.setAuthorId(authorId);
+        v.getAuthor().setId(authorId);
 
         long id = vacancyDao.createVacancy(v);
         v.setId(id);
 
-        log.debug("Вакансии: создано (name={}, categoryId={})", v.getName(), v.getCategoryId());
+        log.debug("Вакансии: создано (name={}, categoryId={})", v.getName(), v.getCategory().getId());
         return VacancyDto.builder()
                 .id(v.getId())
                 .name(v.getName())
                 .description(v.getDescription())
-                .categoryId(v.getCategoryId())
+                .categoryId(v.getCategory().getId())
                 .salary(v.getSalary())
                 .expFrom(v.getExpFrom())
                 .expTo(v.getExpTo())
                 .isActive(v.getIsActive())
-                .authorId(v.getAuthorId())
+                .authorId(v.getAuthor().getId())
                 .createdDate(v.getCreatedDate())
                 .updateDate(v.getUpdateTime())
                 .build();
@@ -107,12 +107,12 @@ public class VacancyServiceImpl implements VacancyService {
             dto.setId(vacancy.get().getId());
             dto.setName(vacancy.get().getName());
             dto.setDescription(vacancy.get().getDescription());
-            dto.setCategoryId(vacancy.get().getCategoryId());
+            dto.setCategoryId(vacancy.get().getCategory().getId());
             dto.setSalary(vacancy.get().getSalary());
             dto.setExpFrom(vacancy.get().getExpFrom());
             dto.setExpTo(vacancy.get().getExpTo());
             dto.setIsActive(vacancy.get().getIsActive());
-            dto.setAuthorId(vacancy.get().getAuthorId());
+            dto.setAuthorId(vacancy.get().getAuthor().getId());
             dto.setCreatedDate(vacancy.get().getCreatedDate());
             dto.setUpdateDate(vacancy.get().getUpdateTime());
             return ResponseEntity.ok(dto);
@@ -132,8 +132,8 @@ public class VacancyServiceImpl implements VacancyService {
     public void respondToVacancy(ResponseDto dto, Long userId) {
         log.info("Отклик: vacancyId={}, resumeId={}, userId={}", dto.getVacancyId(), dto.getResumeId(), userId);
         RespondedApplicant respondedApplicant = new RespondedApplicant();
-        respondedApplicant.setResumeId(dto.getResumeId());
-        respondedApplicant.setVacancyId(dto.getVacancyId());
+        respondedApplicant.getResume().setId(dto.getResumeId());
+        respondedApplicant.getVacancy().setId(dto.getVacancyId());
         respondedApplicant.setConfirmation(false);
         respondedApplicantDao.save(respondedApplicant);
         log.debug("Отклик: сохранён");
@@ -146,8 +146,8 @@ public class VacancyServiceImpl implements VacancyService {
         List<RespondedApplicantDto> dtos = responded.stream()
                 .map(entity -> RespondedApplicantDto.builder()
                         .id(entity.getId())
-                        .resumeId(entity.getResumeId())
-                        .vacancyId(entity.getVacancyId())
+                        .resumeId(entity.getResume().getId())
+                        .vacancyId(entity.getVacancy().getId())
                         .confirmation(entity.getConfirmation())
                         .build())
                 .toList();
@@ -169,7 +169,7 @@ public class VacancyServiceImpl implements VacancyService {
         Vacancy v = new Vacancy();
         v.setName(dto.getName());
         v.setDescription(dto.getDescription());
-        v.setCategoryId(dto.getCategoryId());
+        v.getCategory().setId(dto.getCategoryId());
         v.setSalary(dto.getSalary());
         v.setExpFrom(dto.getExpFrom());
         v.setExpTo(dto.getExpTo());
@@ -200,12 +200,12 @@ public class VacancyServiceImpl implements VacancyService {
             dto.setId(v.getId());
             dto.setName(v.getName());
             dto.setDescription(v.getDescription());
-            dto.setCategoryId(v.getCategoryId());
+            dto.setCategoryId(v.getCategory().getId());
             dto.setSalary(v.getSalary());
             dto.setExpFrom(v.getExpFrom());
             dto.setExpTo(v.getExpTo());
             dto.setIsActive(v.getIsActive());
-            dto.setAuthorId(v.getAuthorId());
+            dto.setAuthorId(v.getAuthor().getId());
             dto.setCreatedDate(v.getCreatedDate());
             dto.setUpdateDate(v.getUpdateTime());
             return dto;
