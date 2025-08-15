@@ -22,7 +22,7 @@ public class MessageDao {
         for (Map<String, Object> map : rows) {
             Message msg = new Message();
             msg.setId(((Number) map.get("id")).longValue());
-            msg.setRespondedApplicants(((Number) map.get("responded_applicants")).longValue());
+            msg.getRespondedApplicant().setId(((Number) map.get("responded_applicants")).longValue());
             msg.setContent((String) map.get("content"));
             msg.setTimestamp((Timestamp) map.get("timestamp"));
             messages.add(msg);
@@ -33,7 +33,7 @@ public class MessageDao {
     public void saveMessage(Message message) {
         String sql = "insert into messages (responded_applicants, content, timestamp) values (?, ?, ?)";
         jdbcTemplate.update(sql,
-                message.getRespondedApplicants(),
+                message.getRespondedApplicant().getId(),
                 message.getContent(),
                 message.getTimestamp()
         );

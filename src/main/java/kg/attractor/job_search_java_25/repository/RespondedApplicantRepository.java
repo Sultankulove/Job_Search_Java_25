@@ -15,7 +15,7 @@ public interface RespondedApplicantRepository extends JpaRepository<RespondedApp
     @Query("""
            select r
              from RespondedApplicant r
-            where r.resumeId in :resumeIds
+            where r.resume.id in :resumeIds
            """)
     List<RespondedApplicant> getRespondedApplicantsByResumesId(@Param("resumeIds") List<Long> resumeIds);
 
@@ -23,18 +23,18 @@ public interface RespondedApplicantRepository extends JpaRepository<RespondedApp
     @Query("""
            select r
              from RespondedApplicant r
-            where r.vacancyId in :vacancyIds
+            where r.vacancy.id in :vacancyIds
            """)
     List<RespondedApplicant> getRespondedApplicantsByVacancyIds(@Param("vacancyIds") List<Long> vacancyIds);
 
     @Query("""
            select r
              from RespondedApplicant r
-            where r.vacancyId = :vacancyId
+            where r.vacancy.id = :vacancyId
            """)
     List<RespondedApplicant> getResponsesByVacancy(@Param("vacancyId") Long vacancyId);
 
-    boolean existsByResumeIdAndVacancyId(Long resumeId, Long vacancyId);
+    boolean existsByResume_IdAndVacancy_Id(Long resumeId, Long vacancyId);
 
     default List<RespondedApplicant> getRespondedApplicantsByResumesIdSafe(List<Long> resumeIds) {
         if (resumeIds == null || resumeIds.isEmpty()) return List.of();

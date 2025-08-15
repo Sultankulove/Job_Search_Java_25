@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    List<Message> findByRespondedApplicantsOrderByTimestampAsc(Long responseId);
+    List<Message> findByRespondedApplicant_IdOrderByTimestampAsc(Long responseId);
+
+
 
 }

@@ -115,8 +115,8 @@ public class ProfileServiceImpl implements ProfileService {
         List<RespondedApplicantDto> dtos = responded.stream()
                 .map(entity -> RespondedApplicantDto.builder()
                         .id(entity.getId())
-                        .resumeId(entity.getResumeId())
-                        .vacancyId(entity.getVacancyId())
+                        .resumeId(entity.getResume().getId())
+                        .vacancyId(entity.getVacancy().getId())
                         .confirmation(entity.getConfirmation())
                         .build())
                 .toList();
@@ -136,8 +136,8 @@ public class ProfileServiceImpl implements ProfileService {
         List<RespondedApplicantDto> dtos = responses.stream()
                 .map(entity -> RespondedApplicantDto.builder()
                         .id(entity.getId())
-                        .resumeId(entity.getResumeId())
-                        .vacancyId(entity.getVacancyId())
+                        .resumeId(entity.getResume().getId())
+                        .vacancyId(entity.getVacancy().getId())
                         .confirmation(entity.getConfirmation())
                         .build())
                 .toList();
