@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +20,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User getUserById(Long id);
 
-    @Modifying
-    @Query("update User u set u.avatar = :avatar where  u.id = :userId")
-    void uploadAvatar(@Param("avatar") String avatar, @Param("userId") Long userId);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("update User u set u.avatar = :avatar where u.id = :userId")
+    int uploadAvatar(@Param("avatar") String avatar, @Param("userId") Long userId);
 
     @Query("select u.avatar from User u where u.id = :id")
     String getAvatarByUserId(@Param("id") Long userId);
@@ -30,16 +32,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 //    User getMyProfile(@Param("id") Long auth);
 
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
     @Query("""
-            update User u
-                        set u.name = :name,
-                                    u.surname = :surname,
-                                                u.age = :age,
-                                                            u.email = :email,
-                                                                        u.password = :password,
-                                                                                    u.phoneNumber = :phoneNumber
-                                                                                                where u.id = :id""")
+   update User u
+      set u.name = :name,
+          u.surname = :surname,
+          u.age = :age,
+          u.email = :email,
+          u.password = :password,
+          u.phoneNumber = :phoneNumber
+    where u.id = :id
+""")
     int editProfile(@Param("id") Long id,
                     @Param("name") String name,
                     @Param("surname") String surname,

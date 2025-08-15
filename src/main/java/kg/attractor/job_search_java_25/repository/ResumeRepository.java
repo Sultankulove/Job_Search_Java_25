@@ -17,9 +17,7 @@ import java.util.List;
 @Repository
 public interface ResumeRepository extends JpaRepository<Resume, Long> {
 
-    @Query("select r from Resume r where r.applicantId = :applicantId")
-    List<Resume> getAllResumesById(@Param("applicantId") Long applicantId);
-
+    List<Resume> findAllByApplicant_Id(Long applicantId);
 
     @Transactional
     @Modifying
@@ -29,23 +27,24 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
             where r.id = :resumeId
            """)
     int resumeIsActive(@Param("resumeId") Long resumeId,
-                       @Param("isActive") Boolean isActive);;
+                       @Param("isActive") Boolean isActive);
 
 
 
-    @Query("select r.applicantId from Resume r where r.id = :resumeId")
+    @Query("select r.applicant.id from Resume r where r.id = :resumeId")
     Long getOwnerId(@Param("resumeId") Long resumeId);
 
 
     @Query("""
-           select new kg.attractor.job_search_java_25.dto.ResumeShortDto(
-               r.name,
-               r.updateTime
-           )
-           from Resume r
-           where r.applicantId = :applicantId
-           order by r.updateTime desc
-           """)
+    select new kg.attractor.job_search_java_25.dto.ResumeShortDto(
+       r.name,
+       r.updateTime
+    )
+    from Resume r
+    where r.applicant.id = :applicantId
+    order by r.updateTime desc
+    """)
     List<ResumeShortDto> getShortResumesByApplicantId(@Param("applicantId") Long applicantId);
+
 
 }

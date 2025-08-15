@@ -2,6 +2,7 @@ package kg.attractor.job_search_java_25.repository;
 
 
 import kg.attractor.job_search_java_25.dto.VacancyShortDto;
+import kg.attractor.job_search_java_25.model.Category;
 import kg.attractor.job_search_java_25.model.Vacancy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,14 +21,11 @@ import java.util.Optional;
 @Repository
 public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
-    Page<Vacancy> findAllByAuthorId(Long authorId, Pageable pageable);
+    Page<Vacancy> findAllByAuthor_Id(Long authorId, Pageable p);
 
     @Modifying
     @Transactional
-    @Query("""
-            update Vacancy v
-                        set v.updateTime = CURRENT_TIMESTAMP()
-                                    where v.id = :id""")
+    @Query("update Vacancy v set v.updateTime = CURRENT_TIMESTAMP where v.id = :id")
     void updateTime(@Param("id") Long id);
 
     @Transactional
@@ -36,17 +34,17 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
        update Vacancy v
           set v.name        = :name,
               v.description = :description,
-              v.categoryId  = :categoryId,
+              v.category  = :Category,
               v.salary      = :salary,
               v.expFrom     = :expFrom,
               v.expTo       = :expTo,
               v.isActive    = :isActive,
               v.updateTime  = CURRENT_TIMESTAMP
-        where v.id = :id and v.authorId = :userId
+        where v.id = :id and v.author.id = :userId
        """)
     int editVacancy(@Param("name") String name,
                      @Param("description") String description,
-                     @Param("categoryId") Long categoryId,
+                     @Param("category") Category category,
                      @Param("salary") Float salary,
                      @Param("expFrom") Integer expFrom,
                      @Param("expTo") Integer expTo,
@@ -68,7 +66,7 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
     long deleteByIdAndAuthorId(Long id, Long authorId);
 
 
-    @Query("select v.authorId from Vacancy v where v.id = :vacancyId")
+    @Query("select v.author.id from Vacancy v where v.id = :vacancyId")
     Optional<Long> getOwnerId(@Param("vacancyId") Long vacancyId);
 
     @Query("""
@@ -89,7 +87,7 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
         v.updateTime
     )
     from Vacancy v
-    where v.authorId = :authorId
+    where v.author.id = :authorId
     order by v.updateTime desc
     """)
     List<VacancyShortDto> getShortVacanciesByAuthorId(@Param("authorId") Long authorId);

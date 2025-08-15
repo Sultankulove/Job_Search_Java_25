@@ -1,13 +1,11 @@
 package kg.attractor.job_search_java_25.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,14 +16,16 @@ public class Vacancy {
     @Id
     private Long id;
 
-    @Column(name = "name")
+    @Column(name="name", length = 64)
     private String name;
 
-    @Column(name = "description")
+    @Column(name="description", length = 512)
     private String description;
 
-    @Column(name = "category_id")
-    private Long categoryId;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
 
     @Column(name = "salary")
     private Float salary;
@@ -39,12 +39,16 @@ public class Vacancy {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "author_id")
-    private Long authorId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "author_id")
+    private User author;
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
 
     @Column(name = "update_time")
     private LocalDateTime updateTime;
+
+    @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RespondedApplicant> responses;
 }

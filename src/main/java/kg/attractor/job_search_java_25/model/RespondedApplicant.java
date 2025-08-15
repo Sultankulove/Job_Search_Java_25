@@ -1,27 +1,31 @@
 package kg.attractor.job_search_java_25.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "Responded_applicants")
+@Table(name = "responded_applicants")
 public class RespondedApplicant {
 
     @Id
     private Long id;
 
-    @Column(name = "resume_id")
-    private Long resumeId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "resume_id")
+    private Resume resume;
 
-    @Column(name = "vacancy_id")
-    private Long vacancyId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "vacancy_id")
+    private Vacancy vacancy;
 
     @Column(name = "confirmation")
     private Boolean confirmation;
+
+    @OneToMany(mappedBy = "respondedApplicant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> messages;
 }

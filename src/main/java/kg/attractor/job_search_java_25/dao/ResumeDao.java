@@ -35,9 +35,9 @@ public class ResumeDao {
                             "insert into resumes (applicant_id, name, category_id, salary, is_active, created_date, update_time) values (?,?,?,?,?,?,?);",
                             Statement.RETURN_GENERATED_KEYS
                     );
-                    ps.setLong(1, resume.getApplicantId());
+                    ps.setLong(1, resume.getApplicant().getId());
                     ps.setString(2, resume.getName());
-                    ps.setLong(3, resume.getCategoryId());
+                    ps.setLong(3, resume.getCategory().getId());
                     ps.setDouble(4, resume.getSalary());
                     ps.setBoolean(5, resume.getIsActive());
                     ps.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
@@ -63,7 +63,7 @@ public class ResumeDao {
 
         jdbcTemplate.update(sql,
                 resume.getName(),
-                resume.getCategoryId(),
+                resume.getCategory().getId(),
                 resume.getSalary(),
                 resume.getIsActive(),
                 new Timestamp(System.currentTimeMillis()),
