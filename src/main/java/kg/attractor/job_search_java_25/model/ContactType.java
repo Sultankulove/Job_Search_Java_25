@@ -1,11 +1,10 @@
 package kg.attractor.job_search_java_25.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,6 +15,9 @@ public class ContactType {
     @Id
     private Long id;
 
-    @Column(name = "type")
+    @Column(name = "type", length = 64, unique = true)
     private String type;
+
+    @OneToMany(mappedBy = "type", cascade = CascadeType.ALL)
+    private List<ContactInfo> contacts;
 }

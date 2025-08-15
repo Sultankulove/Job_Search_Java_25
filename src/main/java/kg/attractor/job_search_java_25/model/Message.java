@@ -1,9 +1,6 @@
 package kg.attractor.job_search_java_25.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,10 +15,11 @@ public class Message {
     @Id
     private Long id;
 
-    @Column(name = "responded_applicants")
-    private Long respondedApplicants;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "responded_applicants")
+    private RespondedApplicant respondedApplicant;
 
-    @Column(name = "content")
+    @Column(name = "content", length = 2048)
     private String content;
 
     @Column(name = "timestamp")
