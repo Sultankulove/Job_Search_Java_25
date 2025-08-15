@@ -1,13 +1,11 @@
 package kg.attractor.job_search_java_25.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,14 +16,16 @@ public class Resume {
     @Id
     private Long id;
 
-    @Column(name = "applicant_id")
-    private Long applicantId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "applicant_id")
+    private User applicant;
 
-    @Column(name = "name")
+    @Column(name = "name", length = 64)
     private String name;
 
-    @Column(name = "category_id")
-    private Long categoryId;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;;
 
     @Column(name = "salary")
     private Float salary;
@@ -39,4 +39,16 @@ public class Resume {
     @Column(name = "update_time")
     private LocalDateTime updateTime;
 
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkExperienceInfo> workExperiences;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EducationInfo> educationInfos;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContactInfo> contacts;
+
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RespondedApplicant> responses;
 }

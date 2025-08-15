@@ -43,7 +43,7 @@ public class ResumeServiceImpl implements ResumeService {
         log.info("Резюме: редактирование id={}, applicantId={}", resumeId, applicantId);
         Resume resume = new Resume();
         resume.setName(resumeEditDto.getName());
-        resume.setCategoryId(resumeEditDto.getCategoryId());
+        resume.getCategory().setId(resumeEditDto.getCategoryId());
         resume.setSalary(resumeEditDto.getSalary());
         resume.setIsActive(resumeEditDto.getIsActive());
         resumeDao.editResume(resume, resumeId, applicantId);
@@ -62,15 +62,15 @@ public class ResumeServiceImpl implements ResumeService {
         log.info("Резюме: создание applicantId={}", applicantId);
         Resume resume = new Resume();
         resume.setName(resumeEditDto.getName());
-        resume.setCategoryId(resumeEditDto.getCategoryId());
+        resume.getCategory().setId(resumeEditDto.getCategoryId());
         resume.setSalary(resumeEditDto.getSalary());
         resume.setIsActive(resumeEditDto.getIsActive());
-        resume.setApplicantId(applicantId);
+        resume.getApplicant().setId(applicantId);
         resumeDao.createResume(resume);
-        log.debug("Резюме: создано (name={}, categoryId={})", resume.getName(), resume.getCategoryId());
+        log.debug("Резюме: создано (name={}, categoryId={})", resume.getName(), resume.getCategory().getId());
         return ResumeEditDto.builder()
                 .name(resume.getName())
-                .categoryId(resume.getCategoryId())
+                .categoryId(resume.getCategory().getId())
                 .salary(resume.getSalary())
                 .isActive(resume.getIsActive())
                 .build();
@@ -83,9 +83,9 @@ public class ResumeServiceImpl implements ResumeService {
             log.info("Резюме: найдено id={}", id);
             ResumeDto dto = new ResumeDto();
             dto.setId(resume.get().getId());
-            dto.setApplicantId(resume.get().getApplicantId());
+            dto.setApplicantId(resume.get().getApplicant().getId());
             dto.setName(resume.get().getName());
-            dto.setCategoryId(resume.get().getCategoryId());
+            dto.setCategoryId(resume.get().getCategory().getId());
             dto.setSalary(resume.get().getSalary());
             dto.setIsActive(resume.get().getIsActive());
             dto.setCreatedDate(resume.get().getCreatedDate());
@@ -117,7 +117,7 @@ public class ResumeServiceImpl implements ResumeService {
         requireResumeOwner(resumeId, applicantId);
         Resume resume = new Resume();
         resume.setName(dto.getName());
-        resume.setCategoryId(dto.getCategoryId());
+        resume.getCategory().setId(dto.getCategoryId());
         resume.setSalary(dto.getSalary());
         resume.setIsActive(dto.getIsActive());
         resumeDao.editResume(resume, resumeId, applicantId);
@@ -144,9 +144,9 @@ public class ResumeServiceImpl implements ResumeService {
         return results.stream().map(r -> {
             ResumeDto dto = new ResumeDto();
             dto.setId(r.getId());
-            dto.setApplicantId(r.getApplicantId());
+            dto.setApplicantId(r.getApplicant().getId());
             dto.setName(r.getName());
-            dto.setCategoryId(r.getCategoryId());
+            dto.setCategoryId(r.getCategory().getId());
             dto.setSalary(r.getSalary());
             dto.setIsActive(r.getIsActive());
             dto.setCreatedDate(r.getCreatedDate());
