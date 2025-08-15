@@ -1,9 +1,6 @@
 package kg.attractor.job_search_java_25.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,12 +13,14 @@ public class ContactInfo {
     @Id
     private Long id;
 
-    @Column(name = "type_id")
-    private Long typeId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "type_id")
+    private ContactType type;
 
-    @Column(name = "resume_id")
-    private Long resumeId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "resume_id")
+    private Resume resume;
 
-    @Column(name = "contact_value")
+    @Column(name = "contact_value", length = 128)
     private String contactValue;
 }

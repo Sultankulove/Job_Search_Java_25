@@ -40,7 +40,7 @@ public class ChatServiceImpl implements ChatService {
 
         log.info("ChatService.sendMessage(chatId={})", chatId);
         Message msg = new Message();
-        msg.setRespondedApplicants(chatId);
+        msg.getRespondedApplicant().setId(chatId);
         msg.setContent(dto.getContent());
         msg.setTimestamp(new Timestamp(currentTimeMillis()));
 
