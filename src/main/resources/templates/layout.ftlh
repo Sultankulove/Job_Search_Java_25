@@ -34,7 +34,7 @@
                         <a class="nav-link" href="/resume">Работодателям</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="auth/login">Войти</a>
+                        <a class="nav-link" href="/auth/login">Войти</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -42,8 +42,8 @@
                             Профиль
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="auth/login">Войти</a></li>
-                            <li><a class="dropdown-item" href="auth/register">Зарегистрироваться</a></li>
+                            <li><a class="dropdown-item" href="/auth/login">Войти</a></li>
+                            <li><a class="dropdown-item" href="/auth/register">Зарегистрироваться</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -82,9 +82,9 @@
                     </form>
                 </#if>
             <#else>
-                <a href="auth/login"
+                <a href="/auth/login"
                    class="btn btn-outline-info m-2">Login</a>
-                <a href="auth/register"
+                <a href="/auth/register"
                    class="btn btn-outline-info m-2">Register</a>
             </#if>
 
@@ -96,6 +96,7 @@
         <#nested spring>
     </div>
     </body>
+    <script src="http://localhost:35729/livereload.js?snipver=1"></script>
 
     </html>
 
