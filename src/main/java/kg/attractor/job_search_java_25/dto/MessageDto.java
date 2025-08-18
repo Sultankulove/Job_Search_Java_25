@@ -25,5 +25,6 @@ public class MessageDto {
     @NotBlank(message = "Сообщение не может быть пустым")
     @Size(max = 1000, message = "Сообщение не должно превышать 1000 символов")
     private String content;
+
     private Timestamp timestamp;
 }

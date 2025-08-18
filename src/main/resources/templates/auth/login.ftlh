@@ -11,6 +11,8 @@
                     <div class="card-body py-5 px-md-5">
 
                         <form id="login-form" action="/login" method="post">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
                             <!-- Email input -->
                             <div data-mdb-input-init class="form-outline mb-4">
                                 <input type="email" id="form2Example1" class="form-control" name="username"/>
