@@ -23,7 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query("update User u set u.avatar = :avatar where u.id = :userId")
-    int uploadAvatar(@Param("avatar") String avatar, @Param("userId") Long userId);
+    void uploadAvatar(@Param("avatar") String avatar, @Param("userId") Long userId);
 
     @Query("select u.avatar from User u where u.id = :id")
     String getAvatarByUserId(@Param("id") Long userId);
@@ -53,7 +53,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
                     @Param("phoneNumber") String phoneNumber);
 
 
-
     @Query("select u.id from User u where u.email = :email")
     Optional<Long> findUserIdByEmail(@Param("email") String email);
 
@@ -62,4 +61,37 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByPhoneNumber(String phoneNumber);
 
+    @Query(
+            """
+        select u from User u where u.id = :auth
+"""
+    )
+    User getMyProfile(Long auth);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("""
+        update User u
+           set u.name        = :name,
+               u.surname     = :surname,
+               u.age         = :age,
+               u.email       = :email,
+               u.phoneNumber = :phoneNumber
+         where u.id          = :id
+    """)
+    int editProfile(@Param("id") Long id,
+                    @Param("name") String name,
+                    @Param("surname") String surname,
+                    @Param("age") Short age,
+                    @Param("email") String email,
+                    @Param("phoneNumber") String phoneNumber);
+
+
+//    boolean existsByEmail(String email);
+//    public boolean existsByEmail(String email) {
+//        String sql = "select count(1) from users where email = ?";
+//        Integer c = jdbcTemplate.queryForObject(sql, Integer.class, email);
+//        return c !=
+//                null && c > 0;
+//    }
 }

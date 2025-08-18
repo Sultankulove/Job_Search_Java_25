@@ -1,8 +1,11 @@
 package kg.attractor.job_search_java_25.repository;
 
 
+import kg.attractor.job_search_java_25.dto.ResumeDto;
+import kg.attractor.job_search_java_25.dto.VacancyDto;
 import kg.attractor.job_search_java_25.dto.VacancyShortDto;
 import kg.attractor.job_search_java_25.model.Category;
+import kg.attractor.job_search_java_25.model.Resume;
 import kg.attractor.job_search_java_25.model.Vacancy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,18 +70,18 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
 
     @Query("select v.author.id from Vacancy v where v.id = :vacancyId")
-    Optional<Long> getOwnerId(@Param("vacancyId") Long vacancyId);
+    Long getOwnerId(@Param("vacancyId") Long vacancyId);
 
     @Query("""
             select new kg.attractor.job_search_java_25.dto.VacancyShortDto(
                         v.name,
                         v.updateTime
                   )
-                  from Vacancy v 
-                  where v.isActive = true 
-                  order by v.updateTime desc 
+                  from Vacancy v
+                  where v.isActive = true
+                  order by v.updateTime desc
             """)
-    List<VacancyShortDto> getActiveShortVacancies(Pageable pageable);
+    List<VacancyShortDto> getActiveShortVacancies();
 
     @Transactional(readOnly = true)
     @Query("""
@@ -92,4 +95,28 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
     """)
     List<VacancyShortDto> getShortVacanciesByAuthorId(@Param("authorId") Long authorId);
 
+    @Modifying
+    @Query(
+            """
+        UPDATE Vacancy v SET v.name = :name,
+        v.description = :description,
+        v.category = :Category,
+        v.salary = :salary,
+        v.expFrom  = :expFrom,
+        v.expTo  = :expTo,
+        v.isActive  = :isActive,
+        v.updateTime  = CURRENT_TIMESTAMP where v.id = :vacancyId and v.author.id = :userId
+"""
+    )
+    void saveVacancy_IdUser_Id(Vacancy vacancy, Long vacancyId, Long userId);
+
+    Optional<Vacancy> findVacancyById(Long vacancyId);
+
+
+    List<VacancyDto> findVacanciesById(Long id);
+
+//    Optional<Object> findAllByAuthor_Id(Long authorId);
+
+//    List<Resume> findAllByApplicant_Id(Long applicantId);
+    List<Vacancy> findAllByAuthor_Id(Long userId);
 }
