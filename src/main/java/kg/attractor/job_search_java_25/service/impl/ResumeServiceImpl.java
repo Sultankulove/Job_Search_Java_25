@@ -251,19 +251,20 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public List<ResumeDto> findAll() {
 
-                    ResumeDto dto = new ResumeDto();
-        List<ResumeDto> resumes = resumeRepository.findAll()
-                .stream()
-                .map(r -> {
-                    dto.setApplicantId(r.getApplicant().getId());
-                    dto.setName(r.getName());
-                    dto.setCategoryId(r.getCategory().getId());
-                    dto.setSalary(r.getSalary());
-                    dto.setIsActive(r.getIsActive());
-                    dto.setCreatedDate(r.getCreatedDate());
-                    dto.setUpdateTime(r.getUpdateTime());
-                    return dto;
-                }).toList();
+        List<ResumeDto> resumes = resumeRepository.findAllResumes();
+//                    ResumeDto dto = new ResumeDto();
+//        List<ResumeDto> resumes = resumeRepository.findAll()
+//                .stream()
+//                .map(r -> {
+//                    dto.setApplicantId(r.getApplicant().getId());
+//                    dto.setName(r.getName());
+//                    dto.setCategoryId(r.getCategory().getId());
+//                    dto.setSalary(r.getSalary());
+//                    dto.setIsActive(r.getIsActive());
+//                    dto.setCreatedDate(r.getCreatedDate());
+//                    dto.setUpdateTime(r.getUpdateTime());
+//                    return dto;
+//                }).toList();
 
         log.debug("resumes: {}", resumes);
         return resumes;

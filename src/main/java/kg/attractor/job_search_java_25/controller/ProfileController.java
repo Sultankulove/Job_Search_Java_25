@@ -25,17 +25,18 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping
-    public String showProfile(Model model, Authentication auth) {
-//        MyProfileDto dto = new MyProfileDto();
-        MyProfileDto myProfileDto = profileService.getMyProfile(userService.findUserIdByEmail(auth.getName()));
-        if (auth != null) {
-            myProfileDto.setEmail(auth.getName());
-        }
+    public String showProfile(Model model,Principal principal) {
+        Long id = userService.findUserIdByEmail(principal.getName());
+
+        MyProfileDto myProfileDto = profileService.getMyProfile(id);
+//        if (principal != null) {
+//            myProfileDto.setEmail(principal.getName());
+//        }
 
 
 //        Long authId =
 
-
+        System.err.println(myProfileDto);
         model.addAttribute("user", myProfileDto);
 
 //        model.addAttribute("user", dto);

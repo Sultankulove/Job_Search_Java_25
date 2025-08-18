@@ -126,7 +126,7 @@
                     <td>
                         <#if r.salary??>${r.salary}<#else>-</#if>
                     </td>
-                    <td><#if r.active?? && r.isActive>Да<#else>Нет</#if></td>
+                    <td><#if r.active?? && r.isActive>Нет<#else>Да</#if></td>
                     <td>${r.updateTime}</td>
                 </tr>
             </#list>

@@ -26,13 +26,8 @@ public class ResumeController {
 
     @GetMapping("/resumes")
     public String listResumes(Model model) {
-//        Long applicantId = (auth != null) ? userService.findUserIdByEmail(auth.getName()) : null;
-//        List<ResumeListViewDto> list = resumeService.findAllForList(applicantId);
-//        List<ResumeDto> resumes = resumeService.findResumesById(applicantId);
         List<ResumeDto> resumes = resumeService.findAll();
         model.addAttribute("list", resumes);
-        List<CategoryDto> categories = categoryService.findAll();
-        model.addAttribute("categories", categories);
         System.err.println(resumes);
         return "list";
     }

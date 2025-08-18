@@ -1,5 +1,6 @@
 package kg.attractor.job_search_java_25.repository;
 
+import kg.attractor.job_search_java_25.dto.MyProfileDto;
 import kg.attractor.job_search_java_25.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -66,7 +67,27 @@ public interface UserRepository extends JpaRepository<User, Long> {
         select u from User u where u.id = :auth
 """
     )
-    User getMyProfile(Long auth);
+//    User getMyProfile(Long auth);
+
+    User findUserById(Long id);
+
+
+    @Query("""
+select new kg.attractor.job_search_java_25.dto.MyProfileDto(
+  u.name,
+  u.surname,
+  u.age,
+  u.email,
+  u.phoneNumber,
+  u.avatar
+)
+from User u
+where u.id = :id
+""")
+    MyProfileDto getMyProfile(@Param("id") Long id);
+
+
+
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional

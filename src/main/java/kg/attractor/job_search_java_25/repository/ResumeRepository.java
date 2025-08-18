@@ -1,6 +1,8 @@
 package kg.attractor.job_search_java_25.repository;
 
 
+import jakarta.validation.constraints.*;
+import kg.attractor.job_search_java_25.dto.ResumeDto;
 import kg.attractor.job_search_java_25.dto.ResumeListViewDto;
 import kg.attractor.job_search_java_25.dto.ResumeShortDto;
 import kg.attractor.job_search_java_25.model.Resume;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -65,4 +68,16 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
         order by r.updateTime desc
         """)
     List<ResumeListViewDto> findAllForList(@Param("applicantId") Long applicantId);
+
+    @Query("""
+        select new kg.attractor.job_search_java_25.dto.ResumeDto(
+        r.applicant.id,
+        r.name,
+        r.category.id,
+        r.salary,
+        r.isActive,
+        r.updateTime,
+        r.createdDate) from Resume r"""
+    )
+    List<ResumeDto> findAllResumes();
 }

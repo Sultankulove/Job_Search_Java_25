@@ -28,7 +28,6 @@ import java.util.List;
 @Slf4j
 public class ProfileServiceImpl implements ProfileService {
 
-    private final ResumeDao resumeDao;
 
     private final UserRepository userRepository;
 
@@ -57,23 +56,14 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public MyProfileDto getMyProfile(Long auth) {
+    public MyProfileDto getMyProfile(Long id) {
 
-        log.debug("Профиль: getMyProfile(auth={})", auth);
+        log.debug("Профиль: getMyProfile(auth={})", id);
         try {
-            User user = userRepository.getMyProfile(auth);
-            MyProfileDto myProfileDto = new MyProfileDto();
-            myProfileDto.setName(user.getName());
-            myProfileDto.setSurname(user.getSurname());
-            myProfileDto.setAge(user.getAge());
-            myProfileDto.setEmail(user.getEmail());
-            myProfileDto.setPhoneNumber(user.getPhoneNumber());
-            myProfileDto.setAvatar(user.getAvatar());
-            log.info("Профиль: отдан профиль userId={}", auth);
-//            return ResponseEntity.ok(myProfileDto);
+            MyProfileDto myProfileDto = userRepository.getMyProfile(id);
             return myProfileDto;
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
-            throw new NotFoundException("User id=" + auth);
+            throw new NotFoundException("User id=" + id);
         }
     }
 
@@ -99,7 +89,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         if (authId == 0) throw new NotFoundException("User id=" + authId);
 
-        User fresh = userRepository.getMyProfile(authId);
+        User fresh = userRepository.findUserById(authId);
 
         MyProfileDto dto1 = new MyProfileDto();
         dto1.setName(fresh.getName());

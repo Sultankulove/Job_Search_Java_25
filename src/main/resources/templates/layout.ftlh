@@ -31,7 +31,7 @@
                         <a class="nav-link active" aria-current="page" href="/vacancies">Cоискателям</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/resume">Работодателям</a>
+                        <a class="nav-link" href="/resumes">у</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/auth/login">Войти</a>
