@@ -1,8 +1,0 @@
-databaseChangeLog:
-  - includeAll:
-      path: db/changelog/initial
-#     Dropping tables in the database
-
-
-  - includeAll:
-      path: db/changelog/migrations
