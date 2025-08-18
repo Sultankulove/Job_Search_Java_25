@@ -64,17 +64,16 @@
                 name = user.getUsername()
                 >
                 <#if user??>
-                    <a href="/profile/${name}" class="text-light m-2 m-sm-0">
-                        Hello, ${name}
+                    <div class="btn btn-outline-success">
+                        <a href="/profile" class="text-decoration-none">
+                            ${name}
+                            <#list user.authorities as auth>${auth}
+                                <#if auth?has_next></#if></#list>
+                        </a>
+                    </div>
 
-                        <#list user.authorities as auth>
-                            <span class="text-danger">${auth}</span>
-                            <#if auth?has_next>
-                                /
-                            </#if>
-                        </#list>
-                    </a>
                     <form action="/logout" method="post">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                         <button type="submit" class="btn btn-outline-info m-2"
                                 id="logout">
                             Logout
