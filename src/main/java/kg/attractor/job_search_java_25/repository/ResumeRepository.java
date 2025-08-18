@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.repository;
 
 
+import kg.attractor.job_search_java_25.dto.ResumeListViewDto;
 import kg.attractor.job_search_java_25.dto.ResumeShortDto;
 import kg.attractor.job_search_java_25.model.Resume;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -47,4 +48,21 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
     List<ResumeShortDto> getShortResumesByApplicantId(@Param("applicantId") Long applicantId);
 
 
+    @Query("""
+        select ResumeListViewDto(
+            a.id,            
+            c.id,           
+            r.name,          
+            r.salary,        
+            r.isActive,      
+            r.createdDate,   
+            r.updateTime  
+        )
+        from Resume r
+          join r.applicant a
+          join r.category c
+        where (:applicantId is null or a.id = :applicantId)
+        order by r.updateTime desc
+        """)
+    List<ResumeListViewDto> findAllForList(@Param("applicantId") Long applicantId);
 }

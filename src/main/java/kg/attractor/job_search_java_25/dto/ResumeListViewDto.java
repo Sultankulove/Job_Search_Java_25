@@ -1,32 +1,24 @@
 package kg.attractor.job_search_java_25.dto;
 
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ResumeDto {
+@AllArgsConstructor
+public class ResumeListViewDto {
     private Long applicantId;
-
-    @NotBlank
-    @Size(max = 64)
-    private String name;
-
-    @NotNull
-    @Positive
     private Long categoryId;
-
-    @PositiveOrZero
+    private String categoryName;
+    private String name;
     private Float salary;
-
-    private boolean isActive;
+    private Boolean isActive;
     private LocalDateTime createdDate;
     private LocalDateTime updateTime;
 }
