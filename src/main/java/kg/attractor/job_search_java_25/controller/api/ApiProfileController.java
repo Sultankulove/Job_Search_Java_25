@@ -6,12 +6,12 @@ import kg.attractor.job_search_java_25.service.ProfileService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -38,7 +38,7 @@ public class ApiProfileController {
     }
 
     @GetMapping
-    public ResponseEntity<MyProfileDto> getMyProfile(Authentication authentication) {
+    public MyProfileDto getMyProfile(Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
         log.debug("GET /api/profile/{} — получить профиль", authentication.getName());
         return profileService.getMyProfile(authId);
@@ -53,16 +53,18 @@ public class ApiProfileController {
         return ResponseEntity.ok(update);
     }
 
+
     @PostMapping("avatar")
-    public HttpStatus uploadAvatar(@RequestPart("avatar")MultipartFile avatar, Authentication authentication) {
-        Long authId = userService.findUserIdByEmail(authentication.getName());
+    public void uploadAvatar(@RequestPart("avatar")MultipartFile avatar, Principal principal) {
+//        if (principal == null) return HttpStatus.UNAUTHORIZED;
+        Long authId = userService.findUserIdByEmail(principal.getName());
         AvatarDto avatarDto = new AvatarDto();
         avatarDto.setUserId(authId);
         avatarDto.setAvatar(avatar);
 
         log.info("POST /api/profile/avatar — загрузка аватара пользователем");
         profileService.addAvatar(avatarDto);
-        return HttpStatus.CREATED;
+//        return HttpStatus.CREATED;
     }
 
     @GetMapping("avatar")
