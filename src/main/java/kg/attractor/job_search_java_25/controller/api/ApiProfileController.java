@@ -6,6 +6,7 @@ import kg.attractor.job_search_java_25.service.ProfileService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -85,11 +86,11 @@ public class ApiProfileController {
 
     // Получить отклики на мои вакансии (для работодателя)
     @GetMapping("/vacancy-responses")
-    public ResponseEntity<List<RespondedApplicantDto>> getVacancyResponses(Authentication authentication) {
+    public ResponseEntity<List<RespondedApplicantDto>> getVacancyResponses(Authentication authentication, Pageable p) {
         Long employerId = userService.findUserIdByEmail(authentication.getName());
         // Вернуть список откликов на вакансии, созданные этим работодателем
 
         log.debug("GET /api/profile/vacancy-responses — отклики на мои вакансии, employerId={}", employerId);
-        return profileService.getMyVacanciesResponses(employerId);
+        return profileService.getMyVacanciesResponses(employerId, p);
     }
 }
