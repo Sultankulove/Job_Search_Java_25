@@ -4,11 +4,11 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.web.bind.annotation.RequestMapping;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@RequestMapping
+@NoArgsConstructor
 @AllArgsConstructor
 public class EditProfileDto {
 
@@ -30,4 +30,6 @@ public class EditProfileDto {
 
     @Pattern(regexp="^\\+?[0-9\\- ()]{7,20}$")
     private String phoneNumber;
+
+    private String avatar;
 }
