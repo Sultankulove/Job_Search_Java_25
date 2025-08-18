@@ -27,9 +27,9 @@
 <#--            <a class="btn" href="/resume/new">+ Создать резюме</a>-->
 <#--        </div>-->
 
-<#--        <p class="muted">Найдено: ${resumes?size?c}</p>-->
+<#--        <p class="muted">Найдено: ${list?size?c}</p>-->
 
-<#--        <#if resumes?has_content>-->
+<#--        <#if list?has_content>-->
 <#--            <table class="table">-->
 <#--                <thead>-->
 <#--                <tr>-->
@@ -42,7 +42,7 @@
 <#--                </tr>-->
 <#--                </thead>-->
 <#--                <tbody>-->
-<#--                <#list resumes as r>-->
+<#--                <#list list as r>-->
 <#--                    <tr>-->
 <#--                        <td>${r.name!"—"}</td>-->
 <#--                        <td>${r.categoryId!"—"}</td>-->
@@ -78,19 +78,34 @@
 <#--    </html>-->
 
 
-<#-- templates/resumes/list.ftlh -->
+<#-- templates/list/list.ftlh -->
     <#import "/spring.ftl" as spring>
-    <!DOCTYPE html>
-    <html>
+<#--    <!DOCTYPE html>-->
+<#--    <html>-->
     <head>
         <meta charset="UTF-8"/>
         <title>Резюме</title>
         <link rel="stylesheet" href="/static/styles/style.css"/>
     </head>
     <body>
-    <h1>Список резюме</h1>
+    <#if SPRING_SECURITY_CONTEXT?? && SPRING_SECURITY_CONTEXT.authentication??>
+        <#assign user = SPRING_SECURITY_CONTEXT.authentication.principal>
+        <#if user?? && user.authorities?has_content>
+            <#list user.authorities as a>
+                <#assign role = a.authority!a?string>
+                <#if role == "ROLE_EMPLOYER">
+                    <h1>Список резюме</h1>
+<#--                    <a class="nav-link" href="/resumes">Список резюме</a>-->
+                <#elseif role == "ROLE_APPLICANT">
+                    <h1>Список вакансий</h1>
+                    <a class="nav-link" href="/vacancies">Список вакансий</a>
+                </#if>
+            </#list>
+        </#if>
+    </#if>
 
-    <#if resumes?has_content>
+
+    <#if list?has_content>
         <table>
             <thead>
             <tr>
@@ -102,14 +117,16 @@
             </tr>
             </thead>
             <tbody>
-            <#list resumes as r>
+
+            <#list list as r>
                 <tr>
                     <td>${r.name!}</td>
                     <td>${r.categoryId!}</td>
+
                     <td>
                         <#if r.salary??>${r.salary}<#else>-</#if>
                     </td>
-                    <td><#if r.active?? && r.active>Да<#else>Нет</#if></td>
+                    <td><#if r.active?? && r.isActive>Да<#else>Нет</#if></td>
                     <td>${r.updateTime}</td>
                 </tr>
             </#list>
@@ -120,6 +137,6 @@
     </#if>
 
     </body>
-    </html>
+<#--    </html>-->
 
 </@main.layout>

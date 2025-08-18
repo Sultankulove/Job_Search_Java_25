@@ -61,10 +61,21 @@
 
                 <legend>Email: ${user.email}</legend>
                 <legend>Телефон: ${user.phoneNumber}</legend>
-                <legend>Возраст: ${user.age}</legend>
-<#--                <legend>Тип аккаунта: ${spring.}</legend>-->
+<#--                <#if user.age == null>-->
+<#--                    <legend>Возраст: Не указан</legend>-->
+<#--                <#else>-->
+<#--                    <legend>Возраст: ${user.age}</legend>-->
+<#--                </#if>-->
+<#--&lt;#&ndash;                <legend>Тип аккаунта: ${spring.}</legend>&ndash;&gt;-->
 
-<#--                <#assign known = SPRING_SECURITY_CONTEXT?? >-->
+                <#if user?? && (user.age)??>
+                    Возраст: ${user.age}
+                <#else>
+                    Возраст не указан
+                </#if>
+
+
+                <#--                <#assign known = SPRING_SECURITY_CONTEXT?? >-->
 
 
             </fieldset>

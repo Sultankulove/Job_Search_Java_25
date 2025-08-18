@@ -44,7 +44,7 @@
 
         <h2>Резюме</h2>
 
-<#--        <#list resumes as resume>-->
+<#--        <#list list as resume>-->
 <#--            <h3>${resume.name}</h3>-->
 
 <#--            <p>Название резюме</p>-->

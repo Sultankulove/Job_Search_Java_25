@@ -32,27 +32,29 @@
         </div>
     </#if>
 
-<#--        <form action="/profile/avatar" method="post" enctype="multipart/form-data">-->
+        <form action="/profile/avatar" method="post" enctype="multipart/form-data">
 
-<#--            <label for="avatar">Фото профиля</label>&ndash;&gt;-->
-<#--            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">-->
-<#--            <input id="avatar" name="avatar" type="file" accept="image/*"/>-->
+            <label for="avatar">Фото профиля</label>-->
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+            <input id="avatar" name="avatar" type="file" accept="image/*"/>
 
-<#--                    <@spring.bind "dto.avatar"/>-->
-<#--                    <#if spring.status.errorMessages?has_content>-->
-<#--                        <div class="error">-->
-<#--                            <#list spring.status.errorMessages as m>${m}<#if m_has_next>, </#if></#list>-->
-<#--                        </div>-->
-<#--                    </#if>-->
+                    <@spring.bind "dto.avatar"/>
+                    <#if spring.status.errorMessages?has_content>
+                        <div class="error">
+                            <#list spring.status.errorMessages as m>${m}<#if m_has_next>, </#if></#list>
+                        </div>
+                    </#if>
 
-<#--                    <br>-->
-<#--                    <button type="submit">Сохранить</button>-->
-<#--        </form>-->
+                    <br>
+                    <button type="submit">Сохранить</button>
+        </form>
 
     <form action="/profile/edit" method="post" enctype="multipart/form-data" novalidate>
-        <#if _csrf??>
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-        </#if>
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+<#---->
+<#--        <#if _csrf??>-->
+<#--            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">-->
+<#--        </#if>-->
 
 
         <div class="row">
@@ -81,13 +83,13 @@
             </#if>
         </div>
 
-<#--        <div class="row">-->
-<#--            <label for="email">Email</label>-->
-<#--            <input id="email" name="email" type="email" value="${(dto.email)!}" required>-->
-<#--            <#if br?? && br.hasFieldErrors("email")>-->
-<#--                <div class="error"><#list br.getFieldErrors("email") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>-->
-<#--            </#if>-->
-<#--        </div>-->
+        <div class="row">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" value="${(dto.email)!}" required>
+            <#if br?? && br.hasFieldErrors("email")>
+                <div class="error"><#list br.getFieldErrors("email") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
+            </#if>
+        </div>
 
 
         <div class="row">

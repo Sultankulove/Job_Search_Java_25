@@ -36,20 +36,40 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/auth/login">Войти</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            Профиль
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="/auth/login">Войти</a></li>
-                            <li><a class="dropdown-item" href="/auth/register">Зарегистрироваться</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="/logout">Выйти</a></li>
-                        </ul>
+
+
+
+                    <li class="nav-item">
+                        <#if SPRING_SECURITY_CONTEXT?? && SPRING_SECURITY_CONTEXT.authentication??>
+                            <#assign user = SPRING_SECURITY_CONTEXT.authentication.principal>
+                            <#if user?? && user.authorities?has_content>
+                                <#list user.authorities as a>
+                                    <#assign role = a.authority!a?string>
+                                    <#if role == "ROLE_EMPLOYER">
+                                        <a class="nav-link" href="/resumes">Список резюме</a>
+                                    <#elseif role == "ROLE_APPLICANT">
+                                        <a class="nav-link" href="/vacancies">Список вакансий</a>
+                                    </#if>
+                                </#list>
+                            </#if>
+                        </#if>
                     </li>
+
+<#--                    <li class="nav-item dropdown">-->
+<#--                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"-->
+<#--                           data-bs-toggle="dropdown" aria-expanded="false">-->
+<#--                            Профиль-->
+<#--                        </a>-->
+<#--                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">-->
+<#--                            <li><a class="dropdown-item" href="/resumes">Список резюме</a></li>-->
+
+<#--                            <li><a class="dropdown-item" href="/vacancies">Список вакансий</a></li>-->
+<#--                            <li>-->
+<#--                                <hr class="dropdown-divider">-->
+<#--                            </li>-->
+<#--                            <li><a class="dropdown-item" href="/logout">Выйти</a></li>-->
+<#--                        </ul>-->
+<#--                    </li>-->
                 </ul>
                 <form class="d-flex">
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
