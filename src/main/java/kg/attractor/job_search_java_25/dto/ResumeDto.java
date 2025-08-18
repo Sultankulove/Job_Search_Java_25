@@ -26,7 +26,7 @@ public class ResumeDto {
     @PositiveOrZero
     private Float salary;
 
-    private boolean isActive;
+    private Boolean isActive;
     private LocalDateTime createdDate;
     private LocalDateTime updateTime;
 }

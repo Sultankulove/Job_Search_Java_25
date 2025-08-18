@@ -1,9 +1,7 @@
 package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.ResumeDto;
-import kg.attractor.job_search_java_25.dto.ResumeEditDto;
-import kg.attractor.job_search_java_25.dto.ResumeSearchDto;
+import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.service.CategoryService;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import kg.attractor.job_search_java_25.service.UserService;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -28,10 +25,15 @@ public class ResumeController {
     private final CategoryService categoryService;
 
     @GetMapping("/resumes")
-    public String listResumes(Model model, Authentication auth) {
-        Long applicantId = (auth != null) ? userService.findUserIdByEmail(auth.getName()) : null;
-        List<ResumeDto> resumes = resumeService.findAllForList(applicantId);
-        model.addAttribute("resumes", resumes);
+    public String listResumes(Model model) {
+//        Long applicantId = (auth != null) ? userService.findUserIdByEmail(auth.getName()) : null;
+//        List<ResumeListViewDto> list = resumeService.findAllForList(applicantId);
+//        List<ResumeDto> resumes = resumeService.findResumesById(applicantId);
+        List<ResumeDto> resumes = resumeService.findAll();
+        model.addAttribute("list", resumes);
+        List<CategoryDto> categories = categoryService.findAll();
+        model.addAttribute("categories", categories);
+        System.err.println(resumes);
         return "list";
     }
 

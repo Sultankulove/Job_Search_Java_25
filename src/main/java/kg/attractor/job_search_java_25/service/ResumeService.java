@@ -29,5 +29,9 @@ public interface ResumeService {
 
     List<ResumeDto> searchResumes(ResumeSearchDto criteria);
 
-    List<ResumeDto> findAllForList(Long applicantId);
+    List<ResumeListViewDto> findAllForList(Long applicantId);
+
+    List<ResumeDto> findResumesById(Long applicantId);
+
+    List<ResumeDto> findAll();
 }
