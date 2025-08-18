@@ -54,7 +54,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ResponseEntity<MyProfileDto> getMyProfile(Long auth) {
+    public MyProfileDto getMyProfile(Long auth) {
 
         log.debug("Профиль: getMyProfile(auth={})", auth);
         try {
@@ -67,7 +67,8 @@ public class ProfileServiceImpl implements ProfileService {
             myProfileDto.setPhoneNumber(user.getPhoneNumber());
             myProfileDto.setAvatar(user.getAvatar());
             log.info("Профиль: отдан профиль userId={}", auth);
-            return ResponseEntity.ok(myProfileDto);
+//            return ResponseEntity.ok(myProfileDto);
+            return myProfileDto;
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             throw new NotFoundException("User id=" + auth);
         }
@@ -82,7 +83,7 @@ public class ProfileServiceImpl implements ProfileService {
         user.setSurname(epd.getSurname());
         user.setAge(epd.getAge());
         user.setEmail(epd.getEmail());
-        user.setPassword(passwordEncoder.encode(epd.getPassword()));
+//        user.setPassword(passwordEncoder.encode(epd.getPassword()));
         user.setPhoneNumber(epd.getPhoneNumber());
 
         int updated = userDao.editProfile(user, authId);

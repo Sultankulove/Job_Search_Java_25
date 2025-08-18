@@ -10,7 +10,7 @@ public interface ProfileService {
 
     ResponseEntity<?> getAvatarByUserId(Long userId);
 
-    ResponseEntity<MyProfileDto> getMyProfile(Long auth);
+    MyProfileDto getMyProfile(Long auth);
 
     MyProfileDto editProfile(EditProfileDto epd, Long auth);
 

@@ -68,6 +68,24 @@
         </div>
 
         <div class="row">
+            <label id="nameLabel" for="surname">Фамилия</label>
+            <input id="surname" name="surname" type="text" value="${(dto.surname)!}" required>
+            <#if br?? && br.hasFieldErrors("suranme")>
+                <div class="error"><#list br.getFieldErrors("surname") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
+            </#if>
+        </div>
+
+        <div class="row">
+            <label for="age">Возраст</label>
+            <@spring.bind "dto.age"/>
+            <input id="age" name="age" type="number" min="18" max="100" step="1"
+                   value="${(spring.status.value)!''}" required>
+            <#if spring.status.errorMessages?has_content>
+                <div class="error">${spring.status.errorMessages?join(", ")}</div>
+            </#if>
+        </div>
+
+        <div class="row">
             <label for="email">Email</label>
             <input id="email" name="email" type="email" value="${(dto.email)!}" required>
             <#if br?? && br.hasFieldErrors("email")>
@@ -79,7 +97,7 @@
         <div class="row">
             <label for="phoneNumber">Телефон</label>
             <input id="phoneNumber" name="phoneNumber" type="tel" value="${(dto.phoneNumber)!}" required>
-            <#if br?? && br.hasFieldErrors("phone")>
+            <#if br?? && br.hasFieldErrors("phoneNumber")>
                 <div class="error"><#list br.getFieldErrors("phoneNumber") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
             </#if>
         </div>
@@ -92,6 +110,8 @@
             </#if>
         </div>
 
+<#--        Не работает подтверждение пароля!-->
+
         <div class="row">
             <label for="confirmPassword">Подтверждение пароля</label>
             <input id="confirmPassword" name="confirmPassword" type="password" required>
@@ -100,13 +120,10 @@
             </#if>
         </div>
 
-        <div class="row">
-            <label for="avatar">Фото профиля (необязательно)</label>
-            <input id="avatar" name="avatar" type="file" accept="image/*">
-            <#if br?? && br.hasFieldErrors("avatar")>
-                <div class="error"><#list br.getFieldErrors("avatar") as e>${e.defaultMessage}<#if e_has_next><br/></#if></#list></div>
-            </#if>
-        </div>
+
+
+
+
 
         <div class="actions">
             <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
