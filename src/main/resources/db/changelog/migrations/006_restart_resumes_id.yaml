@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-restart-resumes-id
+      author: eltur
+      changes:
+        - sql:
+            dbms: h2
+            sql: |
+              ALTER TABLE resumes ALTER COLUMN id RESTART WITH 28;
