@@ -1,9 +1,7 @@
 package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.dto.VacancyEditDto;
-import kg.attractor.job_search_java_25.dto.VacancySearchDto;
+import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +14,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -25,12 +25,38 @@ public class VacancyController {
     private final VacancyService vacancyService;
     private final UserService userService;
 
+//    @GetMapping("vacancies")
+//    private String listVacancies(@ModelAttribute VacancySearchDto criteria, Model model) {
+//        List<VacancyDto> vacancies = vacancyService.searchVacancies(criteria);
+//
+//        model.addAttribute("list", vacancies);
+//
+//        return "list";
+
+
     @GetMapping("vacancies")
-    private String listVacancies(@ModelAttribute VacancySearchDto criteria, Model model) {
-        List<VacancyDto> vacancies = vacancyService.searchVacancies(criteria);
-        model.addAttribute("vacancies", vacancies);
-        return "vacancies";
+    public String listVacancies(Model model) {
+//        Long userId = userService.findUserIdByEmail(principal.getName());
+//        System.err.println(userId);
+//        List<VacancyDto> vacancies = vacancyService.findVacanciesById(userId);
+        List<VacancyDto> vacancies = vacancyService.findAll();
+        System.err.println(vacancies);
+        model.addAttribute("list", vacancies);
+        return "list";
     }
+
+
+//    @GetMapping("/resumes")
+//    public String listResumes(Model model, Authentication auth) {
+//        Long applicantId = (auth != null) ? userService.findUserIdByEmail(auth.getName()) : null;
+////        List<ResumeListViewDto> list = resumeService.findAllForList(applicantId);
+//        List<ResumeDto> resumes = resumeService.findResumesById(applicantId);
+//        model.addAttribute("list", resumes);
+//        List<CategoryDto> categories = categoryService.findAll();
+//        model.addAttribute("categories", categories);
+//        System.err.println(resumes);
+//        return "list";
+//    }
 
     @GetMapping("vacancy/new")
     public String showCreateForm(Model model) {

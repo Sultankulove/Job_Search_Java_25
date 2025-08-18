@@ -40,5 +40,5 @@ public class VacancyDto {
     private Boolean isActive;
     private Long authorId;
     private LocalDateTime createdDate;
-    private LocalDateTime updateDate;
+    private LocalDateTime updateTime;
 }
