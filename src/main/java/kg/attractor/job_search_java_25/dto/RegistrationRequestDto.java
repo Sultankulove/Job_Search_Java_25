@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RegistrationRequestDto {
 
-    @NotBlank
+    @NotBlank(message = "Заполни имя!")
     @Size(max = 50)
     private String name;
 
@@ -22,21 +22,21 @@ public class RegistrationRequestDto {
     @Min(18) @Max(100)
     private Byte age;
 
-    @NotBlank
+    @NotBlank(message = "Email обязателен!")
     @Email
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Пароль не должен быть пустым")
     @Size(min = 8, max = 64)
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d).+$", message = "Пароль должен содержать хотя бы 1 заглавную букву и 1 цифру")
     private String password;
 
-    @NotBlank
+    @NotBlank(message = "Номер телефона обязателен!")
     @Pattern(regexp="^\\+?[0-9\\- ()]{7,20}$", message = "Неверный формат номера телефона")
     private String phoneNumber;
 
     private String avatar;
 
-    @NotNull
+    @NotNull(message = "Выбери тип аккаунта")
     private AccountType accountType;
 }
