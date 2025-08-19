@@ -40,7 +40,7 @@
                     <#list roles as a>
                         <#if a.authority?string == 'ROLE_APPLICANT'>
                             <a class="btn" href="/resume/new">Создать резюме</a>
-                            <a class="btn" href="/resumes?mine=1">Мои резюме</a>
+                            <a class="btn" href="/profile/resumes">Мои резюме</a>
                             <#break>
                         </#if>
                     </#list>

@@ -6,9 +6,14 @@
         <div class="profile__left">
         </div>
         <div class="profile__right">
-            <div class="">
-                <img class="avatar" src="${(user.avatar)!'/images/default-avatar.png'}" alt="avatar">
+            <div class="profile-avatar">
+                <#if user?? && user.avatar?has_content>
+                    <img class="avatar" src="/api/profile/avatar" alt="avatar">
+                <#else>
+                    <img class="avatar" src="../static/images/default-avatar.png" alt="avatar">
+                </#if>
             </div>
+
             <div class="">
                 <h1>${(user.name)!'—'} ${(user.surname)!''}</h1>
                 <p>Email: ${(user.email)!'—'}</p>
@@ -35,7 +40,7 @@
                 <a class="btn" href="/profile/vacancies">Мои вакансии</a>
             <#elseif isApplicant>
                 <a class="btn" href="/resume/new">Создать резюме</a>
-                <a class="btn" href="/resumes?mine=1">Мои резюме</a>
+                <a class="btn" href="/profile/resumes">Мои резюме</a>
             </#if>
         </div>
     </div>
