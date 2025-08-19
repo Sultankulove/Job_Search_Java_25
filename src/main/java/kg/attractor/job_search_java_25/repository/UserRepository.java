@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.repository;
 
 import kg.attractor.job_search_java_25.dto.MyProfileDto;
+import kg.attractor.job_search_java_25.dto.UserProfileDto;
 import kg.attractor.job_search_java_25.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -54,8 +55,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
                     @Param("phoneNumber") String phoneNumber);
 
 
-    @Query("select u.id from User u where u.email = :email")
-    Optional<Long> findUserIdByEmail(@Param("email") String email);
+    @Query("select u.id from User u where lower(u.email) = lower(:email)")
+    Optional<Long> findUserIdByEmailIgnoreCase(@Param("email") String email);
 
     boolean existsByEmail(String email);
 
@@ -106,6 +107,23 @@ where u.id = :id
                     @Param("age") Short age,
                     @Param("email") String email,
                     @Param("phoneNumber") String phoneNumber);
+
+
+
+
+    @Query(
+            """
+        select new kg.attractor.job_search_java_25.dto.MyProfileDto(
+        u.name,
+        u.surname,
+        u.age,
+        u.email,
+        u.phoneNumber,
+        u.avatar
+) from User u where u.id = :id
+"""
+    )
+    UserProfileDto getUserProfileById(Long id);
 
 
 //    boolean existsByEmail(String email);

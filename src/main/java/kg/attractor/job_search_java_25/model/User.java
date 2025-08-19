@@ -13,6 +13,7 @@ import java.util.List;
 public class User {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", length = 64)
@@ -40,7 +41,7 @@ public class User {
     private String accountType;
 
     @Column(name = "enabled", nullable = false)
-    private Boolean enabled;
+    private boolean enabled = true;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Vacancy> vacancies;

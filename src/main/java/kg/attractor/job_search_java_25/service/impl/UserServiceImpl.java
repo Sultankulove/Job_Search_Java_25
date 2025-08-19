@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
         user.setPhoneNumber(rrd.getPhoneNumber());
         user.setAvatar(rrd.getAvatar());
         user.setAccountType(String.valueOf(rrd.getAccountType()));
+        user.setEnabled(true);
         userRepository.save(user);
         log.info("Пользователь зарегистрирован email={}", rrd.getEmail());
     }
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Long findUserIdByEmail(String email) {
-        return userRepository.findUserIdByEmail(email)
+        return userRepository.findUserIdByEmailIgnoreCase(email)
                 .orElseThrow(() -> new NotFoundException("User email=" + email));
     }
 }

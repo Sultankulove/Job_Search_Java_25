@@ -23,7 +23,13 @@ public class UserProfileDto {
     private Byte age;
 
     @NotBlank
+    @Email
+    private String email;
+
+    @NotBlank
     @Pattern(regexp="^\\+?[0-9\\- ()]{7,20}$", message = "Неверный формат номера телефона")
     private String phoneNumber;
     private String avatar;
+
+    private AccountType accountType;
 }
