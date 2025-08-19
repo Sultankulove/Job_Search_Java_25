@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.repository;
 
 
+import jakarta.validation.constraints.*;
 import kg.attractor.job_search_java_25.dto.ResumeDto;
 import kg.attractor.job_search_java_25.dto.VacancyDto;
 import kg.attractor.job_search_java_25.dto.VacancyShortDto;
@@ -17,6 +18,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +26,8 @@ import java.util.Optional;
 @Repository
 public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
+    List<VacancyDto> findVacanciesByCategory_Id(Long categoryId);
+    
     Page<Vacancy> findAllByAuthor_Id(Long authorId, Pageable p);
 
     @Modifying
@@ -119,4 +123,25 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
 //    List<Resume> findAllByApplicant_Id(Long applicantId);
     List<Vacancy> findAllByAuthor_Id(Long userId);
+
+    List<VacancyDto> findByCategory_Id(Long categoryId);
+
+    @Query(
+            """
+        select new kg.attractor.job_search_java_25.dto.VacancyDto(
+           v.id,
+           v.name,
+           v.description,
+           v.category.id,
+           v.salary,
+           v.expFrom,
+           v.expTo,
+           v.isActive,
+           v.author.id,
+           v.createdDate,
+           v.updateTime
+           ) from Vacancy v where v.author.id = :employerId
+"""
+    )
+    List<VacancyDto> findAllByAuthorId(@Param("employerId") Long employerId);
 }

@@ -238,24 +238,50 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public List<VacancyDto> findAll() {
+    public List<VacancyDto> findAll(Long categoryId) {
 
-        return vacancyRepository.findAll()
+        return vacancyRepository.findVacanciesByCategory_Id(categoryId)
                 .stream()
-                .map(vacancy ->{
+                .map(v -> {
                     VacancyDto dto = new VacancyDto();
-                    dto.setId(vacancy.getId());
-                    dto.setName(vacancy.getName());
-                    dto.setCategoryId(vacancy.getCategory().getId());
-                    dto.setDescription(vacancy.getDescription());
-                    dto.setSalary(vacancy.getSalary());
-                    dto.setExpFrom(vacancy.getExpFrom());
-                    dto.setExpTo(vacancy.getExpTo());
-                    dto.setIsActive(vacancy.getIsActive());
-                    dto.setUpdateTime(vacancy.getUpdateTime());
-                    dto.setCreatedDate(vacancy.getCreatedDate());
+                    dto.setId(v.getId());
+                    dto.setName(v.getName());
+                    dto.setDescription(v.getDescription());
+                    dto.setSalary(v.getSalary());
+                    dto.setExpFrom(v.getExpFrom());
+                    dto.setExpTo(v.getExpTo());
+                    dto.setIsActive(v.getIsActive());
+                    dto.setUpdateTime(v.getUpdateTime());
+                    dto.setCreatedDate(v.getCreatedDate());
                     return dto;
-                }).toList();
+                })
+                .toList();
+//        return vacancyRepository.findAll()
+//                .stream()
+//                .map(vacancy ->{
+//                    VacancyDto dto = new VacancyDto();
+//                    dto.setId(vacancy.getId());
+//                    dto.setName(vacancy.getName());
+//                    dto.setCategoryId(vacancy.getCategory().getId());
+//                    dto.setDescription(vacancy.getDescription());
+//                    dto.setSalary(vacancy.getSalary());
+//                    dto.setExpFrom(vacancy.getExpFrom());
+//                    dto.setExpTo(vacancy.getExpTo());
+//                    dto.setIsActive(vacancy.getIsActive());
+//                    dto.setUpdateTime(vacancy.getUpdateTime());
+//                    dto.setCreatedDate(vacancy.getCreatedDate());
+//                    return dto;
+//                }).toList();
+    }
+
+    @Override
+    public List<VacancyDto> findByCategory(Long categoryId) {
+        return vacancyRepository.findByCategory_Id(categoryId);
+    }
+
+    @Override
+    public List<VacancyDto> findByEmployer(Long employerId) {
+        return vacancyRepository.findAllByAuthorId(employerId);
     }
 //
 //    Override
