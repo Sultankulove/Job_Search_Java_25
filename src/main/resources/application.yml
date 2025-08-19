@@ -3,12 +3,18 @@ spring:
     name: "Job_Search_Java_25"
   datasource:
     url: jdbc:h2:./db/test;AUTO_SERVER=TRUE
+
     username: root
     password: qwerty
     driver-class-name: org.h2.Driver
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
 
-  liquibase:
-    change-log: classpath:/db/changelog/master.yaml
   mvc:
     static-path-pattern: /static/**
     log-request-details: false

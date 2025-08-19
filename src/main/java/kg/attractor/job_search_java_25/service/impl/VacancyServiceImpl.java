@@ -1,15 +1,17 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import kg.attractor.job_search_java_25.dao.RespondedApplicantDao;
 import kg.attractor.job_search_java_25.dao.VacancyDao;
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.model.Vacancy;
+import kg.attractor.job_search_java_25.repository.RespondedApplicantRepository;
+import kg.attractor.job_search_java_25.repository.VacancyRepository;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +24,18 @@ import java.util.Optional;
 @Slf4j
 public class VacancyServiceImpl implements VacancyService {
     private final VacancyDao vacancyDao;
-    private final RespondedApplicantDao respondedApplicantDao;
+    private final VacancyRepository vacancyRepository;
+    private final RespondedApplicantRepository respondedApplicantRepository;
 
     @Override
-    public List<VacancyShortDto> getShortVacanciesList(Long employerId) {
+    public List<VacancyShortDto> getShortVacanciesList(Long employerId, Pageable p) {
         log.debug("VacancyService.getShortVacanciesList(employerId={})", employerId);
         List<VacancyShortDto> shortVacancies;
-        shortVacancies = vacancyDao.getAllVacanciesById(employerId)
-                .stream()
-                .map(v -> new VacancyShortDto(v.getName(), v.getUpdateTime()))
-                .toList();
+
+        shortVacancies = vacancyRepository.findAllByAuthor_Id(employerId, p)
+                        .stream()
+                                .map(vacancy -> new VacancyShortDto(vacancy.getName(), vacancy.getUpdateTime()))
+                                        .toList();
         log.info("Вакансии: короткий список size={}", shortVacancies.size());
         return shortVacancies;
     }
@@ -39,7 +43,7 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public ResponseEntity<?> updateTime(Long id) {
         log.info("Вакансии: обновление времени id={}", id);
-        vacancyDao.updateTime(id);
+        vacancyRepository.updateTime(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -55,7 +59,7 @@ public class VacancyServiceImpl implements VacancyService {
         vacancy.setExpTo(editVacancyEditDto.getExpTo());
         vacancy.setIsActive(editVacancyEditDto.getIsActive());
 
-        vacancyDao.editVacancy(vacancy, vacancyId, userId);
+        vacancyRepository.saveVacancy_IdUser_Id(vacancy, vacancyId, userId);
         log.debug("Вакансии: отредактировано id={}", vacancyId);
     }
 
@@ -63,7 +67,7 @@ public class VacancyServiceImpl implements VacancyService {
     public void vacancyIsActiveById(Long vacancyId, VacancyIsActiveDto vacancyIsActiveDto) {
         boolean isActive = vacancyIsActiveDto.getIsActive();
         log.info("Вакансии: публикация id={}, isActive={}", vacancyId, isActive);
-        vacancyDao.vacancyIsActive(vacancyId, isActive);
+        vacancyRepository.vacancyIsActive(vacancyId, isActive);
     }
 
     @Override
@@ -79,8 +83,9 @@ public class VacancyServiceImpl implements VacancyService {
         v.setIsActive(createVacancyEditDto.getIsActive());
         v.getAuthor().setId(authorId);
 
-        long id = vacancyDao.createVacancy(v);
-        v.setId(id);
+        Vacancy vacancy = vacancyRepository.save(v);
+
+        v.setId(vacancy.getId());
 
         log.debug("Вакансии: создано (name={}, categoryId={})", v.getName(), v.getCategory().getId());
         return VacancyDto.builder()
@@ -94,13 +99,13 @@ public class VacancyServiceImpl implements VacancyService {
                 .isActive(v.getIsActive())
                 .authorId(v.getAuthor().getId())
                 .createdDate(v.getCreatedDate())
-                .updateDate(v.getUpdateTime())
+                .updateTime(v.getUpdateTime())
                 .build();
     }
 
     @Override
     public ResponseEntity<?> getVacancyById(Long id) {
-        Optional<Vacancy> vacancy = vacancyDao.getVacancyById(id);
+        Optional<Vacancy> vacancy = vacancyRepository.findVacancyById(id);
         if (vacancy.isPresent()) {
             log.info("Вакансии: найдено id={}", id);
             VacancyDto dto = new VacancyDto();
@@ -114,7 +119,7 @@ public class VacancyServiceImpl implements VacancyService {
             dto.setIsActive(vacancy.get().getIsActive());
             dto.setAuthorId(vacancy.get().getAuthor().getId());
             dto.setCreatedDate(vacancy.get().getCreatedDate());
-            dto.setUpdateDate(vacancy.get().getUpdateTime());
+            dto.setUpdateTime(vacancy.get().getUpdateTime());
             return ResponseEntity.ok(dto);
         } else {
             log.warn("Вакансии: не найдено id={}", id);
@@ -125,7 +130,7 @@ public class VacancyServiceImpl implements VacancyService {
     @Override
     public void deleteVacancyById(Long id) {
         log.warn("Вакансии: удаление id={}", id);
-        vacancyDao.deleteVacancyById(id);
+        vacancyRepository.deleteById(id);
     }
 
     @Override
@@ -135,14 +140,14 @@ public class VacancyServiceImpl implements VacancyService {
         respondedApplicant.getResume().setId(dto.getResumeId());
         respondedApplicant.getVacancy().setId(dto.getVacancyId());
         respondedApplicant.setConfirmation(false);
-        respondedApplicantDao.save(respondedApplicant);
+        respondedApplicantRepository.save(respondedApplicant);
         log.debug("Отклик: сохранён");
     }
 
     @Override
     public ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(Long vacancyId) {
         log.debug("Отклики: запрос списка по vacancyId={}", vacancyId);
-        List<RespondedApplicant> responded = respondedApplicantDao.getResponsesByVacancy(vacancyId);
+        List<RespondedApplicant> responded = respondedApplicantRepository.getResponsesByVacancy(vacancyId);
         List<RespondedApplicantDto> dtos = responded.stream()
                 .map(entity -> RespondedApplicantDto.builder()
                         .id(entity.getId())
@@ -157,7 +162,7 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public List<VacancyShortDto> getPublicShortVacancies() {
-        var list = vacancyDao.getActiveShortVacancies();
+        var list = vacancyRepository.getActiveShortVacancies();
         log.info("Публичные вакансии: {}", list.size());
         return list;
     }
@@ -174,7 +179,7 @@ public class VacancyServiceImpl implements VacancyService {
         v.setExpFrom(dto.getExpFrom());
         v.setExpTo(dto.getExpTo());
         v.setIsActive(dto.getIsActive());
-        vacancyDao.editVacancy(v, vacancyId, employerId);
+        vacancyRepository.saveVacancy_IdUser_Id(v, vacancyId, employerId);
         log.info("Вакансия {} отредактирована работодателем {}", vacancyId, employerId);
     }
 
@@ -182,12 +187,12 @@ public class VacancyServiceImpl implements VacancyService {
     public void vacancyIsActiveOwned(Long vacancyId, VacancyIsActiveDto dto, Long employerId) {
         log.debug("vacancyIsActiveOwned(vacancyId={}, employerId={})", vacancyId, employerId);
         requireVacancyOwner(vacancyId, employerId);
-        vacancyDao.vacancyIsActive(vacancyId, dto.getIsActive());
+        vacancyRepository.vacancyIsActive(vacancyId, dto.getIsActive());
         log.info("Статус активности вакансии {} изменён работодателем {} на {}", vacancyId, employerId, dto.getIsActive());
     }
 
     private void requireVacancyOwner(Long vacancyId, Long employerId) {
-        Long ownerId = vacancyDao.getOwnerId(vacancyId);
+        Long ownerId = vacancyRepository.getOwnerId(vacancyId);
         if (!ownerId.equals(employerId)) throw new ForbiddenException("Not your vacancy");
     }
 
@@ -207,8 +212,111 @@ public class VacancyServiceImpl implements VacancyService {
             dto.setIsActive(v.getIsActive());
             dto.setAuthorId(v.getAuthor().getId());
             dto.setCreatedDate(v.getCreatedDate());
-            dto.setUpdateDate(v.getUpdateTime());
+            dto.setUpdateTime(v.getUpdateTime());
             return dto;
         }).toList();
     }
+
+    @Override
+    public List<VacancyDto> findVacanciesById(Long userId) {
+
+        return vacancyRepository.findAllByAuthor_Id((userId))
+                .stream().map(v -> {
+                    VacancyDto dto = new VacancyDto();
+                    dto.setId(v.getId());
+                    dto.setName(v.getName());
+                    dto.setCategoryId(v.getCategory().getId());
+                    dto.setDescription(v.getDescription());
+                    dto.setSalary(v.getSalary());
+                    dto.setExpFrom(v.getExpFrom());
+                    dto.setExpTo(v.getExpTo());
+                    dto.setIsActive(v.getIsActive());
+                    dto.setUpdateTime(v.getUpdateTime());
+                    dto.setCreatedDate(v.getCreatedDate());
+                    return dto;
+                }).toList();
+    }
+
+    @Override
+    public List<VacancyDto> findAll(Long categoryId) {
+
+        return vacancyRepository.findVacanciesByCategory_Id(categoryId)
+                .stream()
+                .map(v -> {
+                    VacancyDto dto = new VacancyDto();
+                    dto.setId(v.getId());
+                    dto.setName(v.getName());
+                    dto.setDescription(v.getDescription());
+                    dto.setSalary(v.getSalary());
+                    dto.setExpFrom(v.getExpFrom());
+                    dto.setExpTo(v.getExpTo());
+                    dto.setIsActive(v.getIsActive());
+                    dto.setUpdateTime(v.getUpdateTime());
+                    dto.setCreatedDate(v.getCreatedDate());
+                    return dto;
+                })
+                .toList();
+//        return vacancyRepository.findAll()
+//                .stream()
+//                .map(vacancy ->{
+//                    VacancyDto dto = new VacancyDto();
+//                    dto.setId(vacancy.getId());
+//                    dto.setName(vacancy.getName());
+//                    dto.setCategoryId(vacancy.getCategory().getId());
+//                    dto.setDescription(vacancy.getDescription());
+//                    dto.setSalary(vacancy.getSalary());
+//                    dto.setExpFrom(vacancy.getExpFrom());
+//                    dto.setExpTo(vacancy.getExpTo());
+//                    dto.setIsActive(vacancy.getIsActive());
+//                    dto.setUpdateTime(vacancy.getUpdateTime());
+//                    dto.setCreatedDate(vacancy.getCreatedDate());
+//                    return dto;
+//                }).toList();
+    }
+
+    @Override
+    public List<VacancyDto> findByCategory(Long categoryId) {
+        return vacancyRepository.findByCategory_Id(categoryId);
+    }
+
+    @Override
+    public List<VacancyDto> findByEmployer(Long employerId) {
+        return vacancyRepository.findAllByAuthorId(employerId);
+    }
+
+    @Override
+    public List<VacancyDto> findAllVacancies() {
+        return vacancyRepository.findAll()
+                .stream()
+                .map(vacancy -> {
+                    VacancyDto dto = new VacancyDto();
+                    dto.setId(vacancy.getId());
+                    dto.setName(vacancy.getName());
+                    dto.setDescription(vacancy.getDescription());
+                    dto.setSalary(vacancy.getSalary());
+                    dto.setExpFrom(vacancy.getExpFrom());
+                    dto.setExpTo(vacancy.getExpTo());
+                    dto.setIsActive(vacancy.getIsActive());
+                    dto.setUpdateTime(vacancy.getUpdateTime());
+                    dto.setCreatedDate(vacancy.getCreatedDate());
+                    return dto;
+                }).toList();
+    }
+//
+//    Override
+//    public List<ResumeDto> findResumesById(Long applicantId) {
+//        return resumeRepository.findAllByApplicant_Id(applicantId)
+//                .stream().map(r -> {
+//                    ResumeDto dto = new ResumeDto();
+//                    dto.setApplicantId(r.getApplicant().getId());
+//                    dto.setName(r.getName());
+//                    dto.setCategoryId(r.getCategory().getId());
+//                    dto.setSalary(r.getSalary());
+//                    dto.setActive(r.getIsActive());
+//                    dto.setCreatedDate(r.getCreatedDate());
+//                    dto.setUpdateTime(r.getUpdateTime());
+//                    return dto;
+//                }).toList();
+//
+//    }
 }

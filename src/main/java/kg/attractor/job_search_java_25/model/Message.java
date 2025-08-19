@@ -16,7 +16,7 @@ public class Message {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "responded_applicants")
+    @JoinColumn(name = "responded_applicant_id")
     private RespondedApplicant respondedApplicant;
 
     @Column(name = "content", length = 2048)

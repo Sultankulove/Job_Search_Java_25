@@ -22,6 +22,9 @@ public class ResumeEditDto {
     @PositiveOrZero
     private Float salary;
 
-    @NotNull
-    private Boolean isActive;
+    private boolean isActive;
+
+    public boolean getActive() {
+        return isActive;
+    }
 }

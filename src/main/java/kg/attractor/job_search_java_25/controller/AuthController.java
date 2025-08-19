@@ -1,7 +1,9 @@
 package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
+import kg.attractor.job_search_java_25.dto.AccountType;
 import kg.attractor.job_search_java_25.dto.RegistrationRequestDto;
+import kg.attractor.job_search_java_25.exceptions.types.ConflictException;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,11 +28,11 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public String registerForm(Model model, @ModelAttribute("dto") RegistrationRequestDto dto,
-                               org.springframework.security.web.csrf.CsrfToken token) {
-        model.addAttribute("_csrf", token);
-        model.addAttribute("dto", dto);
-        model.addAttribute("accountTypes", kg.attractor.job_search_java_25.dto.AccountType.values());
+    public String registerForm(Model model, @ModelAttribute("dto") RegistrationRequestDto dto) {
+
+        model.addAttribute("dto", new RegistrationRequestDto());
+
+        model.addAttribute("accountTypes", List.of(AccountType.APPLICANT, AccountType.EMPLOYER));
         return "auth/register";
     }
 
@@ -38,12 +42,30 @@ public class AuthController {
             BindingResult bindingResult,
             Model model) {
 
+        if (dto.getAccountType() == null ||
+                (dto.getAccountType() != AccountType.APPLICANT &&
+                        dto.getAccountType() != AccountType.EMPLOYER)) {
+            bindingResult.rejectValue("accountType", "invalid", "Выберите тип аккаунта");
+        }
+
         if (bindingResult.hasErrors()) {
+            model.addAttribute("accountTypes",
+                    java.util.List.of(AccountType.APPLICANT, AccountType.EMPLOYER));
             return "auth/register";
         }
 
         try {
             userService.registration(dto);
+        } catch (ConflictException ex) {
+            String key = ex.getMessage();
+            if ("email".equalsIgnoreCase(key)) {
+                bindingResult.rejectValue("email", "duplicate", "Email уже используется");
+            } else if ("phoneNumber".equalsIgnoreCase(key)) {
+                bindingResult.rejectValue("phoneNumber", "duplicate", "Телефон уже используется");
+            } else {
+                bindingResult.reject("registration.conflict", "Данные уже используются");
+            }
+            return "auth/register";
         } catch (IllegalArgumentException ex) {
             bindingResult.reject("registration.error", ex.getMessage());
             return "auth/register";
@@ -51,5 +73,4 @@ public class AuthController {
 
         return "redirect:/auth/login?registered";
     }
-
 }

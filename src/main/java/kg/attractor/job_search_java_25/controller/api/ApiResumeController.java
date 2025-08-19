@@ -24,7 +24,7 @@ public class ApiResumeController {
     @PatchMapping("{id}")
     public ResponseEntity<?> updateResumeById(@PathVariable Long id, Authentication authentication) {
         Long applicantId = userService.findUserIdByEmail(authentication.getName());
-        log.info("PATCH /api/resumes/{} — обновление времени", id);
+        log.info("PATCH /api/list/{} — обновление времени", id);
         resumeService.updateTime(id);
         resumeService.updateTimeOwned(id, applicantId);
         return ResponseEntity.noContent().build();
@@ -35,7 +35,7 @@ public class ApiResumeController {
                                             @RequestBody @Valid ResumeEditDto resumeEditDto,
                                             Authentication authentication) {
         Long applicantId = userService.findUserIdByEmail(authentication.getName());
-        log.info("PUT /api/resumes/{} — редактирование резюме, applicantId={}", resumeId, applicantId);
+        log.info("PUT /api/list/{} — редактирование резюме, applicantId={}", resumeId, applicantId);
         resumeService.editResume(resumeEditDto, resumeId, applicantId);
         resumeService.editResumeOwned(resumeEditDto, resumeId, applicantId);
         return ResponseEntity.ok().build();
@@ -46,7 +46,7 @@ public class ApiResumeController {
                                                  @RequestBody @Valid ResumeIsActiveDto resumeIsActiveDto,
                                                  Authentication authentication) {
         Long applicantId = userService.findUserIdByEmail(authentication.getName());
-        log.info("PATCH /api/resumes/{}/status — публикация={}", resumeId, resumeIsActiveDto.getIsActive());
+        log.info("PATCH /api/list/{}/status — публикация={}", resumeId, resumeIsActiveDto.getIsActive());
         resumeService.resumeIsActiveById(resumeId, resumeIsActiveDto);
         resumeService.resumeIsActiveOwned(resumeId, resumeIsActiveDto, applicantId);
         return ResponseEntity.ok().build();
@@ -56,28 +56,28 @@ public class ApiResumeController {
     public ResponseEntity<ResumeEditDto> createResume(@RequestBody @Valid ResumeEditDto resumeEditDto,
                                                       Authentication authentication) {
         Long applicantId = userService.findUserIdByEmail(authentication.getName());
-        log.info("POST /api/resumes — создание резюме, applicantId={}", applicantId);
+        log.info("POST /api/list — создание резюме, applicantId={}", applicantId);
         ResumeEditDto saved = resumeService.createResume(applicantId, resumeEditDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @GetMapping("{id}")
     public ResponseEntity<?> getResumeById(@PathVariable Long id) {
-        log.debug("GET /api/resumes/{} — получить резюме", id);
+        log.debug("GET /api/list/{} — получить резюме", id);
         return resumeService.getResumeById(id);
     }
 
 
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteResumeById(@PathVariable Long id) {
-        log.warn("DELETE /api/resumes/{} — удаление резюме", id);
+        log.warn("DELETE /api/list/{} — удаление резюме", id);
         resumeService.deleteResumeById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ResumeDto>> searchResumes(@ModelAttribute ResumeSearchDto criteria) {
-        log.debug("GET /api/resumes/search — критерии={}", criteria);
+        log.debug("GET /api/list/search — критерии={}", criteria);
         List<ResumeDto> results = resumeService.searchResumes(criteria);
         return ResponseEntity.ok(results);
     }

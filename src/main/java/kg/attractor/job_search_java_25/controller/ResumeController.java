@@ -1,9 +1,8 @@
 package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.ResumeDto;
-import kg.attractor.job_search_java_25.dto.ResumeEditDto;
-import kg.attractor.job_search_java_25.dto.ResumeSearchDto;
+import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.service.CategoryService;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -11,55 +10,60 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
 public class ResumeController {
     private final ResumeService resumeService;
     private final UserService userService;
+    private final CategoryService categoryService;
+
+
 
     @GetMapping("/resumes")
-    public String listResumes(Model model, Authentication auth) {
-        Long applicantId = null;
-        if (auth != null) {
-            applicantId = userService.findUserIdByEmail(auth.getName());
-        }
+    public String listResumes(@RequestParam(required=false) Long categoryId,
+                              Model model) {
+        List<ResumeDto> resumes = (categoryId == null)
+                ? resumeService.findAll()
+                : resumeService.findByCategory(categoryId);
 
-        List<ResumeDto> resumes;
-        try {
-            resumes = resumeService.searchResumes(new ResumeSearchDto());
-        } catch (Exception e) {
-            resumes = Collections.emptyList();
-        }
-        model.addAttribute("resumes", resumes);
-        return "resumes";
+        model.addAttribute("title", "Список резюме");
+        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("list", resumes);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("params", Map.of("categoryId", String.valueOf(categoryId==null?"":categoryId)));
+        return "list";
     }
+
+
+
+
 
     @GetMapping("/resume/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("resume", new ResumeDto());
+        model.addAttribute("resume", new ResumeEditDto());
+        model.addAttribute("categories", categoryService.findAll());
         return "resume_form";
     }
+
+    
+
+
 
     @PostMapping("/resume/new")
     public String createResume(@ModelAttribute("resume") @Valid ResumeEditDto resumeDto, BindingResult bindingResult, Authentication authentication, Model model) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryService.findAll());
             model.addAttribute("errors", bindingResult.getAllErrors());
             return "resume_form";
         }
-        Long applicantId = null;
-        if (authentication != null) {
-            applicantId = userService.findUserIdByEmail(authentication.getName());
-        }
-
+        Long applicantId = userService.findUserIdByEmail(authentication.getName());
         resumeService.createResume(applicantId, resumeDto);
+
         return "redirect:/resumes";
     }
 

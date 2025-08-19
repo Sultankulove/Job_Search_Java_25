@@ -14,6 +14,7 @@ import java.util.List;
 public class Resume {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
@@ -31,7 +32,7 @@ public class Resume {
     private Float salary;
 
     @Column(name = "is_active")
-    private Boolean isActive;
+    private boolean isActive = false;
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
@@ -51,4 +52,8 @@ public class Resume {
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RespondedApplicant> responses;
+
+    public boolean getIsActive() {
+        return isActive;
+    }
 }

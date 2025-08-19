@@ -2,13 +2,14 @@ package kg.attractor.job_search_java_25.service;
 
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface VacancyService {
 
-    List<VacancyShortDto> getShortVacanciesList(Long employerId);
+    List<VacancyShortDto> getShortVacanciesList(Long employerId, Pageable p);
 
     ResponseEntity<?> updateTime(Long id);
 
@@ -33,4 +34,14 @@ public interface VacancyService {
     void vacancyIsActiveOwned(Long vacancyId, @Valid VacancyIsActiveDto vacancyIsActiveDto, Long authorId);
 
     List<VacancyDto> searchVacancies(VacancySearchDto criteria);
+
+    List<VacancyDto> findVacanciesById(Long userId);
+
+    List<VacancyDto> findAll(Long categoryId);
+
+    List<VacancyDto> findByCategory(Long categoryId);
+
+    List<VacancyDto> findByEmployer(Long employerId);
+
+    List<VacancyDto> findAllVacancies();
 }

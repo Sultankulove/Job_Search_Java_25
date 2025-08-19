@@ -1,18 +1,17 @@
 package kg.attractor.job_search_java_25.dto;
 
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
+//@RequiredArgsConstructor
 @AllArgsConstructor
 public class VacancyDto {
+
     private Long id;
 
     @NotBlank
@@ -40,5 +39,5 @@ public class VacancyDto {
     private Boolean isActive;
     private Long authorId;
     private LocalDateTime createdDate;
-    private LocalDateTime updateDate;
+    private LocalDateTime updateTime;
 }

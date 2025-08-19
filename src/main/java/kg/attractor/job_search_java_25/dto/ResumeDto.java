@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResumeDto {
-    private Long id;
     private Long applicantId;
 
     @NotBlank
@@ -27,7 +26,6 @@ public class ResumeDto {
     @PositiveOrZero
     private Float salary;
 
-    @NotNull
     private Boolean isActive;
     private LocalDateTime createdDate;
     private LocalDateTime updateTime;

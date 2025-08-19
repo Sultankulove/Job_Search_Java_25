@@ -1,9 +1,8 @@
 package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.dto.VacancyEditDto;
-import kg.attractor.job_search_java_25.dto.VacancySearchDto;
+import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.service.CategoryService;
 import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +10,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,13 +23,51 @@ public class VacancyController {
 
     private final VacancyService vacancyService;
     private final UserService userService;
+    private final CategoryService categoryService;
 
-    @GetMapping("vacancies")
-    private String listVacancies(@ModelAttribute VacancySearchDto criteria, Model model) {
-        List<VacancyDto> vacancies = vacancyService.searchVacancies(criteria);
-        model.addAttribute("vacancies", vacancies);
-        return "vacancies";
+
+
+@GetMapping("/vacancies")
+public String listVacancies(
+        @RequestParam(value = "categoryId", required = false) String categoryId,
+        Model model) {
+
+    Long catId = null;
+    if (categoryId != null && !categoryId.isBlank()) {
+        try { catId = Long.parseLong(categoryId); } catch (NumberFormatException ignored) {}
     }
+
+    var vacancies = (catId == null)
+            ? vacancyService.findAllVacancies()
+            : vacancyService.findByCategory(catId);
+
+    model.addAttribute("title", "Список вакансий");
+    model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+    model.addAttribute("list", vacancies);
+
+    var cats = categoryService.findAll();
+    model.addAttribute("categories", cats);
+
+    model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId));
+
+    return "list";
+}
+
+
+
+
+
+    @GetMapping("/profile/vacancies")
+    public String myVacancies(Authentication auth, Model model) {
+        Long employerId = userService.findUserIdByEmail(auth.getName());
+        List<VacancyDto> vacancies = vacancyService.findByEmployer(employerId);
+
+        model.addAttribute("title", "Мои вакансии");
+        model.addAttribute("headers", List.of("Название", "Категория", "Статус", "Обновлено"));
+        model.addAttribute("list", vacancies);
+        return "list";
+    }
+
 
     @GetMapping("vacancy/new")
     public String showCreateForm(Model model) {

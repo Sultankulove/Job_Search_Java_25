@@ -28,4 +28,12 @@ public interface ResumeService {
     void resumeIsActiveOwned(Long resumeId, @Valid ResumeIsActiveDto resumeIsActiveDto, Long applicantId);
 
     List<ResumeDto> searchResumes(ResumeSearchDto criteria);
+
+    List<ResumeListViewDto> findAllForList(Long applicantId);
+
+    List<ResumeDto> findResumesById(Long applicantId);
+
+    List<ResumeDto> findAll();
+
+    List<ResumeDto> findByCategory(Long categoryId);
 }

@@ -1,8 +1,8 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import kg.attractor.job_search_java_25.dao.MessageDao;
 import kg.attractor.job_search_java_25.dto.MessageDto;
 import kg.attractor.job_search_java_25.model.Message;
+import kg.attractor.job_search_java_25.repository.MessageRepository;
 import kg.attractor.job_search_java_25.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +17,12 @@ import static java.lang.System.currentTimeMillis;
 @RequiredArgsConstructor
 @Slf4j
 public class ChatServiceImpl implements ChatService {
-    private final MessageDao messageDao;
-
+    private final MessageRepository messageRepository;
     @Override
     public List<MessageDto> getChatByResponseId(Long responseId) {
 
         log.debug("ChatService.getChatByResponseId(responseId={}) — start", responseId);
-        List<Message> messages = messageDao.getMessagesByResponseId(responseId);
+        List<Message> messages = messageRepository.getMessagesByRespondedApplicant_IdOrderByTimestampAsc(responseId);
         log.info("Чат: получено сообщений {}", messages.size());
 
         return messages.stream()
@@ -44,7 +43,7 @@ public class ChatServiceImpl implements ChatService {
         msg.setContent(dto.getContent());
         msg.setTimestamp(new Timestamp(currentTimeMillis()));
 
-        messageDao.saveMessage(msg);
+        messageRepository.save(msg);
         log.debug("Сообщение сохранено (len={})", dto.getContent() == null ? 0 : dto.getContent().length());
 
     }
