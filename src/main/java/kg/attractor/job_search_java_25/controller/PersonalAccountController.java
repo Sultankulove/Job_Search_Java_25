@@ -23,8 +23,8 @@ public class PersonalAccountController {
     private final UserService userService;
     @GetMapping
     public String personalAccount(Model model, Authentication auth) {
-        ResumeShortDto resumeShortDto = new ResumeShortDto();
-        VacancyShortDto vacancyShortDto = new VacancyShortDto();
+//        ResumeShortDto resumeShortDto = new ResumeShortDto();
+//        VacancyShortDto vacancyShortDto = new VacancyShortDto();
         Long authId = userService.findUserIdByEmail(auth.getName());
         MyProfileDto myProfileDto = profileService.getMyProfile(authId);
         List<ResumeShortDto> myResumeShortDto = profileService.getMyShortResumes(authId);

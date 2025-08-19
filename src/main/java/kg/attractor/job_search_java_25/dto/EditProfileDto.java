@@ -1,10 +1,7 @@
 package kg.attractor.job_search_java_25.dto;
 
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Builder
@@ -32,4 +29,8 @@ public class EditProfileDto {
     private String phoneNumber;
 
     private String avatar;
+
+    public EditProfileDto(@NotBlank @Size(max = 50) String name, @Size(max = 50) String surname, @Min(18) @Max(100) Byte age, @NotBlank @Email String email, @NotBlank @Pattern(regexp="^\\+?[0-9\\- ()]{7,20}$", message = "Неверный формат номера телефона") String phoneNumber) {
+
+    }
 }

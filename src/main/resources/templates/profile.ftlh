@@ -1,47 +1,42 @@
-<#import "layout.ftlh" as main>
+<#import "layout.ftlh" as l>
+<#import "spring.ftl" as spring>
 
-<@main.layout ; spring>
-
-
-<div class="container text-center">
-    <div class="col">
-        <div class="row">
-            <img src="/api/profile/avatar" class="img-thumbnail" width="300" height="200" alt="avatar">
+<@l.layout title="Профиль">
+    <div class="card profile">
+        <div class="profile__left">
         </div>
-        <div class="row">
-            <fieldset>
-                <legend>${user.name} ${user.surname}</legend>
+        <div class="profile__right">
+            <div class="">
+                <img class="avatar" src="${(user.avatar)!'/images/default-avatar.png'}" alt="avatar">
+            </div>
+            <div class="">
+                <h1>${(user.name)!'—'} ${(user.surname)!''}</h1>
+                <p>Email: ${(user.email)!'—'}</p>
+                <p>Телефон: ${(user.phoneNumber)!'—'}</p>
+                <p>Возраст: ${(user.age)!'—'}</p>
+            </div>
 
+            <a href="/profile/edit" class="btn btn--primary">Редактировать</a>
 
+            <#assign roles = (SPRING_SECURITY_CONTEXT.authentication.authorities)![]>
+            <#assign isEmployer = false>
+            <#assign isApplicant = false>
+            <#list roles as a>
+                <#if a.authority?string == 'ROLE_EMPLOYER'><#assign isEmployer = true><#break></#if>
+            </#list>
+            <#if !isEmployer>
+                <#list roles as a>
+                    <#if a.authority?string == 'ROLE_APPLICANT'><#assign isApplicant = true><#break></#if>
+                </#list>
+            </#if>
 
-                <#if SPRING_SECURITY_CONTEXT?? && SPRING_SECURITY_CONTEXT.authentication??>
-<#--                    <#assign usr = SPRING_SECURITY_CONTEXT.authentication.principal name = usr.getUsername()>-->
-                    <#assign usr = SPRING_SECURITY_CONTEXT.authentication.principal>
-                    <#if usr?? && usr.authorities?has_content>
-                        <#list usr.authorities as a>
-                            <#assign role = a.authority!a?string>
-                            <#if role == "ROLE_EMPLOYER">
-                                <legend>Роль: работодатель</legend>
-                            <#elseif role == "ROLE_APPLICANT">
-                                <legend>Роль: соискатель</legend>
-                            </#if>
-                        </#list>
-                    </#if>
-                </#if>
-
-                <legend>Email: ${user.email}</legend>
-                <legend>Телефон: ${user.phoneNumber}</legend>
-
-                <#if user?? && (user.age)??>
-                    Возраст: ${user.age}
-                <#else>
-                    Возраст не указан
-                </#if>
-
-            </fieldset>
-            <a class="btn btn-outline-secondary" href="/profile/edit">Редактировать</a>
+            <#if isEmployer>
+                <a class="btn" href="/vacancy/new">Создать вакансию</a>
+                <a class="btn" href="/profile/vacancies">Мои вакансии</a>
+            <#elseif isApplicant>
+                <a class="btn" href="/resume/new">Создать резюме</a>
+                <a class="btn" href="/resumes?mine=1">Мои резюме</a>
+            </#if>
         </div>
     </div>
-
-
-</@main.layout>
+</@l.layout>
