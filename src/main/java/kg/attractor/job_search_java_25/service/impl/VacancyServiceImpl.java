@@ -283,6 +283,25 @@ public class VacancyServiceImpl implements VacancyService {
     public List<VacancyDto> findByEmployer(Long employerId) {
         return vacancyRepository.findAllByAuthorId(employerId);
     }
+
+    @Override
+    public List<VacancyDto> findAllVacancies() {
+        return vacancyRepository.findAll()
+                .stream()
+                .map(vacancy -> {
+                    VacancyDto dto = new VacancyDto();
+                    dto.setId(vacancy.getId());
+                    dto.setName(vacancy.getName());
+                    dto.setDescription(vacancy.getDescription());
+                    dto.setSalary(vacancy.getSalary());
+                    dto.setExpFrom(vacancy.getExpFrom());
+                    dto.setExpTo(vacancy.getExpTo());
+                    dto.setIsActive(vacancy.getIsActive());
+                    dto.setUpdateTime(vacancy.getUpdateTime());
+                    dto.setCreatedDate(vacancy.getCreatedDate());
+                    return dto;
+                }).toList();
+    }
 //
 //    Override
 //    public List<ResumeDto> findResumesById(Long applicantId) {

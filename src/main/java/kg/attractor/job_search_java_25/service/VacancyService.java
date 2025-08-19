@@ -42,4 +42,6 @@ public interface VacancyService {
     List<VacancyDto> findByCategory(Long categoryId);
 
     List<VacancyDto> findByEmployer(Long employerId);
+
+    List<VacancyDto> findAllVacancies();
 }

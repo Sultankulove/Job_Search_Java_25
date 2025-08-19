@@ -26,38 +26,36 @@ public class VacancyController {
     private final CategoryService categoryService;
 
 
+
 @GetMapping("/vacancies")
 public String listVacancies(
-        @RequestParam(value = "categoryId", required=false) String categoryId,
-                            Model model) {
-//    Long catId = (categoryId == null || categoryId.isBlank()) ? null : Long.valueOf(categoryId);
-//    var vacancies = vacancyService.findAll(catId);
+        @RequestParam(value = "categoryId", required = false) String categoryId,
+        Model model) {
 
     Long catId = null;
     if (categoryId != null && !categoryId.isBlank()) {
-        try {
-            catId = Long.parseLong(categoryId);
-        } catch (NumberFormatException e) {
-            // Некорректный параметр – просто игнорируем фильтр
-            catId = null;
-        }
+        try { catId = Long.parseLong(categoryId); } catch (NumberFormatException ignored) {}
     }
 
-    var vacancies = vacancyService.findAll(catId);
-//    List<VacancyDto> vacancies = (categoryId == null)
-//            ? vacancyService.findAll()
-//            : vacancyService.findByCategory(categoryId);
-
-    model.addAttribute("list", vacancies);
+    var vacancies = (catId == null)
+            ? vacancyService.findAllVacancies()
+            : vacancyService.findByCategory(catId);
 
     model.addAttribute("title", "Список вакансий");
     model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
     model.addAttribute("list", vacancies);
-    model.addAttribute("categories", categoryService.findAll());
-//    model.addAttribute("params", Map.of("categoryId", categoryId));
+
+    var cats = categoryService.findAll();
+    model.addAttribute("categories", cats);
+
     model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId));
+
     return "list";
 }
+
+
+
+
 
     @GetMapping("/profile/vacancies")
     public String myVacancies(Authentication auth, Model model) {
