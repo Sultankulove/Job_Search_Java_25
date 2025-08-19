@@ -34,4 +34,6 @@ public interface ResumeService {
     List<ResumeDto> findResumesById(Long applicantId);
 
     List<ResumeDto> findAll();
+
+    List<ResumeDto> findByCategory(Long categoryId);
 }

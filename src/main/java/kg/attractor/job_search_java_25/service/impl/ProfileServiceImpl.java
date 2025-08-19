@@ -1,6 +1,5 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import kg.attractor.job_search_java_25.dao.ResumeDao;
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
@@ -164,5 +163,19 @@ public class ProfileServiceImpl implements ProfileService {
                 .map(r -> new ResumeShortDto(r.getName(), r.getUpdateTime()))
                 .toList();
     }
+
+    @Override
+    public UserProfileDto getUserProfile(Long id) {
+        return userRepository.getUserProfileById(id);
+    }
+
+//    @Override
+//    public UserProfileDto getMyUserProfile(Long id) {
+//        MyProfileDto src = userRepository.getMyProfile(id);
+//        UserProfileDto dto = new UserProfileDto(
+//                src.getName(), src.getSurname(), src.getAge(),
+//                src.getEmail(), src.getPhoneNumber(), src.getAvatar(),
+//        );
+//    }
 
 }

@@ -10,12 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,13 +22,26 @@ public class ResumeController {
     private final UserService userService;
     private final CategoryService categoryService;
 
+
+
     @GetMapping("/resumes")
-    public String listResumes(Model model) {
-        List<ResumeDto> resumes = resumeService.findAll();
+    public String listResumes(@RequestParam(required=false) Long categoryId,
+                              Model model) {
+        List<ResumeDto> resumes = (categoryId == null)
+                ? resumeService.findAll()
+                : resumeService.findByCategory(categoryId);
+
+        model.addAttribute("title", "Список резюме");
+        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", resumes);
-        System.err.println(resumes);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("params", Map.of("categoryId", String.valueOf(categoryId==null?"":categoryId)));
         return "list";
     }
+
+
+
+
 
     @GetMapping("/resume/new")
     public String showCreateForm(Model model) {

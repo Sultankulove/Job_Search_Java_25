@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
-import java.util.List;
 
 @Controller
 @Slf4j
@@ -25,23 +24,12 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping
-    public String showProfile(Model model,Principal principal) {
-        Long id = userService.findUserIdByEmail(principal.getName());
-
-        MyProfileDto myProfileDto = profileService.getMyProfile(id);
-//        if (principal != null) {
-//            myProfileDto.setEmail(principal.getName());
-//        }
-
-
-//        Long authId =
-
-        System.err.println(myProfileDto);
-        model.addAttribute("user", myProfileDto);
-
-//        model.addAttribute("user", dto);
-        return "profile";
-    }
+    public String profile(Model model, Authentication auth) {
+    Long userId = userService.findUserIdByEmail(auth.getName());
+    MyProfileDto user = profileService.getMyProfile(userId);
+    model.addAttribute("user", user);
+    return "profile";
+}
 
     @PostMapping("avatar")
     public String uploadAvatar(
@@ -59,13 +47,20 @@ public class ProfileController {
     }
 
 
-
     @GetMapping("/edit")
-    public String editProfile(Model model) {
-        model.addAttribute("dto", new EditProfileDto());
-        model.addAttribute("user", new UserProfileDto());
+    public String editProfile(Model model, Principal principal) {
+        if (principal == null) return "redirect:/auth/login";
+        if (!model.containsAttribute("dto")) {
+            Long id = userService.findUserIdByEmail(principal.getName());
+            var user = profileService.getMyProfile(id);
+            model.addAttribute("dto", new EditProfileDto(
+                    user.getName(), user.getSurname(), user.getAge(),
+                    user.getEmail(), user.getPhoneNumber()
+            ));
+    }
         return "edit_profile";
     }
+
 
     @PostMapping("/edit")
     public String updateProfile(@ModelAttribute("dto") @Valid EditProfileDto dto,
@@ -73,14 +68,10 @@ public class ProfileController {
                                 Model model,
                                 Principal principal) {
         if (br.hasErrors()) {
-            model.addAttribute("errors", br.getAllErrors());
-            System.out.println("errors: " + br.getAllErrors());
             return "edit_profile";
         }
         Long authId = userService.findUserIdByEmail(principal.getName());
-
         profileService.editProfile(dto, authId);
-
         return "redirect:/profile";
     }
 }

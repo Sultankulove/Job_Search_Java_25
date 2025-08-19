@@ -22,4 +22,6 @@ public interface ProfileService {
     List<VacancyShortDto> getMyShortVacancies(Long userId);
 
     List<ResumeShortDto> getMyShortResumes(Long userId);
+
+    UserProfileDto getUserProfile(Long id);
 }

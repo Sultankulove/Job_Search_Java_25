@@ -270,4 +270,10 @@ public class ResumeServiceImpl implements ResumeService {
         return resumes;
 
     }
+
+    @Override
+    public List<ResumeDto> findByCategory(Long categoryId) {
+        List<ResumeDto> resume = findResumesById(categoryId);
+        return resume;
+    }
 }
