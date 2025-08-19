@@ -41,6 +41,23 @@ public class ResumeController {
 
 
 
+    @GetMapping("/profile/resumes")
+    public String myResumes(Authentication auth, Model model) {
+        Long userId = userService.findUserIdByEmail(auth.getName());
+        List<ResumeDto> resumes = resumeService.findByAuthor(userId);
+
+        var cats = categoryService.findAll();
+
+        model.addAttribute("title", "Мои резюме");
+        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("list", resumes);
+        model.addAttribute("categories", cats);
+        model.addAttribute("params", Map.of("categoryId", ""));
+
+        return "list";
+    }
+
+
 
 
     @GetMapping("/resume/new")

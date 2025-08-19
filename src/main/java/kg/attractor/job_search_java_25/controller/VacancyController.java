@@ -12,10 +12,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -57,16 +57,27 @@ public String listVacancies(
 
 
 
+
     @GetMapping("/profile/vacancies")
     public String myVacancies(Authentication auth, Model model) {
         Long employerId = userService.findUserIdByEmail(auth.getName());
         List<VacancyDto> vacancies = vacancyService.findByEmployer(employerId);
 
+        var cats = categoryService.findAll();
+        model.addAttribute("categories", cats);
+
+        model.addAttribute("params", Map.of("categoryId", ""));
+
         model.addAttribute("title", "Мои вакансии");
         model.addAttribute("headers", List.of("Название", "Категория", "Статус", "Обновлено"));
         model.addAttribute("list", vacancies);
+
+         model.addAttribute("categoryNamesById",
+             cats.stream().collect(Collectors.toMap(CategoryDto::getId, CategoryDto::getName)));
+
         return "list";
     }
+
 
 
     @GetMapping("vacancy/new")

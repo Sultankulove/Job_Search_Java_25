@@ -276,4 +276,21 @@ public class ResumeServiceImpl implements ResumeService {
         List<ResumeDto> resume = findResumesById(categoryId);
         return resume;
     }
+
+    @Override
+    public List<ResumeDto> findByAuthor(Long userId) {
+        return resumeRepository.findAllByApplicant_Id(userId)
+                .stream()
+                .map(r -> {
+                    ResumeDto dto = new ResumeDto();
+                    dto.setApplicantId(r.getApplicant().getId());
+                    dto.setName(r.getName());
+                    dto.setCategoryId(r.getCategory().getId());
+                    dto.setSalary(r.getSalary());
+                    dto.setIsActive(r.getIsActive());
+                    dto.setCreatedDate(r.getCreatedDate());
+                    dto.setUpdateTime(r.getUpdateTime());
+                    return dto;
+                }).toList();
+    }
 }
