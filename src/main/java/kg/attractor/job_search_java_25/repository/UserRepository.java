@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.repository;
 
 import kg.attractor.job_search_java_25.dto.MyProfileDto;
+import kg.attractor.job_search_java_25.dto.ProfilePageDto;
 import kg.attractor.job_search_java_25.dto.UserProfileDto;
 import kg.attractor.job_search_java_25.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -88,7 +89,18 @@ where u.id = :id
     MyProfileDto getMyProfile(@Param("id") Long id);
 
 
+    @Query("""
+        select new kg.attractor.job_search_java_25.dto.ProfilePageDto(
+            u.id, u.name, u.surname, u.age,
+            u.email, u.phoneNumber, u.avatar, u.accountType
+        )
+        from User u
+        where u.id = :id
+        """)
+    Optional<ProfilePageDto> findProfile(@Param("id") Long id);
 
+    @Query("select u.id from User u where lower(u.email) = lower(:email)")
+    Long findUserIdByEmail(@Param("email") String email);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
