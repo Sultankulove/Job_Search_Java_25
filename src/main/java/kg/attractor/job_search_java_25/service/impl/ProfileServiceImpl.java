@@ -1,5 +1,6 @@
 package kg.attractor.job_search_java_25.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
@@ -52,6 +53,12 @@ public class ProfileServiceImpl implements ProfileService {
         log.debug("Профиль: получение аватара userId={}", userId);
         String avatar = userRepository.getAvatarByUserId(userId);
         return FileUtil.downloadImage(avatar, SUB_DIR);
+    }
+
+    @Override
+    public ProfilePageDto get(Long id) {
+        return userRepository.findProfile(id)
+                .orElseThrow(() -> new EntityNotFoundException("User " + id + " not found"));
     }
 
     @Override
