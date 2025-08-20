@@ -38,4 +38,6 @@ public interface ResumeService {
     List<ResumeDto> findByCategory(Long categoryId);
 
     List<ResumeDto> findByAuthor(Long userId);
+
+    UserProfileDto findByUser(Long userId);
 }
