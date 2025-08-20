@@ -293,4 +293,9 @@ public class ResumeServiceImpl implements ResumeService {
                     return dto;
                 }).toList();
     }
+
+    @Override
+    public UserProfileDto findByUser(Long userId) {
+        return findByUser(userId);
+    }
 }
