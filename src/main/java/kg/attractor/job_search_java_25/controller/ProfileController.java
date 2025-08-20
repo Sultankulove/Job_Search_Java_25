@@ -2,8 +2,7 @@ package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.*;
-import kg.attractor.job_search_java_25.service.ProfileService;
-import kg.attractor.job_search_java_25.service.UserService;
+import kg.attractor.job_search_java_25.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -21,15 +21,38 @@ import java.security.Principal;
 @RequestMapping("/profile")
 public class ProfileController {
     private final UserService userService;
+    private final VacancyService vacancyService;
+    private final ResumeService resumeService;
+    private final ResponseService responseService;
     private final ProfileService profileService;
 
-    @GetMapping
+//    @GetMapping
+//    public String profile(Model model, Authentication auth) {
+//    Long userId = userService.findUserIdByEmail(auth.getName());
+//    MyProfileDto user = profileService.getMyProfile(userId);
+//    model.addAttribute("user", user);
+//    return "profile";
+//}
+
+    @GetMapping("/profile")
     public String profile(Model model, Authentication auth) {
-    Long userId = userService.findUserIdByEmail(auth.getName());
-    MyProfileDto user = profileService.getMyProfile(userId);
-    model.addAttribute("user", user);
-    return "profile";
-}
+        Long userId = userService.findUserIdByEmail(auth.getName());
+        ProfilePageDto user = profileService.get(userId);
+
+        model.addAttribute("user", user);
+        model.addAttribute("isEmployer", user.isEmployer());
+
+        if (user.isEmployer()) {
+            model.addAttribute("myVacancies", vacancyService.findByEmployer(userId));
+            model.addAttribute("myResumes", java.util.List.of());
+            model.addAttribute("responsesCount", responseService.countForEmployer(userId));
+        } else {
+            model.addAttribute("myResumes", resumeService.findByUser(userId));
+            model.addAttribute("myVacancies", java.util.List.of());
+            model.addAttribute("responsesCount", responseService.countForApplicant(userId));
+        }
+        return "profile";
+    }
 
     @PostMapping("avatar")
     public String uploadAvatar(
