@@ -21,6 +21,27 @@ public interface RespondedApplicantRepository extends JpaRepository<RespondedApp
 
 
     @Query("""
+           select count(ra)
+           from RespondedApplicant ra
+             join ra.vacancy v
+           where v.author.id = :employerId
+           """)
+    long countForEmployer(@Param("employerId") Long employerId);
+
+    @Query("""
+           select count(ra)
+           from RespondedApplicant ra
+             join ra.resume r
+           where r.applicant.id = :applicantId
+           """)
+    long countForApplicant(@Param("applicantId") Long applicantId);
+
+    boolean existsByVacancy_IdAndResume_Id(Long vacancyId, Long resumeId);
+    List<RespondedApplicant> findByVacancy_Id(Long vacancyId);
+    List<RespondedApplicant> findByResume_Id(Long resumeId);
+
+
+    @Query("""
            select r
              from RespondedApplicant r
             where r.vacancy.id in :vacancyIds
