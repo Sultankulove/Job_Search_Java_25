@@ -11,6 +11,8 @@ public interface ProfileService {
 
     ResponseEntity<?> getAvatarByUserId(Long userId);
 
+    ProfilePageDto get(Long id);
+
     MyProfileDto getMyProfile(Long auth);
 
     MyProfileDto editProfile(EditProfileDto epd, Long auth);
