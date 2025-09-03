@@ -2,6 +2,8 @@ package kg.attractor.job_search_java_25.service;
 
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
@@ -37,11 +39,11 @@ public interface VacancyService {
 
     List<VacancyDto> findVacanciesById(Long userId);
 
-    List<VacancyDto> findAll(Long categoryId);
-
-    List<VacancyDto> findByCategory(Long categoryId);
-
     List<VacancyDto> findByEmployer(Long employerId);
 
     List<VacancyDto> findAllVacancies();
+
+    Page<VacancyDto> getVacancies(Pageable pageable);
+
+    Page<VacancyDto> getVacanciesByCategory(Long categoryId, PageRequest of);
 }
