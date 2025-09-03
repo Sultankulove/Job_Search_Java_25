@@ -9,12 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,38 +17,57 @@ import java.util.List;
 public class AuthController {
     private final UserService userService;
 
+    @GetMapping("/chooseRole")
+    public String chooseRoleForRegistration() {
+        return "auth/chooseRole";
+    }
+
     @GetMapping("/login")
-    public String login(Model model) {
+    public String loginForm() {
         return "auth/login";
     }
 
+
     @GetMapping("/register")
-    public String registerForm(Model model, @ModelAttribute("dto") RegistrationRequestDto dto) {
+    public String registerForm(Model model,
+                               @RequestParam(required = false) String role) {
 
-        model.addAttribute("dto", new RegistrationRequestDto());
+        RegistrationRequestDto dto = new RegistrationRequestDto();
 
-        model.addAttribute("accountTypes", List.of(AccountType.APPLICANT, AccountType.EMPLOYER));
+        if ("applicant".equalsIgnoreCase(role)) {
+            dto.setAccountType(AccountType.APPLICANT);
+        } else if ("employer".equalsIgnoreCase(role)) {
+            dto.setAccountType(AccountType.EMPLOYER);
+        } else {
+            return "auth/chooseRole";
+        }
+
+        model.addAttribute("dto", dto);
+        model.addAttribute("role", role);
         return "auth/register";
     }
 
     @PostMapping("/register")
-    public String register(
-            @Valid @ModelAttribute("dto") RegistrationRequestDto dto,
-            BindingResult bindingResult,
-            Model model) {
+    public String register(@Valid @ModelAttribute("dto") RegistrationRequestDto dto,
+                           BindingResult bindingResult,
+                           @RequestParam(required = false) String role,
+                           Model model) {
 
-        if (dto.getAccountType() == null ||
-                (dto.getAccountType() != AccountType.APPLICANT &&
-                        dto.getAccountType() != AccountType.EMPLOYER)) {
-            bindingResult.rejectValue("accountType", "invalid", "Выберите тип аккаунта");
+        model.addAttribute("role", role);
+        if (dto.getAccountType() == null && role != null) {
+            if ("applicant".equalsIgnoreCase(role)) {
+                dto.setAccountType(AccountType.APPLICANT);
+            } else if ("employer".equalsIgnoreCase(role)) {
+                dto.setAccountType(AccountType.EMPLOYER);
+            }
         }
 
+        if (dto.getAccountType() == null) {
+            bindingResult.rejectValue("accountType", "invalid", "Не удалось определить тип аккаунта.");
+        }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("accountTypes",
-                    java.util.List.of(AccountType.APPLICANT, AccountType.EMPLOYER));
             return "auth/register";
         }
-
         try {
             userService.registration(dto);
         } catch (ConflictException ex) {
