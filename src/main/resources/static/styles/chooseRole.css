@@ -1,0 +1,130 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: url('../images/wallper.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 5vh;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 0;
+}
+.container-custom {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    width: 100%;
+    min-height: 500px;
+    padding: 3.5rem 4rem !important;
+}
+
+@media (min-width: 1200px) {
+    .container-custom {
+        max-width: 900px;
+        padding: 4rem 5rem !important;
+    }
+}
+
+
+input[type="radio"] {
+    display: none;
+}
+
+.form-check-label {
+    cursor: pointer;
+    user-select: none;
+}
+.option-card {
+    background-color: #212529;
+    border: 1.5px solid #6c757d;
+    border-radius: 1rem;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: border-color 0.3s, background-color 0.3s;
+    font-size: 1.125rem;
+}
+
+.option-card strong {
+    font-size: 1.25rem;
+}
+.option-card small {
+    font-size: 1rem;
+}
+input[type="radio"]:checked + label.option-card {
+    background-color: #0d6efd22;
+    border-color: #0d6efd;
+}
+.option-card svg {
+    width: 48px;
+    height: 48px;
+    fill: white;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+input[type="radio"]:checked + label.option-card svg {
+    opacity: 1;
+}
+
+@media (max-width: 576px) {
+    .container-custom {
+        padding: 2rem 2rem !important;
+        max-width: 100%;
+    }
+    .option-card {
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        gap: 1rem;
+    }
+    .option-card strong {
+        font-size: 1.125rem;
+    }
+    .option-card small {
+        font-size: 0.875rem;
+    }
+    .option-card svg {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+.back-button {
+    position: absolute;
+    top: 5rem;
+    left: 2rem;
+    background: transparent;
+    border: none;
+    color: #f8f9fa;
+    z-index: 10;
+    padding: 0;
+    line-height: 1;
+}
+
+.back-button svg {
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+}
+
+.search-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: #f8f9fa;
+}
+.search-icon svg {
+    width: 40px;
+    height: 40px;
+    fill: #0d6efd;
+}
