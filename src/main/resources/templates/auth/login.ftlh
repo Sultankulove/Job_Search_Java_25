@@ -1,36 +1,53 @@
 <#import "../layout.ftlh" as main>
 <@main.layout>
-    <section class=" text-center text-lg-start">
-        <div class="card m-3">
+    <section class="text-center text-lg-start">
+        <div class="card m-3 shadow-lg border-0" style="background-color: #1e1e1e;">
             <div class="row g-0 d-flex align-items-center">
-                <div class="col-lg-4 d-none d-lg-flex">
-                    <img src="https://mdbootstrap.com/img/new/ecommerce/vertical/004.jpg" alt="Trendy Pants and Shoes"
-                         class="w-100 rounded-t-5 rounded-tr-lg-0 rounded-bl-lg-5"/>
+
+
+
+                <div class="col-lg-4 d-none d-lg-block">
+
+                    <img src="../../static/images/default-avatar.png"
+                         alt="Login visual"
+                         class="rounded-circle border border-secondary shadow"
+                         style="width: 100%; height: 100%; object-fit: cover; margin-left: 5%">
                 </div>
+
                 <div class="col-lg-8">
-                    <div class="card-body py-5 px-md-5">
+                    <div class="card-body py-5 px-md-5 text-start">
+
+                        <h2 class="text-light mb-4">Добро пожаловать 👋</h2>
+                        <p class="text-secondary mb-4">Введите свои данные, чтобы войти в систему.</p>
 
                         <form id="login-form" action="/login" method="post">
                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 
-                            <!-- Email input -->
-                            <div data-mdb-input-init class="form-outline mb-4">
-                                <input type="email" id="form2Example1" class="form-control" name="username"/>
-                                <label class="form-label" for="form2Example1">Email address</label>
+                            <div class="mb-4">
+                                <label for="form2Example1" class="form-label text-light">Email</label>
+                                <input type="email" id="form2Example1" name="username"
+                                       class="form-control bg-dark text-light border-secondary"
+                                       placeholder="you@example.com" required/>
                             </div>
 
-                            <!-- Password input -->
-                            <div data-mdb-input-init class="form-outline mb-4">
-                                <input type="password" id="form2Example2" class="form-control" name="password"/>
-                                <label class="form-label" for="form2Example2">Password</label>
+                            <div class="mb-4">
+                                <label for="form2Example2" class="form-label text-light">Пароль</label>
+                                <input type="password" id="form2Example2" name="password"
+                                       class="form-control bg-dark text-light border-secondary"
+                                       placeholder="Ваш пароль" required/>
                             </div>
-                            <!-- Submit button -->
-                            <button type="submit" data-mdb-button-init data-mdb-ripple-init
-                                    class="btn btn-primary btn-block mb-4">Sign in
-                            </button>
+
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Войти
+                                </button>
+                            </div>
+
+                            <div class="text-center">
+                                <a href="/auth/register" class="text-decoration-none text-info">Нет аккаунта? Зарегистрируйтесь</a>
+                            </div>
 
                         </form>
-
                     </div>
                 </div>
             </div>
