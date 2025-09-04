@@ -10,7 +10,7 @@
                 <#if user?? && user.avatar?has_content>
                     <img class="avatar" src="/api/profile/avatar" alt="avatar">
                 <#else>
-                    <img class="avatar" src="../static/images/default-avatar.png" alt="avatar">
+                    <img class="avatar" src="../static/images/default-avatar.png" alt="avatar" style="width: 200px; height: 200px; margin-top: 20px; margin-left: 20px">
                 </#if>
             </div>
 
