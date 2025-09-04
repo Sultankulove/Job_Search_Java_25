@@ -1,5 +1,6 @@
 package kg.attractor.job_search_java_25.service.impl;
 
+import jakarta.validation.constraints.*;
 import kg.attractor.job_search_java_25.dao.ResumeDao;
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
@@ -12,12 +13,14 @@ import kg.attractor.job_search_java_25.repository.UserRepository;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -218,17 +221,6 @@ public class ResumeServiceImpl implements ResumeService {
             dto.setUpdateTime(v.getUpdateTime());
                     return dto;
                 }).toList();
-//        return resumeRepository.findAllForList(applicantId).stream().map(v -> {
-//            ResumeDto dto = new ResumeDto();
-//            dto.setApplicantId(v.getApplicantId());
-//            dto.setCategoryId(v.getCategoryId());
-//            dto.setName(v.getName());
-//            dto.setSalary(v.getSalary());
-//            dto.setActive(Boolean.TRUE.equals(v.getIsActive()));
-//            dto.setCreatedDate(v.getCreatedDate());
-//            dto.setUpdateTime(v.getUpdateTime());
-//            return dto;
-//        }).toList();
     }
 
     @Override
@@ -252,20 +244,6 @@ public class ResumeServiceImpl implements ResumeService {
     public List<ResumeDto> findAll() {
 
         List<ResumeDto> resumes = resumeRepository.findAllResumes();
-//                    ResumeDto dto = new ResumeDto();
-//        List<ResumeDto> resumes = resumeRepository.findAll()
-//                .stream()
-//                .map(r -> {
-//                    dto.setApplicantId(r.getApplicant().getId());
-//                    dto.setName(r.getName());
-//                    dto.setCategoryId(r.getCategory().getId());
-//                    dto.setSalary(r.getSalary());
-//                    dto.setIsActive(r.getIsActive());
-//                    dto.setCreatedDate(r.getCreatedDate());
-//                    dto.setUpdateTime(r.getUpdateTime());
-//                    return dto;
-//                }).toList();
-
         log.debug("resumes: {}", resumes);
         return resumes;
 
@@ -292,5 +270,38 @@ public class ResumeServiceImpl implements ResumeService {
                     dto.setUpdateTime(r.getUpdateTime());
                     return dto;
                 }).toList();
+    }
+
+    @Override
+    public Page<ResumeDto> getResumes(Pageable pageble) {
+
+        return resumeRepository.findAll(pageble)
+                .map(resume -> {
+                    ResumeDto dto = new ResumeDto();
+                    dto.setApplicantId(resume.getApplicant().getId());
+                    dto.setName(resume.getName());
+                    dto.setCategoryId(resume.getCategory().getId());
+                    dto.setSalary(resume.getSalary());
+                    dto.setIsActive(resume.getIsActive());
+                    dto.setCreatedDate(resume.getCreatedDate());
+                    dto.setUpdateTime(resume.getUpdateTime());
+                    return dto;
+                });
+    }
+
+    @Override
+    public Page<ResumeDto> getResumesByCategory(Long categoryId, PageRequest of) {
+        return resumeRepository.findByCategory_Id(categoryId, of)
+                .map(resume -> {
+                    ResumeDto dto = new ResumeDto();
+                    dto.setApplicantId(resume.getApplicant().getId());
+                    dto.setName(resume.getName());
+                    dto.setCategoryId(resume.getCategory().getId());
+                    dto.setSalary(resume.getSalary());
+                    dto.setIsActive(resume.getIsActive());
+                    dto.setCreatedDate(resume.getCreatedDate());
+                    dto.setUpdateTime(resume.getUpdateTime());
+                    return dto;
+                });
     }
 }

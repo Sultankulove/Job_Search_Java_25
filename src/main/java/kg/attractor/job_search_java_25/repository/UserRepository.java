@@ -125,6 +125,8 @@ where u.id = :id
     )
     UserProfileDto getUserProfileById(Long id);
 
+    User getByEmailAndAccountTypeEqualsIgnoreCase(String email, String role);
+
 
 //    boolean existsByEmail(String email);
 //    public boolean existsByEmail(String email) {

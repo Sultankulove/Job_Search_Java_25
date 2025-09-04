@@ -86,11 +86,13 @@ public class SecurityConfig {
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/api/profile/avatar").permitAll()
+                        .requestMatchers("/profile").permitAll()
                         .anyRequest().permitAll()
                 )
 
                 .formLogin(form -> form
-                        .loginPage("/auth/login").loginProcessingUrl("/login")
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
                         .failureUrl("/auth/login?error")
                         .permitAll()
