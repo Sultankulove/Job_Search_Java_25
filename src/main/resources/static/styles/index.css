@@ -1,0 +1,67 @@
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.table-dark {
+    background-color: #1e1e1e;
+}
+
+.table-dark thead {
+    background-color: #2a2a2a;
+}
+
+.table th,
+.table td {
+    padding: 1rem 1.25rem;
+    border-color: #2c2c2c;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #181818;
+}
+
+select.form-select {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+select.form-select option {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+}
+
+.btn-primary {
+    background-color: #2196f3;
+    border-color: #2196f3;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #42a5f5;
+    border-color: #42a5f5;
+}
+
+.btn-outline-primary {
+    border-color: #42a5f5;
+    color: #42a5f5;
+}
+
+.btn-outline-primary:hover {
+    background-color: rgba(66, 165, 245, 0.1);
+    color: #90caf9;
+}
+
+.pagination .page-item .btn {
+    margin: 0 4px;
+}
+
+.table {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.form-label {
+    color: #e0e0e0;
+}
