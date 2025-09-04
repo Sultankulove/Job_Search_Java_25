@@ -37,6 +37,6 @@ public class RegistrationRequestDto {
 
     private String avatar;
 
-    @NotNull(message = "Выбери тип аккаунта")
+//    @NotNull(message = "Выбери тип аккаунта")
     private AccountType accountType;
 }
