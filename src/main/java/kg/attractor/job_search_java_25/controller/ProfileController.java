@@ -6,6 +6,7 @@ import kg.attractor.job_search_java_25.service.ProfileService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,18 +26,22 @@ public class ProfileController {
 
     @GetMapping
     public String profile(Model model, Authentication auth) {
-    Long userId = userService.findUserIdByEmail(auth.getName());
-    MyProfileDto user = profileService.getMyProfile(userId);
-    model.addAttribute("user", user);
-    return "profile";
-}
+        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+            return "redirect:/login";
+        }
+
+        Long userId = userService.findUserIdByEmail(auth.getName());
+        MyProfileDto user = profileService.getMyProfile(userId);
+        model.addAttribute("user", user);
+        return "profile";
+    }
 
     @PostMapping("avatar")
     public String uploadAvatar(
             @RequestPart("avatar") MultipartFile avatar,
-            Principal principal
+            Authentication authentication
     ) {
-        Long authId = userService.findUserIdByEmail(principal.getName());
+        Long authId = userService.findUserIdByEmail(authentication.getName());
         AvatarDto avatarDto = new AvatarDto(avatar, authId);
 
 
