@@ -2,6 +2,9 @@ package kg.attractor.job_search_java_25.service;
 
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -38,4 +41,8 @@ public interface ResumeService {
     List<ResumeDto> findByCategory(Long categoryId);
 
     List<ResumeDto> findByAuthor(Long userId);
+
+    Page<ResumeDto> getResumes(Pageable pageable);
+
+    Page<ResumeDto> getResumesByCategory(Long categoryId, PageRequest of);
 }

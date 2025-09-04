@@ -6,6 +6,8 @@ import kg.attractor.job_search_java_25.service.CategoryService;
 import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,25 +30,21 @@ public class VacancyController {
 
 
 @GetMapping("/vacancies")
-public String listVacancies(
-        @RequestParam(value = "categoryId", required = false) String categoryId,
-        Model model) {
+public String listVacancies(@RequestParam(defaultValue = "0") int page,
+                            @RequestParam(value = "categoryId", required = false) Long categoryId,
+                            Model model) {
 
-    Long catId = null;
-    if (categoryId != null && !categoryId.isBlank()) {
-        try { catId = Long.parseLong(categoryId); } catch (NumberFormatException ignored) {}
-    }
-
-    var vacancies = (catId == null)
-            ? vacancyService.findAllVacancies()
-            : vacancyService.findByCategory(catId);
+    Page<VacancyDto> vacancies = (categoryId == null)
+            ? vacancyService.getVacancies(PageRequest.of(page, 15))
+            : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
 
     model.addAttribute("title", "Список вакансий");
     model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
     model.addAttribute("list", vacancies);
 
-    var cats = categoryService.findAll();
-    model.addAttribute("categories", cats);
+    model.addAttribute("currentPage", vacancies.getNumber());
+    model.addAttribute("totalPages",vacancies.getTotalPages());
+    model.addAttribute("categories", categoryService.findAll());
 
     model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId));
 
@@ -83,14 +81,17 @@ public String listVacancies(
     @GetMapping("vacancy/new")
     public String showCreateForm(Model model) {
         model.addAttribute("vacancy", new VacancyEditDto());
-        return "vacancy_form";
+        return "CreatedForm";
     }
 
     @PostMapping("/vacancy/new")
-    public String createVacancy(@ModelAttribute("vacancy") @Valid VacancyEditDto vacancyDto, BindingResult bindingResult, Authentication authentication, Model model) {
+    public String createVacancy(@ModelAttribute("vacancy") @Valid VacancyEditDto vacancyDto,
+                                BindingResult bindingResult,
+                                Authentication authentication,
+                                Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", bindingResult.getAllErrors());
-            return "vacancy_form";
+            return "CreatedForm";
         }
 
         Long authorId = null;
