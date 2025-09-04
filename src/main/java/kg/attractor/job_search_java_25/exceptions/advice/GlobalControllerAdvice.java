@@ -2,6 +2,7 @@ package kg.attractor.job_search_java_25.exceptions.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kg.attractor.job_search_java_25.exceptions.types.*;
+import kg.attractor.job_search_java_25.exceptions.types.NullPointerException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
@@ -13,6 +14,14 @@ import org.springframework.web.client.HttpServerErrorException;
 @RequiredArgsConstructor
 public class GlobalControllerAdvice {
 
+    @ExceptionHandler(NullPointerException.class)
+    public String handleNullPointerException(NullPointerException ex, Model model) {
+        model.addAttribute("error", ex.getMessage());
+        model.addAttribute("message", ex.getMessage());
+        model.addAttribute("stackTrace", ex.getStackTrace());
+        model.addAttribute("cause", ex.getCause());
+        return "errors/error";
+    }
 
     @ExceptionHandler(EmptyResultDataAccessException.class)
     public String handleEmptyResultDataAccessException(HttpServletRequest request, Model model) {
