@@ -6,6 +6,9 @@ import kg.attractor.job_search_java_25.service.CategoryService;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class ResumeController {
@@ -25,15 +29,20 @@ public class ResumeController {
 
 
     @GetMapping("/resumes")
-    public String listResumes(@RequestParam(required=false) Long categoryId,
+    public String listResumes(@RequestParam(defaultValue = "0") int page,
+                              @RequestParam(required=false) Long categoryId,
                               Model model) {
-        List<ResumeDto> resumes = (categoryId == null)
-                ? resumeService.findAll()
-                : resumeService.findByCategory(categoryId);
 
+        Page<ResumeDto> resumes = (categoryId == null)
+                ? resumeService.getResumes(PageRequest.of(page, 15))
+                : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15));
+
+        log.info("resumes: {}", resumes);
         model.addAttribute("title", "Список резюме");
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", resumes);
+        model.addAttribute("currentPage",resumes.getNumber());
+        model.addAttribute("totalPages",resumes.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("params", Map.of("categoryId", String.valueOf(categoryId==null?"":categoryId)));
         return "list";
