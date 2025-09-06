@@ -94,7 +94,14 @@
                     SPRING_SECURITY_CONTEXT.authentication.principal != 'anonymousUser'>
                         <li class="nav-item">
                             <form action="/logout" method="post" class="d-inline">
-                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+                                <#if _csrf??>
+                                    <input
+                                            type="hidden"
+                                            name="${(_csrf.parameterName)!'csrf-param-name'}"
+                                            value="${(_csrf.token)!'csrf-token'}"
+                                    />
+
+                                </#if>
                                 <button type="submit" class="btn btn-outline-light btn-sm">
                                     <i class="bi bi-box-arrow-right"></i> Выйти
                                 </button>

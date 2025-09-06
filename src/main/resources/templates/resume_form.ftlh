@@ -11,8 +11,13 @@
     <h2 class="text-center text-danger mb-4">Создание резюме:</h2>
 
     <form class="needs-validation" novalidate method="post" action="/resume/new">
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <#if _csrf??>
+            <input
+                    type="hidden"
+                    name="${(_csrf.parameterName)!'csrf-param-name'}"
+                    value="${(_csrf.token)!'csrf-token'}"/>
 
+        </#if>
         <div class="mb-3">
             <label class="form-label" for="name">Название резюме:</label>
             <input id="name" name="name" type="text" class="form-control"

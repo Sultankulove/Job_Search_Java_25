@@ -12,8 +12,13 @@
 
             <div class="card-body">
                 <form action="/profile/edit" method="post" class="row g-3">
-                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+                    <#if _csrf??>
+                        <input
+                                type="hidden"
+                                name="${(_csrf.parameterName)!'csrf-param-name'}"
+                                value="${(_csrf.token)!'csrf-token'}"/>
 
+                    </#if>
                     <div class="col-md-6">
                         <@spring.bind "dto.name"/>
                         <label class="form-label">Имя</label>

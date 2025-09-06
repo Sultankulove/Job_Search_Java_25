@@ -5,7 +5,13 @@
 <@l.layout title="Создать">
 
     <form action="${formAction}" method="post" class="form">
-        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+        <#if _csrf??>
+            <input
+                    type="hidden"
+                    name="${(_csrf.parameterName)!'csrf-param-name'}"
+                    value="${(_csrf.token)!'csrf-token'}"/>
+
+        </#if>
 
         <@spring.bind "${dtoName}.name"/>
         <div class="mb-3">
