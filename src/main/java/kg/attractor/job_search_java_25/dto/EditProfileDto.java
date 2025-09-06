@@ -30,7 +30,17 @@ public class EditProfileDto {
 
     private String avatar;
 
-    public EditProfileDto(@NotBlank @Size(max = 50) String name, @Size(max = 50) String surname, @Min(18) @Max(100) Byte age, @NotBlank @Email String email, @NotBlank @Pattern(regexp="^\\+?[0-9\\- ()]{7,20}$", message = "Неверный формат номера телефона") String phoneNumber) {
+    public EditProfileDto(
+            @NotBlank @Size(max = 50)
+            String name, @Size(max = 50)
+            String surname,
+            @Min(18) @Max(100)
+            Byte age,
+            @NotBlank @Email
+            String email,
+            @NotBlank
+            @Pattern(regexp="^\\+?[0-9\\- ()]{7,20}$", message = "Неверный формат номера телефона")
+            String phoneNumber) {
 
     }
 }
