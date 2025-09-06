@@ -31,12 +31,12 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" href="/vacancies">
-                            <i class="bi bi-card-list"></i> Вакансии
+                            <i class="bi bi-card-list"></i> Vacancy
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/resumes">
-                            <i class="bi bi-person-lines-fill"></i> Резюме
+                            <i class="bi bi-person-lines-fill"></i> Resume
                         </a>
                     </li>
 
@@ -47,7 +47,7 @@
 
                         <li class="nav-item">
                             <a class="nav-link" href="/profile">
-                                <i class="bi bi-person-circle"></i> Профиль
+                                <i class="bi bi-person-circle"></i> Profile
                             </a>
                         </li>
 
@@ -57,12 +57,12 @@
                             <#if a.authority?string == 'ROLE_EMPLOYER'>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/vacancy/new">
-                                        <i class="bi bi-plus-square"></i> Создать вакансию
+                                        <i class="bi bi-plus-square"></i> Create Vacancy
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/profile/vacancies">
-                                        <i class="bi bi-folder"></i> Мои вакансии
+                                        <i class="bi bi-folder"></i> My vacancies
                                     </a>
                                 </li>
                                 <#break>
@@ -73,12 +73,12 @@
                             <#if a.authority?string == 'ROLE_APPLICANT'>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/resume/new">
-                                        <i class="bi bi-plus-square"></i> Создать резюме
+                                        <i class="bi bi-plus-square"></i> Create resume
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/profile/resumes">
-                                        <i class="bi bi-folder"></i> Мои резюме
+                                        <i class="bi bi-folder"></i> My resume
                                     </a>
                                 </li>
                                 <#break>
@@ -103,19 +103,19 @@
 
                                 </#if>
                                 <button type="submit" class="btn btn-outline-light btn-sm">
-                                    <i class="bi bi-box-arrow-right"></i> Выйти
+                                    <i class="bi bi-box-arrow-right"></i> Logout
                                 </button>
                             </form>
                         </li>
                     <#else>
                         <li class="nav-item">
                             <a class="nav-link" href="/auth/login">
-                                <i class="bi bi-box-arrow-in-right"></i> Войти
+                                <i class="bi bi-box-arrow-in-right"></i> Login
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/auth/chooseRole">
-                                <i class="bi bi-person-plus"></i> Регистрация
+                                <i class="bi bi-person-plus"></i> Registration
                             </a>
                         </li>
                     </#if>
