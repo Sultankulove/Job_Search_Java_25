@@ -47,6 +47,8 @@ public class User implements UserDetails {
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
+    private String resetPasswordToken;
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Vacancy> vacancies;
 
