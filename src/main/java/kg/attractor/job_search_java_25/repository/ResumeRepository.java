@@ -6,7 +6,6 @@ import kg.attractor.job_search_java_25.dto.ResumeListViewDto;
 import kg.attractor.job_search_java_25.dto.ResumeShortDto;
 import kg.attractor.job_search_java_25.model.Resume;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -84,4 +83,9 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
         r.createdDate) from Resume r"""
     )
     List<ResumeDto> findAllResumes();
+
+    Page<Resume> findAllByApplicant_Id(Long authorId, Pageable pageable);
+
+    Page<Resume> findAllByApplicant_IdAndCategory_Id(Long authorId, Long categoryId, Pageable pageable);
+
 }
