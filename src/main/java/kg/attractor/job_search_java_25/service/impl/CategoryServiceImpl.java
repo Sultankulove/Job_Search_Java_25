@@ -17,15 +17,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> findAll() {
-        List<Category> categories = categoryRepository.findAll();
-        List<CategoryDto> categoryDtos = new ArrayList<>();
-        for (Category category : categories) {
-            CategoryDto categoryDto = new CategoryDto();
-            categoryDto.setId(category.getId());
-            categoryDto.setName(category.getName());
-//            categoryDto.setParentId(category.getParent().getId());
-            categoryDtos.add(categoryDto);
-        }
-        return categoryDtos;
+        return categoryRepository.findAll()
+                .stream()
+                .map(category -> {
+                    CategoryDto categoryDto = new CategoryDto();
+                    categoryDto.setId(category.getId());
+                    categoryDto.setName(category.getName());
+                    return categoryDto;
+                }).toList();
     }
 }
