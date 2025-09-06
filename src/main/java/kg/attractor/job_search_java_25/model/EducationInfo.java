@@ -13,6 +13,7 @@ import java.sql.Date;
 public class EducationInfo {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
