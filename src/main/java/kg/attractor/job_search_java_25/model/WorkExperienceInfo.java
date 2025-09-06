@@ -11,6 +11,7 @@ import lombok.Setter;
 public class WorkExperienceInfo {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
