@@ -53,6 +53,8 @@
                                     Зарегистрируйтесь</a>
                             </div>
 
+                            <a href="forgot-password">Забыли пароль?</a>
+
                         </form>
                     </div>
                 </div>
