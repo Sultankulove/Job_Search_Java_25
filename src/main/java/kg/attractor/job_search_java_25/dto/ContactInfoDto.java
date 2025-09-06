@@ -6,10 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDto {
+@Builder
+public class ContactInfoDto {
+
     private Long id;
-    private String name;
+
+    private Long type_id;
+
+    private Long resume_id;
+
+    private String contactValue;
+
 }

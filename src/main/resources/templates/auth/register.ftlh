@@ -9,8 +9,13 @@
             <p class="text-secondary">Заполните поля ниже. Поле с фото — необязательно (добавите позже в профиле).</p>
 
             <form action="/auth/register" method="post" class="form">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+                <#if _csrf??>
+                    <input
+                            type="hidden"
+                            name="${(_csrf.parameterName)!'csrf-param-name'}"
+                            value="${(_csrf.token)!'csrf-token'}"/>
 
+                </#if>
                 <#if role??>
                     <input type="hidden" name="role" value="${role}">
                     <div class="mb-3 text-secondary">

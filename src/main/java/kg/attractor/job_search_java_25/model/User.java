@@ -47,6 +47,8 @@ public class User implements UserDetails {
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
+    private String resetPasswordToken;
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Vacancy> vacancies;
 
@@ -55,18 +57,21 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        String role = switch (accountType) {
+            case "ADMIN" -> "ROLE_ADMIN";
+            case "EMPLOYER" -> "ROLE_EMPLOYER";
+            case "APPLICANT" -> "ROLE_APPLICANT";
+            default -> "ROLE_APPLICANT";
+        };
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
 
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
+
 
     @Override
     public boolean isAccountNonLocked() {
@@ -81,5 +86,10 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 }

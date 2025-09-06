@@ -1,15 +1,10 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import jakarta.validation.constraints.*;
 import kg.attractor.job_search_java_25.dao.ResumeDao;
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
-import kg.attractor.job_search_java_25.model.Category;
-import kg.attractor.job_search_java_25.model.Resume;
-import kg.attractor.job_search_java_25.model.User;
-import kg.attractor.job_search_java_25.repository.CategoryRepository;
-import kg.attractor.job_search_java_25.repository.ResumeRepository;
-import kg.attractor.job_search_java_25.repository.UserRepository;
+import kg.attractor.job_search_java_25.model.*;
+import kg.attractor.job_search_java_25.repository.*;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -32,14 +28,18 @@ public class ResumeServiceImpl implements ResumeService {
     private final ResumeRepository resumeRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ContactTypeRepository contactTypeRepository;
+    private final WorkExperienceInfoRepository workExperienceInfoRepository;
+    private final EducationInfoRepository educationInfoRepository;
+    private final ContactInfoRepository contactInfoRepository;
 
     @Override
     public List<ResumeShortDto> getShortResumesList(Long applicantId) {
         log.debug("ResumeService.getShortResumesList(applicantId={})", applicantId);
         List<ResumeShortDto> shortResumes;
         shortResumes = resumeRepository.findAllByApplicant_Id(applicantId)
-                        .stream()
-                                .map(r -> new ResumeShortDto(r.getName(), r.getUpdateTime()))
+                .stream()
+                .map(r -> new ResumeShortDto(r.getName(), r.getUpdateTime()))
                 .toList();
         log.info("Резюме: короткий список size={}", shortResumes.size());
         return shortResumes;
@@ -68,7 +68,7 @@ public class ResumeServiceImpl implements ResumeService {
         resume.setName(resumeEditDto.getName());
         resume.getCategory().setId(resumeEditDto.getCategoryId());
         resume.setSalary(resumeEditDto.getSalary());
-        resume.setActive(resumeEditDto.getActive());
+        resume.setActive(resumeEditDto.isActive());
 
 
         resumeRepository.save(resume);
@@ -101,7 +101,7 @@ public class ResumeServiceImpl implements ResumeService {
         var resume = new Resume();
         resume.setName(dto.getName());
         resume.setSalary(dto.getSalary());
-        resume.setActive(Boolean.TRUE.equals(dto.getActive()));
+        resume.setActive(Boolean.TRUE.equals(dto.isActive()));
         resume.setCategory(category);
         resume.setApplicant(applicant);
         resume.setCreatedDate(now);
@@ -111,11 +111,56 @@ public class ResumeServiceImpl implements ResumeService {
         log.debug("Резюме: создано id={}, name='{}', categoryId={}",
                 resume.getId(), resume.getName(), resume.getCategory().getId());
 
+        if (dto.getWorkExperiences() != null) {
+            for (WorkExperienceInfoDto workDto : dto.getWorkExperiences()) {
+                WorkExperienceInfo work = new WorkExperienceInfo();
+                work.setResume(resume);
+                work.setCompanyName(workDto.getCompanyName());
+                work.setPosition(workDto.getPosition());
+                work.setResponsibilities(workDto.getResponsibilities());
+                work.setYears(workDto.getYears());
+                workExperienceInfoRepository.save(work);
+            }
+        }
+
+        if (dto.getEducationInfos() != null) {
+            for (EducationInfoDto eduDto : dto.getEducationInfos()) {
+                EducationInfo edu = new EducationInfo();
+                edu.setResume(resume);
+                edu.setInstitution(eduDto.getInstitution());
+                edu.setProgram(eduDto.getProgram());
+                edu.setDegree(eduDto.getDegree());
+                edu.setStartDate(eduDto.getStartDate() != null ? Date.valueOf(eduDto.getStartDate()) : null);
+                edu.setEndDate(eduDto.getEndDate() != null ? Date.valueOf(eduDto.getEndDate()) : null);
+                educationInfoRepository.save(edu);
+            }
+        }
+
+        if (dto.getContactInfos() != null) {
+            for (ContactInfoDto contactDto : dto.getContactInfos()) {
+                if (contactDto.getContactValue() == null || contactDto.getContactValue().isBlank()) {
+                    continue;
+                }
+
+                ContactType contactType = contactTypeRepository.findById(contactDto.getType_id())
+                        .orElseThrow(() -> new IllegalArgumentException("ContactType не найден: id=" + contactDto.getType_id()));
+
+                ContactInfo contact = new ContactInfo();
+                contact.setResume(resume);
+                contact.setType(contactType);
+                contact.setContactValue(contactDto.getContactValue());
+                contactInfoRepository.save(contact);
+            }
+        }
+
+        log.debug("Резюме и вложенные сущности сохранены: resumeId={}", resume.getId());
+
+
         return ResumeEditDto.builder()
                 .name(resume.getName())
-                .categoryId(resume.getCategory() != null ? resume.getCategory().getId() : null)
+                .categoryId(resume.getCategory().getId())
                 .salary(resume.getSalary())
-                .isActive(resume.getIsActive())
+                .active(resume.getIsActive())
                 .build();
     }
 
@@ -169,7 +214,7 @@ public class ResumeServiceImpl implements ResumeService {
         resume.setName(dto.getName());
         resume.getCategory().setId(dto.getCategoryId());
         resume.setSalary(dto.getSalary());
-        resume.setActive(dto.getActive());
+        resume.setActive(dto.isActive());
 
         resumeRepository.save(resume);
         log.info("Резюме {} отредактировано владельцем {}", resumeId, applicantId);
@@ -211,14 +256,14 @@ public class ResumeServiceImpl implements ResumeService {
 
         return resumeRepository.findAllForList(applicantId)
                 .stream().map(v -> {
-            ResumeListViewDto dto = new ResumeListViewDto();
-            dto.setApplicantId(v.getApplicantId());
-            dto.setCategoryId(v.getCategoryId());
-            dto.setName(v.getName());
-            dto.setSalary(v.getSalary());
-            dto.setIsActive(Boolean.TRUE.equals(v.getIsActive()));
-            dto.setCreatedDate(v.getCreatedDate());
-            dto.setUpdateTime(v.getUpdateTime());
+                    ResumeListViewDto dto = new ResumeListViewDto();
+                    dto.setApplicantId(v.getApplicantId());
+                    dto.setCategoryId(v.getCategoryId());
+                    dto.setName(v.getName());
+                    dto.setSalary(v.getSalary());
+                    dto.setIsActive(Boolean.TRUE.equals(v.getIsActive()));
+                    dto.setCreatedDate(v.getCreatedDate());
+                    dto.setUpdateTime(v.getUpdateTime());
                     return dto;
                 }).toList();
     }
@@ -292,6 +337,38 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public Page<ResumeDto> getResumesByCategory(Long categoryId, PageRequest of) {
         return resumeRepository.findByCategory_Id(categoryId, of)
+                .map(resume -> {
+                    ResumeDto dto = new ResumeDto();
+                    dto.setApplicantId(resume.getApplicant().getId());
+                    dto.setName(resume.getName());
+                    dto.setCategoryId(resume.getCategory().getId());
+                    dto.setSalary(resume.getSalary());
+                    dto.setIsActive(resume.getIsActive());
+                    dto.setCreatedDate(resume.getCreatedDate());
+                    dto.setUpdateTime(resume.getUpdateTime());
+                    return dto;
+                });
+    }
+
+    @Override
+    public Page<ResumeDto> getResumesByAuthor(Long userId, Pageable pageable) {
+        return resumeRepository.findAllByApplicant_Id(userId, pageable)
+                .map(resume -> {
+                    ResumeDto dto = new ResumeDto();
+                    dto.setApplicantId(resume.getApplicant().getId());
+                    dto.setName(resume.getName());
+                    dto.setCategoryId(resume.getCategory().getId());
+                    dto.setSalary(resume.getSalary());
+                    dto.setIsActive(resume.getIsActive());
+                    dto.setCreatedDate(resume.getCreatedDate());
+                    dto.setUpdateTime(resume.getUpdateTime());
+                    return dto;
+                });
+    }
+
+    @Override
+    public Page<ResumeDto> getResumesByAuthorAndCategory(Long userId, Long categoryId, Pageable pageable) {
+        return resumeRepository.findAllByApplicant_IdAndCategory_Id(userId, categoryId, pageable)
                 .map(resume -> {
                     ResumeDto dto = new ResumeDto();
                     dto.setApplicantId(resume.getApplicant().getId());

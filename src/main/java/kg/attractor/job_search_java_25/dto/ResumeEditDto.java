@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,9 +25,9 @@ public class ResumeEditDto {
     @PositiveOrZero
     private Float salary;
 
-    private boolean isActive;
+    private boolean active;
 
-    public boolean getActive() {
-        return isActive;
-    }
+    private List<WorkExperienceInfoDto> workExperiences = new ArrayList<>();
+    private List<EducationInfoDto> educationInfos = new ArrayList<>();
+    private List<ContactInfoDto> contactInfos = new ArrayList<>();
 }

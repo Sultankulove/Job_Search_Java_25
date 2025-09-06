@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class VacancyEditDto {
@@ -22,7 +21,6 @@ public class VacancyEditDto {
     private String description;
 
     @NotNull
-    @Positive
     private Long categoryId;
 
     @PositiveOrZero
@@ -34,6 +32,5 @@ public class VacancyEditDto {
     @PositiveOrZero
     private Integer expTo;
 
-    @NotNull
-    private Boolean isActive;
+    private boolean active;
 }

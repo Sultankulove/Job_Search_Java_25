@@ -46,4 +46,8 @@ public interface VacancyService {
     Page<VacancyDto> getVacancies(Pageable pageable);
 
     Page<VacancyDto> getVacanciesByCategory(Long categoryId, PageRequest of);
+
+    Page<VacancyDto> findByEmployerId(Long employerId, Pageable pageable);
+
+    Page<VacancyDto> findByEmployerIdAndCategory(Long employerId, Long categoryId, Pageable pageable);
 }

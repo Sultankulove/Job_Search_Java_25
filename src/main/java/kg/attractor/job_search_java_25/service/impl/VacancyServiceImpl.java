@@ -4,7 +4,9 @@ import kg.attractor.job_search_java_25.dao.VacancyDao;
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
+import kg.attractor.job_search_java_25.model.Category;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
+import kg.attractor.job_search_java_25.model.User;
 import kg.attractor.job_search_java_25.model.Vacancy;
 import kg.attractor.job_search_java_25.repository.RespondedApplicantRepository;
 import kg.attractor.job_search_java_25.repository.VacancyRepository;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,7 +62,7 @@ public class VacancyServiceImpl implements VacancyService {
         vacancy.setSalary(editVacancyEditDto.getSalary());
         vacancy.setExpFrom(editVacancyEditDto.getExpFrom());
         vacancy.setExpTo(editVacancyEditDto.getExpTo());
-        vacancy.setIsActive(editVacancyEditDto.getIsActive());
+        vacancy.setIsActive(editVacancyEditDto.isActive());
 
         vacancyRepository.saveVacancy_IdUser_Id(vacancy, vacancyId, userId);
         log.debug("Вакансии: отредактировано id={}", vacancyId);
@@ -78,12 +81,21 @@ public class VacancyServiceImpl implements VacancyService {
         Vacancy v = new Vacancy();
         v.setName(createVacancyEditDto.getName());
         v.setDescription(createVacancyEditDto.getDescription());
-        v.getCategory().setId(createVacancyEditDto.getCategoryId());
+
+        Category category = new Category();
+        category.setId(createVacancyEditDto.getCategoryId());
+        v.setCategory(category);
+
         v.setSalary(createVacancyEditDto.getSalary());
         v.setExpFrom(createVacancyEditDto.getExpFrom());
         v.setExpTo(createVacancyEditDto.getExpTo());
-        v.setIsActive(createVacancyEditDto.getIsActive());
-        v.getAuthor().setId(authorId);
+        v.setIsActive(createVacancyEditDto.isActive());
+        v.setCreatedDate(LocalDateTime.now());
+        v.setUpdateTime(LocalDateTime.now());
+
+        User author = new User();
+        author.setId(authorId);
+        v.setAuthor(author);
 
         Vacancy vacancy = vacancyRepository.save(v);
 
@@ -180,7 +192,7 @@ public class VacancyServiceImpl implements VacancyService {
         v.setSalary(dto.getSalary());
         v.setExpFrom(dto.getExpFrom());
         v.setExpTo(dto.getExpTo());
-        v.setIsActive(dto.getIsActive());
+        v.setIsActive(dto.isActive());
         vacancyRepository.saveVacancy_IdUser_Id(v, vacancyId, employerId);
         log.info("Вакансия {} отредактирована работодателем {}", vacancyId, employerId);
     }
@@ -274,6 +286,20 @@ public class VacancyServiceImpl implements VacancyService {
         return vacancyRepository.findByCategory_Id(categoryId, of)
                 .map(this::mapToDto);
     }
+
+    @Override
+    public Page<VacancyDto> findByEmployerId(Long employerId, Pageable pageable) {
+
+        return vacancyRepository.findAllByAuthor_Id(employerId, pageable)
+                .map(this::mapToDto);
+    }
+
+    @Override
+    public Page<VacancyDto> findByEmployerIdAndCategory(Long employerId, Long categoryId, Pageable pageable) {
+        return vacancyRepository.findAllByAuthor_IdAndCategory_Id(employerId, categoryId, pageable)
+                .map(this::mapToDto);
+    }
+
 
     private VacancyDto mapToDto(Vacancy vacancy) {
         VacancyDto dto = new VacancyDto();

@@ -5,7 +5,6 @@
             <div class="row g-0 d-flex align-items-center">
 
 
-
                 <div class="col-lg-4 d-none d-lg-block">
 
                     <img src="../../static/images/default-avatar.png"
@@ -21,7 +20,13 @@
                         <p class="text-secondary mb-4">Введите свои данные, чтобы войти в систему.</p>
 
                         <form id="login-form" action="/login" method="post">
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                            <#if _csrf??>
+                                <input
+                                        type="hidden"
+                                        name="${(_csrf.parameterName)!'csrf-param-name'}"
+                                        value="${(_csrf.token)!'csrf-token'}"/>
+
+                            </#if>
 
                             <div class="mb-4">
                                 <label for="form2Example1" class="form-label text-light">Email</label>
@@ -44,8 +49,11 @@
                             </div>
 
                             <div class="text-center">
-                                <a href="/auth/register" class="text-decoration-none text-info">Нет аккаунта? Зарегистрируйтесь</a>
+                                <a href="/auth/register" class="text-decoration-none text-info">Нет аккаунта?
+                                    Зарегистрируйтесь</a>
                             </div>
+
+                            <a href="forgot-password">Забыли пароль?</a>
 
                         </form>
                     </div>

@@ -2,46 +2,64 @@
 <#import "spring.ftl" as spring>
 
 <@l.layout title="Профиль">
-    <div class="card profile">
-        <div class="profile__left">
-        </div>
-        <div class="profile__right">
-            <div class="profile-avatar">
-                <#if user?? && user.avatar?has_content>
-                    <img class="avatar" src="/api/profile/avatar" alt="avatar">
-                <#else>
-                    <img class="avatar" src="../static/images/default-avatar.png" alt="avatar" style="width: 200px; height: 200px; margin-top: 20px; margin-left: 20px">
-                </#if>
+    <div class="card shadow-lg border-0 rounded-4 bg-dark text-light p-4">
+        <div class="row">
+            <div class="col-md-4 d-flex justify-content-center align-items-start flex-column">
+                <div class="profile-avatar text-center w-100 mb-3">
+                    <#if user?? && user.avatar?has_content>
+                        <img class="rounded-circle border border-light" src="/api/profile/avatar" alt="avatar" style="width: 200px; height: 200px;">
+                    <#else>
+                        <img class="rounded-circle border border-secondary" src="/static/images/default-avatar.png" alt="avatar" style="width: 200px; height: 200px;">
+                    </#if>
+                </div>
             </div>
 
-            <div class="">
-                <h1>${(user.name)!'—'} ${(user.surname)!''}</h1>
-                <p>Email: ${(user.email)!'—'}</p>
-                <p>Телефон: ${(user.phoneNumber)!'—'}</p>
-                <p>Возраст: ${(user.age)!'—'}</p>
-            </div>
+            <div class="col-md-8">
+                <h2 class="fw-bold">${(user.name)!'—'} ${(user.surname)!''}</h2>
+                <p class="mb-1"><i class="bi bi-envelope"></i> <strong>Email:</strong> ${(user.email)!'—'}</p>
+                <p class="mb-1"><i class="bi bi-telephone"></i> <strong>Телефон:</strong> ${(user.phoneNumber)!'—'}</p>
+                <p class="mb-3"><i class="bi bi-cake2"></i> <strong>Возраст:</strong> ${(user.age)!'—'}</p>
 
-            <a href="/profile/edit" class="btn btn--primary">Редактировать</a>
+                <a href="/profile/edit" class="btn btn-outline-light mb-3">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
 
-            <#assign roles = (SPRING_SECURITY_CONTEXT.authentication.authorities)![]>
-            <#assign isEmployer = false>
-            <#assign isApplicant = false>
-            <#list roles as a>
-                <#if a.authority?string == 'ROLE_EMPLOYER'><#assign isEmployer = true><#break></#if>
-            </#list>
-            <#if !isEmployer>
+                <#assign roles = (SPRING_SECURITY_CONTEXT.authentication.authorities)![]>
+                <#assign isEmployer = false>
+                <#assign isApplicant = false>
                 <#list roles as a>
-                    <#if a.authority?string == 'ROLE_APPLICANT'><#assign isApplicant = true><#break></#if>
+                    <#if a.authority?string == 'ROLE_EMPLOYER'>
+                        <#assign isEmployer = true>
+                        <#break>
+                    </#if>
                 </#list>
-            </#if>
+                <#if !isEmployer>
+                    <#list roles as a>
+                        <#if a.authority?string == 'ROLE_APPLICANT'>
+                            <#assign isApplicant = true>
+                            <#break>
+                        </#if>
+                    </#list>
+                </#if>
 
-            <#if isEmployer>
-                <a class="btn" href="/vacancy/new">Создать вакансию</a>
-                <a class="btn" href="/profile/vacancies">Мои вакансии</a>
-            <#elseif isApplicant>
-                <a class="btn" href="/resume/new">Создать резюме</a>
-                <a class="btn" href="/profile/resumes">Мои резюме</a>
-            </#if>
+                <div class="mt-2">
+                    <#if isEmployer>
+                        <a class="btn btn-primary me-2 mb-2" href="/vacancy/new">
+                            <i class="bi bi-plus-circle"></i> Создать вакансию
+                        </a>
+                        <a class="btn btn-secondary mb-2" href="/profile/vacancies">
+                            <i class="bi bi-folder2-open"></i> Мои вакансии
+                        </a>
+                    <#elseif isApplicant>
+                        <a class="btn btn-primary me-2 mb-2" href="/resume/new">
+                            <i class="bi bi-plus-circle"></i> Создать резюме
+                        </a>
+                        <a class="btn btn-secondary mb-2" href="/profile/resumes">
+                            <i class="bi bi-folder2-open"></i> Мои резюме
+                        </a>
+                    </#if>
+                </div>
+            </div>
         </div>
     </div>
 </@l.layout>

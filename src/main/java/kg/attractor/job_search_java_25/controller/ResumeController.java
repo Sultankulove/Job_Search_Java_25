@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -51,9 +52,19 @@ public class ResumeController {
 
 
     @GetMapping("/profile/resumes")
-    public String myResumes(Authentication auth, Model model) {
+    public String myResumes(Authentication auth,
+                            @RequestParam(defaultValue = "0") int page,
+                            @RequestParam(required = false) Long categoryId,
+                            Model model) {
         Long userId = userService.findUserIdByEmail(auth.getName());
-        List<ResumeDto> resumes = resumeService.findByAuthor(userId);
+
+        Page<ResumeDto> resumes;
+
+        if (categoryId == null) {
+            resumes = resumeService.getResumesByAuthor(userId, PageRequest.of(page, 15));
+        } else {
+            resumes = resumeService.getResumesByAuthorAndCategory(userId, categoryId, PageRequest.of(page, 15));
+        }
 
         var cats = categoryService.findAll();
 
@@ -61,37 +72,66 @@ public class ResumeController {
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", resumes);
         model.addAttribute("categories", cats);
-        model.addAttribute("params", Map.of("categoryId", ""));
+        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+        model.addAttribute("currentPage", resumes.getNumber());
+        model.addAttribute("totalPages", resumes.getTotalPages());
 
         return "list";
     }
 
 
 
-
     @GetMapping("/resume/new")
-    public String showCreateForm(Model model) {
-        model.addAttribute("resume", new ResumeEditDto());
+    public String showResumeCreateForm(Model model) {
+        ResumeEditDto dto = new ResumeEditDto();
+
+        dto.getWorkExperiences().add(new WorkExperienceInfoDto());
+        dto.getEducationInfos().add(new EducationInfoDto());
+        dto.getContactInfos().add(new ContactInfoDto());
+
+
+        model.addAttribute("dto", dto);
         model.addAttribute("categories", categoryService.findAll());
-        return "resume_form";
+        model.addAttribute("formAction", "/resume/new");
+        model.addAttribute("dtoName", "dto");
+        model.addAttribute("formType", "resume");
+        return "form";
     }
-
-    
-
 
 
     @PostMapping("/resume/new")
-    public String createResume(@ModelAttribute("resume") @Valid ResumeEditDto resumeDto, BindingResult bindingResult, Authentication authentication, Model model) {
+    public String createResume(@ModelAttribute("dto") ResumeEditDto dto,
+                               BindingResult bindingResult,
+                               Authentication auth,
+                               Model model) {
+
+        dto.setWorkExperiences(dto.getWorkExperiences().stream()
+                .filter(we -> we.getCompanyName() != null && !we.getCompanyName().isBlank())
+                .collect(Collectors.toList()));
+
+        dto.setEducationInfos(dto.getEducationInfos().stream()
+                .filter(edu -> edu.getInstitution() != null && !edu.getInstitution().isBlank())
+                .collect(Collectors.toList()));
+
+        dto.setContactInfos(dto.getContactInfos().stream()
+                .filter(c -> c.getContactValue() != null && !c.getContactValue().isBlank())
+                .collect(Collectors.toList()));
+
         if (bindingResult.hasErrors()) {
+            model.addAttribute("formAction", "/resume/new");
+            model.addAttribute("formType", "resume");
+            model.addAttribute("dtoName", "dto");
             model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("errors", bindingResult.getAllErrors());
-            return "resume_form";
+            return "form";
         }
-        Long applicantId = userService.findUserIdByEmail(authentication.getName());
-        resumeService.createResume(applicantId, resumeDto);
+
+        Long applicantId = userService.findUserIdByEmail(auth.getName());
+
+        resumeService.createResume(applicantId, dto);
 
         return "redirect:/resumes";
     }
+
 
     @GetMapping("/resume/{id}/edit")
     public String editResume(@PathVariable Long id, Model model) {

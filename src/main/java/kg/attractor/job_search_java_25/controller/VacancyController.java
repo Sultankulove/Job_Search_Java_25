@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -57,21 +56,23 @@ public String listVacancies(@RequestParam(defaultValue = "0") int page,
 
 
     @GetMapping("/profile/vacancies")
-    public String myVacancies(Authentication auth, Model model) {
+    public String myVacancies(Authentication auth,
+                              Model model,
+                              @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(value = "categoryId", required = false) Long categoryId) {
+
         Long employerId = userService.findUserIdByEmail(auth.getName());
-        List<VacancyDto> vacancies = vacancyService.findByEmployer(employerId);
 
-        var cats = categoryService.findAll();
-        model.addAttribute("categories", cats);
-
-        model.addAttribute("params", Map.of("categoryId", ""));
-
+        Page<VacancyDto> vacancies = (categoryId == null)
+                ? vacancyService.findByEmployerId(employerId, PageRequest.of(page, 15))
+                : vacancyService.findByEmployerIdAndCategory(employerId, categoryId, PageRequest.of(page, 15));
         model.addAttribute("title", "Мои вакансии");
-        model.addAttribute("headers", List.of("Название", "Категория", "Статус", "Обновлено"));
+        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", vacancies);
 
-         model.addAttribute("categoryNamesById",
-             cats.stream().collect(Collectors.toMap(CategoryDto::getId, CategoryDto::getName)));
+        model.addAttribute("categories", categoryService.findAll());
+
+        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
 
         return "list";
     }
@@ -80,25 +81,25 @@ public String listVacancies(@RequestParam(defaultValue = "0") int page,
 
     @GetMapping("vacancy/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("vacancy", new VacancyEditDto());
+        model.addAttribute("dto", new VacancyEditDto());
+        model.addAttribute("categories", categoryService.findAll());
         return "CreatedForm";
     }
 
+
     @PostMapping("/vacancy/new")
-    public String createVacancy(@ModelAttribute("vacancy") @Valid VacancyEditDto vacancyDto,
+    public String createVacancy(@ModelAttribute("dto") @Valid VacancyEditDto vacancyDto,
                                 BindingResult bindingResult,
                                 Authentication authentication,
                                 Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("errors", bindingResult.getAllErrors());
+            model.addAttribute("categories", categoryService.findAll());
             return "CreatedForm";
         }
-
         Long authorId = null;
         if (authentication != null) {
             authorId = userService.findUserIdByEmail(authentication.getName());
         }
-
         vacancyService.createVacancies(authorId, vacancyDto);
         return "redirect:/vacancies";
     }
