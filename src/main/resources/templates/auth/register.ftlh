@@ -23,7 +23,6 @@
                     </div>
                 </#if>
 
-                <#--                Имя -->
                 <@spring.bind "dto.name"/>
                 <div class="mb-3">
                     <label class="form-label">Имя</label>
@@ -36,7 +35,6 @@
                     </#if>
                 </div>
 
-                <#--                 Фамилия -->
                 <@spring.bind "dto.surname"/>
                 <div class="mb-3">
                     <label class="form-label">Фамилия</label>
@@ -49,7 +47,6 @@
                     </#if>
                 </div>
 
-                <#--                 Возраст -->
                 <@spring.bind "dto.age"/>
                 <div class="mb-3">
                     <label class="form-label">Возраст</label>
@@ -62,7 +59,6 @@
                     </#if>
                 </div>
 
-                <#--                 Email -->
                 <@spring.bind "dto.email"/>
                 <div class="mb-3">
                     <label class="form-label">Email</label>
@@ -75,7 +71,6 @@
                     </#if>
                 </div>
 
-                <#--                Телефон-->
                 <@spring.bind "dto.phoneNumber"/>
                 <div class="mb-3">
                     <label class="form-label">Телефон</label>
@@ -88,7 +83,6 @@
                     </#if>
                 </div>
 
-                <#--                Пароль-->
                 <@spring.bind "dto.password"/>
                 <div class="mb-4">
                     <label class="form-label">Пароль</label>
