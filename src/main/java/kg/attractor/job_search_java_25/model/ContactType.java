@@ -13,6 +13,7 @@ import java.util.List;
 public class ContactType {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "type", length = 64, unique = true)
