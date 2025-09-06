@@ -1,15 +1,24 @@
 package kg.attractor.job_search_java_25.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.AccountType;
 import kg.attractor.job_search_java_25.dto.RegistrationRequestDto;
 import kg.attractor.job_search_java_25.exceptions.types.ConflictException;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -85,6 +94,28 @@ public class AuthController {
             return "auth/register";
         }
 
-        return "redirect:/auth/login?registered";
+        UserDetails userDetails = userService.loadUserByUsername(dto.getEmail());
+
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        userDetails.getPassword(),
+                        userDetails.getAuthorities()
+                );
+
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+
+        if (attributes instanceof ServletRequestAttributes servletRequestAttributes) {
+            HttpServletRequest request = servletRequestAttributes.getRequest();
+            HttpSession session = request.getSession(true);
+            session.setAttribute(
+                    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                    SecurityContextHolder.getContext()
+            );
+        }
+
+        return "redirect:/";
     }
 }
