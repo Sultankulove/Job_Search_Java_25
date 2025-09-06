@@ -4,52 +4,77 @@
 
 
 <@l.layout title="Редактирование профиля">
-    <div class="card">
-        <h1>Редактирование профиля</h1>
-
-        <form action="/profile/edit" method="post" class="form">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-
-            <@spring.bind "dto.name"/>
-            <label>Имя
-                <input name="${spring.status.expression}" value="${spring.status.value!}">
-            </label>
-            <#if spring.status.errorMessages?has_content>
-                <div class="error"><#list spring.status.errorMessages as m>${m}<#if m_has_next>, </#if></#list></div>
-            </#if>
-
-            <@spring.bind "dto.surname"/>
-            <label>Фамилия
-                <input name="${spring.status.expression}" value="${spring.status.value!}">
-            </label>
-
-            <@spring.bind "dto.age"/>
-            <label>Возраст
-                <input type="number" name="${spring.status.expression}" value="${spring.status.value!}">
-            </label>
-
-            <@spring.bind "dto.phoneNumber"/>
-            <label>Телефон
-                <input name="${spring.status.expression}" value="${spring.status.value!}">
-            </label>
-
-            <@spring.bind "dto.email"/>
-            <label>Email
-                <input type="email" name="${spring.status.expression}" value="${spring.status.value!}" readonly>
-            </label>
-
-            <button class="btn btn--primary" type="submit">Сохранить</button>
-        </form>
-
-        <hr>
-
-        <form action="/profile/avatar" method="post" enctype="multipart/form-data" class="form">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-            <div class="avatar-upload">
-                <img class="avatar" src="${(dto.avatar)!'/images/default-avatar.png'}" alt="">
-                <input type="file" name="avatar" accept="image/*">
+    <div class="container mt-4">
+        <div class="card bg-dark text-light shadow-lg">
+            <div class="card-header border-0 pb-0">
+                <h2 class="text-center">Редактирование профиля</h2>
             </div>
-            <button class="btn" type="submit">Загрузить фото</button>
-        </form>
+
+            <div class="card-body">
+                <form action="/profile/edit" method="post" class="row g-3">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+
+                    <div class="col-md-6">
+                        <@spring.bind "dto.name"/>
+                        <label class="form-label">Имя</label>
+                        <input name="${spring.status.expression}" value="${spring.status.value!}" class="form-control <#if spring.status.errorMessages?has_content>is-invalid</#if>">
+                        <#if spring.status.errorMessages?has_content>
+                            <div class="invalid-feedback"><#list spring.status.errorMessages as m>${m}</#list></div>
+                        </#if>
+                    </div>
+
+                    <div class="col-md-6">
+                        <@spring.bind "dto.surname"/>
+                        <label class="form-label">Фамилия</label>
+                        <input name="${spring.status.expression}" value="${spring.status.value!}" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <@spring.bind "dto.age"/>
+                        <label class="form-label">Возраст</label>
+                        <input type="number" name="${spring.status.expression}" value="${spring.status.value!}" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <@spring.bind "dto.phoneNumber"/>
+                        <label class="form-label">Телефон</label>
+                        <input name="${spring.status.expression}" value="${spring.status.value!}" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <@spring.bind "dto.email"/>
+                        <label class="form-label">Email</label>
+                        <input type="email" name="${spring.status.expression}" value="${spring.status.value!}" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-12 text-end mt-3">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="bi bi-save"></i> Сохранить
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="bg-secondary my-4">
+
+                <h4 class="mb-3">Загрузить аватар</h4>
+                <form action="/profile/avatar" method="post" enctype="multipart/form-data" class="row g-3 align-items-center">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+
+                    <div class="col-auto">
+                        <img class="rounded-circle shadow" src="/api/profile/avatar" alt="avatar" width="100" height="100">
+                    </div>
+
+                    <div class="col">
+                        <input type="file" name="avatar" accept="image/*" class="form-control">
+                    </div>
+
+                    <div class="col-auto">
+                        <button class="btn btn-secondary" type="submit">
+                            <i class="bi bi-upload"></i> Загрузить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </@l.layout>
