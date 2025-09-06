@@ -31,14 +31,24 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" href="/vacancies">
-                            <i class="bi bi-card-list"></i> Vacancy
+                            <i class="bi bi-card-list"></i> <@spring.message "layout.vacancy"/>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/resumes">
-                            <i class="bi bi-person-lines-fill"></i> Resume
+                            <i class="bi bi-person-lines-fill"></i> <@spring.message "layout.resume"/>
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-translate"></i> <@spring.message "layout.navbar.chng_lang"/>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
+                            <li><a class="dropdown-item" href="/?lang=en"><@spring.message "layout.navbar.chng_lang.en"/></a></li>
+                            <li><a class="dropdown-item" href="/?lang=ru"><@spring.message "layout.navbar.chng_lang.ru"/></a></li>
+                        </ul>
+                    </li>
+
 
                     <#if SPRING_SECURITY_CONTEXT?? &&
                     SPRING_SECURITY_CONTEXT.authentication?? &&
@@ -47,7 +57,7 @@
 
                         <li class="nav-item">
                             <a class="nav-link" href="/profile">
-                                <i class="bi bi-person-circle"></i> Profile
+                                <i class="bi bi-person-circle"></i> <@spring.message "layout.profile"/>
                             </a>
                         </li>
 
@@ -57,12 +67,12 @@
                             <#if a.authority?string == 'ROLE_EMPLOYER'>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/vacancy/new">
-                                        <i class="bi bi-plus-square"></i> Create Vacancy
+                                        <i class="bi bi-plus-square"></i> <@spring.message "layout.create_vacancy"/>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/profile/vacancies">
-                                        <i class="bi bi-folder"></i> My vacancies
+                                        <i class="bi bi-folder"></i> <@spring.message "layout.my_vacancies"/>
                                     </a>
                                 </li>
                                 <#break>
@@ -73,13 +83,14 @@
                             <#if a.authority?string == 'ROLE_APPLICANT'>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/resume/new">
-                                        <i class="bi bi-plus-square"></i> Create resume
+                                        <i class="bi bi-plus-square"></i> <@spring.message "layout.create_resume"/>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="/profile/resumes">
-                                        <i class="bi bi-folder"></i> My resume
+                                        <i class="bi bi-folder"></i> <@spring.message "layout.my_resume"/>
                                     </a>
+
                                 </li>
                                 <#break>
                             </#if>
@@ -103,19 +114,19 @@
 
                                 </#if>
                                 <button type="submit" class="btn btn-outline-light btn-sm">
-                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                    <i class="bi bi-box-arrow-right"></i> <@spring.message "layout.logout"/>
                                 </button>
                             </form>
                         </li>
                     <#else>
                         <li class="nav-item">
                             <a class="nav-link" href="/auth/login">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
+                                <i class="bi bi-box-arrow-in-right"></i> <@spring.message "layout.login"/>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/auth/chooseRole">
-                                <i class="bi bi-person-plus"></i> Registration
+                                <i class="bi bi-person-plus"></i> <@spring.message "layout.registration"/>
                             </a>
                         </li>
                     </#if>
