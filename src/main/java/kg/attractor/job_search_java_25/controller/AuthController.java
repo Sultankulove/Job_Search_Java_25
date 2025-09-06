@@ -1,11 +1,14 @@
 package kg.attractor.job_search_java_25.controller;
 
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.AccountType;
 import kg.attractor.job_search_java_25.dto.RegistrationRequestDto;
 import kg.attractor.job_search_java_25.exceptions.types.ConflictException;
+import kg.attractor.job_search_java_25.exceptions.types.UserNotFoundException;
+import kg.attractor.job_search_java_25.model.User;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.io.UnsupportedEncodingException;
 
 @Controller
 @RequiredArgsConstructor
@@ -117,5 +122,50 @@ public class AuthController {
         }
 
         return "redirect:/";
+    }
+
+    @GetMapping("forgot-password")
+    public String showForgotPasswordForm() {
+        return "auth/forgot_password";
+    }
+
+    @PostMapping("forgot-password")
+    public String processForgotPasswordForm(HttpServletRequest request,
+                                            Model model) {
+        try {
+            userService.makeResetPasswordLink(request);
+            model.addAttribute("message", "We have sent a reset password link to your email. Please check it.");
+        } catch (UserNotFoundException | UnsupportedEncodingException e) {
+            model.addAttribute("error", e.getMessage());
+        } catch (MessagingException e) {
+            model.addAttribute("error", "Error while sending email.");
+        }
+        return "auth/forgot_password";
+    }
+
+    @GetMapping("reset-password")
+    public String resetPassword(@RequestParam(name = "token") String token, Model model) {
+        try {
+            userService.getByResetPasswordToken(token);
+            model.addAttribute("token", token);
+        } catch (UserNotFoundException e) {
+            model.addAttribute("error", "Invalid token.");
+        }
+        return "auth/reset_password";
+    }
+
+    @PostMapping("reset-password")
+    public String proccesResetPassword(HttpServletRequest request, Model model) {
+        String token = request.getParameter("token");
+        String newPassword = request.getParameter("password");
+        try {
+            User user = userService.getByResetPasswordToken(token);
+            userService.updatePassword(user, newPassword);
+            model.addAttribute("message", "You have successfully changed your password.");
+        } catch (UserNotFoundException e) {
+            model.addAttribute("error", "Invalid token.");
+        }
+        return "message";
+
     }
 }
