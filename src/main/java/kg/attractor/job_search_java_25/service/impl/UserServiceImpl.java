@@ -3,11 +3,14 @@ package kg.attractor.job_search_java_25.service.impl;
 import kg.attractor.job_search_java_25.dto.RegistrationRequestDto;
 import kg.attractor.job_search_java_25.exceptions.types.ConflictException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
+import kg.attractor.job_search_java_25.exceptions.types.UserNotFoundException;
 import kg.attractor.job_search_java_25.model.User;
 import kg.attractor.job_search_java_25.repository.UserRepository;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,5 +45,16 @@ public class UserServiceImpl implements UserService {
     public Long findUserIdByEmail(String email) {
         return userRepository.findUserIdByEmailIgnoreCase(email)
                 .orElseThrow(() -> new NotFoundException("User email=" + email));
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        var user = userRepository.findByEmail(username)
+                .orElseThrow(UserNotFoundException::new);
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                user.getAuthorities()
+        );
     }
 }
