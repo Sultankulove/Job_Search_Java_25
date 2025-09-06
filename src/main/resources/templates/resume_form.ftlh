@@ -1,6 +1,7 @@
 <#import "layout.ftlh" as main>
+<#import "/spring.ftl" as spring>
 
-<@main.layout ; spring>
+<@main.layout>
 
     <#assign br = .data_model["org.springframework.validation.BindingResult.resume"]! />
 

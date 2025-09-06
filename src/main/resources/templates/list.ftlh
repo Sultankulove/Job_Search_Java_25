@@ -1,4 +1,6 @@
 <#import "layout.ftlh" as l>
+<#import "/spring.ftl" as spring>
+
 <@l.layout title="${title! 'Список'}">
 
     <head>
