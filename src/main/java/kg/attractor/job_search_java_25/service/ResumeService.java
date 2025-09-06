@@ -45,4 +45,8 @@ public interface ResumeService {
     Page<ResumeDto> getResumes(Pageable pageable);
 
     Page<ResumeDto> getResumesByCategory(Long categoryId, PageRequest of);
+
+    Page<ResumeDto> getResumesByAuthor(Long userId, Pageable pageable);
+
+    Page<ResumeDto> getResumesByAuthorAndCategory(Long userId, Long categoryId, Pageable pageable);
 }
