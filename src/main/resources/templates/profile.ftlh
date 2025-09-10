@@ -1,7 +1,7 @@
 <#import "layout.ftlh" as l>
 <#import "spring.ftl" as spring>
 
-<@l.layout title="Профиль">
+<@l.layout title="<@spring.message 'profile.title'/>">
     <div class="card shadow-lg border-0 rounded-4 bg-dark text-light p-4">
         <div class="row">
             <div class="col-md-4 d-flex justify-content-center align-items-start flex-column">
@@ -16,12 +16,12 @@
 
             <div class="col-md-8">
                 <h2 class="fw-bold">${(user.name)!'—'} ${(user.surname)!''}</h2>
-                <p class="mb-1"><i class="bi bi-envelope"></i> <strong>Email:</strong> ${(user.email)!'—'}</p>
-                <p class="mb-1"><i class="bi bi-telephone"></i> <strong>Телефон:</strong> ${(user.phoneNumber)!'—'}</p>
-                <p class="mb-3"><i class="bi bi-cake2"></i> <strong>Возраст:</strong> ${(user.age)!'—'}</p>
+                <p class="mb-1"><i class="bi bi-envelope"></i> <strong><@spring.message 'profile.email'/>:</strong> ${(user.email)!'—'}</p>
+                <p class="mb-1"><i class="bi bi-telephone"></i> <strong><@spring.message 'profile.phone'/>:</strong> ${(user.phoneNumber)!'—'}</p>
+                <p class="mb-3"><i class="bi bi-cake2"></i> <strong><@spring.message 'profile.age'/>:</strong> ${(user.age)!'—'}</p>
 
                 <a href="/profile/edit" class="btn btn-outline-light mb-3">
-                    <i class="bi bi-pencil"></i> Редактировать
+                    <i class="bi bi-pencil"></i> <@spring.message 'profile.edit'/>
                 </a>
 
                 <#assign roles = (SPRING_SECURITY_CONTEXT.authentication.authorities)![]>
@@ -45,17 +45,17 @@
                 <div class="mt-2">
                     <#if isEmployer>
                         <a class="btn btn-primary me-2 mb-2" href="/vacancy/new">
-                            <i class="bi bi-plus-circle"></i> Создать вакансию
+                            <i class="bi bi-plus-circle"></i> <@spring.message 'profile.create_vacancy'/>
                         </a>
                         <a class="btn btn-secondary mb-2" href="/profile/vacancies">
-                            <i class="bi bi-folder2-open"></i> Мои вакансии
+                            <i class="bi bi-folder2-open"></i> <@spring.message 'profile.my_vacancies'/>
                         </a>
                     <#elseif isApplicant>
                         <a class="btn btn-primary me-2 mb-2" href="/resume/new">
-                            <i class="bi bi-plus-circle"></i> Создать резюме
+                            <i class="bi bi-plus-circle"></i> <@spring.message 'profile.create_resume'/>
                         </a>
                         <a class="btn btn-secondary mb-2" href="/profile/resumes">
-                            <i class="bi bi-folder2-open"></i> Мои резюме
+                            <i class="bi bi-folder2-open"></i> <@spring.message 'profile.my_resumes'/>
                         </a>
                     </#if>
                 </div>

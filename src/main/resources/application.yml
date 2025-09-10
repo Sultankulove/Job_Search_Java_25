@@ -15,8 +15,11 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
+  messages:
+    basename: messages
+    encoding: UTF-8
 
-#======================== Mail config
+  #======================== Mail config
   mail:
     host: smtp.gmail.com
     username: ${MAIL_USERNAME}
