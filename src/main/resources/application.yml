@@ -5,8 +5,8 @@ spring:
     name: "Job_Search_Java_25"
   datasource:
     url: "jdbc:h2:./db/test;AUTO_SERVER=TRUE"
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: root
+    password: qwerty
     driver-class-name: org.h2.Driver
   flyway:
     locations: classpath:db/migration

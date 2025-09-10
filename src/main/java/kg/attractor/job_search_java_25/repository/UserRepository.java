@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,11 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByResetPasswordToken(String resetPasswordToken);
 
     Optional<User> findByEmail(String email);
-
-    @Query("select u from User as u")
-    List<User> getAllUsers();
-
-    User getUserById(Long id);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
