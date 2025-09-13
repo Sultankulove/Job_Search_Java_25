@@ -7,20 +7,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class VacancyEditDto {
-    private Long id;
-
+@NoArgsConstructor
+@Builder
+public class VacancyUpsertDto {
     @NotBlank
-    @Size(max = 100)
+    @Size(max=100)
     private String name;
 
     @NotBlank
-    @Size(max = 500)
+    @Size(max=500)
     private String description;
 
     @NotNull
+    @Positive
     private Long categoryId;
 
     @PositiveOrZero
@@ -32,5 +32,6 @@ public class VacancyEditDto {
     @PositiveOrZero
     private Integer expTo;
 
-    private boolean active;
+    @NotNull
+    private Boolean active;
 }
