@@ -11,12 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ContactInfoDto {
 
-    private Long id;
-
-    private Long type_id;
-
-    private Long resume_id;
-
+    private Long typeId;
     private String contactValue;
 
 }
