@@ -1,12 +1,25 @@
 package kg.attractor.job_search_java_25.mappers;
 
-import kg.attractor.job_search_java_25.dto.AccountType;
-import kg.attractor.job_search_java_25.dto.UserProfileDto;
+import jakarta.persistence.*;
+import kg.attractor.job_search_java_25.dto.userDtos.AccountType;
+import kg.attractor.job_search_java_25.dto.userDtos.UserProfileDto;
+import kg.attractor.job_search_java_25.model.Resume;
 import kg.attractor.job_search_java_25.model.User;
+import kg.attractor.job_search_java_25.model.Vacancy;
 
 import java.util.List;
 
 public class UserMapper {
+
+
+    private String name;
+    private String surname;
+    private Byte age;
+    private String email;
+    private String phoneNumber;
+    private String avatar;
+    private String accountType;
+
     public static UserProfileDto toDto(User user) {
         if (user == null) return null;
 

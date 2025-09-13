@@ -1,6 +1,10 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
+import kg.attractor.job_search_java_25.dto.userDtos.AccountType;
+import kg.attractor.job_search_java_25.dto.userDtos.AvatarDto;
+import kg.attractor.job_search_java_25.dto.userDtos.EditProfileDto;
+import kg.attractor.job_search_java_25.dto.userDtos.UserProfileDto;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.mappers.UserMapper;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
@@ -147,7 +151,7 @@ public class ProfileServiceImpl implements ProfileService {
         User user = userRepository.findUserById(id)
                 .orElseThrow(() -> new NotFoundException("UserProfileDto not found"));
 
-        return kg.attractor.job_search_java_25.dto.UserProfileDto.builder()
+        return UserProfileDto.builder()
                 .name(user.getName())
                 .surname(user.getSurname())
                 .age(user.getAge())

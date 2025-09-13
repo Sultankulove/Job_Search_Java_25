@@ -1,6 +1,6 @@
 package kg.attractor.job_search_java_25.service;
 
-import kg.attractor.job_search_java_25.dto.MessageDto;
+import kg.attractor.job_search_java_25.dto.messageDto.MessageDto;
 
 import java.util.List;
 

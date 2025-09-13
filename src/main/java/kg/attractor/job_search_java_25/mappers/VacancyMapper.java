@@ -1,48 +1,69 @@
 package kg.attractor.job_search_java_25.mappers;
 
-import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.dto.VacancyEditDto;
-import kg.attractor.job_search_java_25.model.Vacancy;
+import kg.attractor.job_search_java_25.dto.ActiveDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyUpsertDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyViewDto;
+import kg.attractor.job_search_java_25.model.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class VacancyMapper {
 
-    public static VacancyDto toDto(Vacancy vacancy) {
-        if (vacancy == null) return null;
-
-        VacancyDto dto = new VacancyDto();
-        dto.setId(vacancy.getId());
-        dto.setName(vacancy.getName());
-        dto.setDescription(vacancy.getDescription());
-        dto.setCategoryId(vacancy.getCategory().getId());
-        dto.setSalary(vacancy.getSalary());
-        dto.setExpFrom(vacancy.getExpFrom());
-        dto.setExpTo(vacancy.getExpTo());
-        dto.setIsActive(vacancy.getIsActive());
-        dto.setAuthorId(vacancy.getAuthor().getId());
-        dto.setCreatedDate(vacancy.getCreatedDate());
-        dto.setUpdateTime(vacancy.getUpdateTime());
-        return dto;
+    public VacancyViewDto toView(Vacancy v) {
+        if (v == null) return null;
+        return new VacancyViewDto(
+                v.getId(),
+                v.getAuthor() != null ? v.getAuthor().getId() : null,
+                v.getCategory()  != null ? v.getCategory().getId()  : null,
+                v.getCategory()  != null ? v.getCategory().getName(): null,
+                v.getName(),
+                v.getDescription(),
+                v.getSalary(),
+                v.getExpFrom(),
+                v.getExpTo(),
+                v.getIsActive(),
+                v.getCreatedDate(),
+                v.getUpdateTime()
+        );
     }
 
-    public static List<VacancyDto> toDtoList(List<Vacancy> vacancies) {
-        return vacancies.stream()
-                .map(VacancyMapper::toDto)
-                .toList();
+    public VacancyListItemDto toListItem(Vacancy r) {
+        if (r == null) return null;
+        return new VacancyListItemDto(
+                r.getId(),
+                r.getName(),
+                r.getCategory() != null ? r.getCategory().getName() : null,
+                r.getSalary(),
+                r.getIsActive(),
+                r.getUpdateTime()
+        );
     }
 
-    public static VacancyEditDto toEditDto(Vacancy vacancy) {
-        if (vacancy == null) return null;
-        VacancyEditDto dto = new VacancyEditDto();
-        dto.setId(vacancy.getId());
-        dto.setName(vacancy.getName());
-        dto.setDescription(vacancy.getDescription());
-        dto.setCategoryId(vacancy.getCategory().getId());
-        dto.setSalary(vacancy.getSalary());
-        dto.setExpFrom(vacancy.getExpFrom());
-        dto.setExpTo(vacancy.getExpTo());
-        dto.setActive(vacancy.getIsActive());
-        return dto;
+    public Vacancy applyUpsert(VacancyUpsertDto d, Vacancy e, Category category, User author) {
+        e.setName(d.getName());
+        e.setDescription(d.getDescription());
+        e.setCategory(category);
+        e.setSalary(d.getSalary());
+        e.setExpFrom(d.getExpFrom());
+        e.setExpTo(d.getExpTo());
+        e.setIsActive(Boolean.TRUE.equals(d.getActive()));
+        if (author != null) e.setAuthor(author);
+        return e;
+    }
+
+
+    public void applyActive(ActiveDto dto, Vacancy e) {
+        if (dto != null && dto.getActive() != null) e.setIsActive(dto.getActive());
+    }
+
+
+    public List<VacancyListItemDto> toListItems(List<Vacancy> list) {
+        return list == null ? List.of() : list.stream().map(this::toListItem).toList();
+    }
+    public List<VacancyViewDto> toViews(List<Vacancy> list) {
+        return list == null ? List.of() : list.stream().map(this::toView).toList();
     }
 }

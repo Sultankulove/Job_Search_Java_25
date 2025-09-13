@@ -1,9 +1,6 @@
 package kg.attractor.job_search_java_25.repository;
 
 
-import kg.attractor.job_search_java_25.dto.ResumeDto;
-import kg.attractor.job_search_java_25.dto.ResumeListViewDto;
-import kg.attractor.job_search_java_25.dto.ResumeShortDto;
 import kg.attractor.job_search_java_25.model.Resume;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

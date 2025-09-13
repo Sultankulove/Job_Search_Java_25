@@ -2,7 +2,7 @@ package kg.attractor.job_search_java_25.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
-import kg.attractor.job_search_java_25.dto.RegistrationRequestDto;
+import kg.attractor.job_search_java_25.dto.userDtos.RegistrationRequestDto;
 import kg.attractor.job_search_java_25.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

@@ -1,7 +1,11 @@
 package kg.attractor.job_search_java_25.service;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.dto.ActiveDto;
+import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.ResponseDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyUpsertDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,13 +15,13 @@ import java.util.List;
 
 public interface VacancyService {
 
-    List<VacancyShortDto> getShortVacanciesList(Long employerId, Pageable p);
+    Page<VacancyListItemDto> getShortVacanciesList(Long employerId, Pageable p);
 
     ResponseEntity<?> updateTime(Long id);
 
-    void editVacancy(VacancyEditDto editVacancyEditDto, Long id, Long userId);
+    void edtVacancy(VacancyUpsertDto v, Long vacancyId, Long userId);
 
-    void vacancyIsActiveById(Long vacancyId, VacancyIsActiveDto vacancyIsActiveDto);
+    void vacancyIsActive(Long vacancyId, ActiveDto activeDto);
 
     VacancyDto createVacancies(Long authorId, VacancyEditDto createVacancyEditDto);
 

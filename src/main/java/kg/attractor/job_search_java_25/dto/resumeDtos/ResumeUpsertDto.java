@@ -1,6 +1,9 @@
-package kg.attractor.job_search_java_25.dto;
+package kg.attractor.job_search_java_25.dto.resumeDtos;
 
 import jakarta.validation.constraints.*;
+import kg.attractor.job_search_java_25.dto.contactDros.ContactInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

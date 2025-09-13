@@ -1,6 +1,6 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import kg.attractor.job_search_java_25.dto.MessageDto;
+import kg.attractor.job_search_java_25.dto.messageDto.MessageDto;
 import kg.attractor.job_search_java_25.model.Message;
 import kg.attractor.job_search_java_25.repository.MessageRepository;
 import kg.attractor.job_search_java_25.service.ChatService;

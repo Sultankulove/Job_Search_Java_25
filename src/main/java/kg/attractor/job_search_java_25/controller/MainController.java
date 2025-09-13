@@ -1,7 +1,5 @@
 package kg.attractor.job_search_java_25.controller;
 
-import kg.attractor.job_search_java_25.dto.ResumeDto;
-import kg.attractor.job_search_java_25.dto.VacancyDto;
 import kg.attractor.job_search_java_25.service.CategoryService;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import kg.attractor.job_search_java_25.service.UserService;

@@ -1,6 +1,9 @@
 package kg.attractor.job_search_java_25.service;
 
-import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
+import kg.attractor.job_search_java_25.dto.userDtos.AvatarDto;
+import kg.attractor.job_search_java_25.dto.userDtos.EditProfileDto;
+import kg.attractor.job_search_java_25.dto.userDtos.UserProfileDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 

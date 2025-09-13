@@ -3,7 +3,7 @@ package kg.attractor.job_search_java_25.service.impl;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import kg.attractor.job_search_java_25.config.ApplicationConfig;
-import kg.attractor.job_search_java_25.dto.RegistrationRequestDto;
+import kg.attractor.job_search_java_25.dto.userDtos.RegistrationRequestDto;
 import kg.attractor.job_search_java_25.exceptions.types.ConflictException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.exceptions.types.UserNotFoundException;

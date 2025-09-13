@@ -1,4 +1,4 @@
-package kg.attractor.job_search_java_25.dto;
+package kg.attractor.job_search_java_25.dto.vacancyDtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,16 +9,19 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class ResumeViewDto {
+@NoArgsConstructor
+public class VacancyViewDto {
     private Long id;
-    private Long applicantId;
+    private Long authorId;
     private Long categoryId;
     private String categoryName;
     private String name;
+    private String description;
     private Float salary;
-    private boolean active;
+    private Integer expFrom;
+    private Integer expTo;
+    private Boolean active;
     private LocalDateTime createdDate;
     private LocalDateTime updateTime;
-}
+};

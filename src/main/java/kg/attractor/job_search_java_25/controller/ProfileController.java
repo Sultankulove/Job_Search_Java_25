@@ -1,7 +1,9 @@
 package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.dto.userDtos.AvatarDto;
+import kg.attractor.job_search_java_25.dto.userDtos.EditProfileDto;
+import kg.attractor.job_search_java_25.dto.userDtos.UserProfileDto;
 import kg.attractor.job_search_java_25.service.ProfileService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;

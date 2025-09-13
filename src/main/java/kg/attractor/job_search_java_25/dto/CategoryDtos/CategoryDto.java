@@ -1,4 +1,4 @@
-package kg.attractor.job_search_java_25.dto;
+package kg.attractor.job_search_java_25.dto.CategoryDtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,12 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class ContactInfoDto {
-
-    private Long typeId;
-    private String contactValue;
-
+public class CategoryDto {
+    private Long id;
+    private String name;
 }

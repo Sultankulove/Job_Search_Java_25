@@ -1,6 +1,6 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import kg.attractor.job_search_java_25.dto.WorkExperienceInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
 import kg.attractor.job_search_java_25.model.WorkExperienceInfo;
 import kg.attractor.job_search_java_25.repository.WorkExperienceInfoRepository;
 import kg.attractor.job_search_java_25.service.WorkExperienceInfoService;

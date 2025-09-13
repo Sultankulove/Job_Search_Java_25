@@ -48,7 +48,7 @@ public class Resume {
     private List<EducationInfo> educationInfos;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContactInfo> contacts;
+    private List<ContactInfo> contactInfos;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RespondedApplicant> responses;

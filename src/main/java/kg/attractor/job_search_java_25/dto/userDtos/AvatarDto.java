@@ -1,4 +1,4 @@
-package kg.attractor.job_search_java_25.dto;
+package kg.attractor.job_search_java_25.dto.userDtos;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

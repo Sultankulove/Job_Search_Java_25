@@ -1,8 +1,7 @@
 package kg.attractor.job_search_java_25.repository;
 
 
-import kg.attractor.job_search_java_25.dto.VacancyDto;
-import kg.attractor.job_search_java_25.dto.VacancyShortDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
 import kg.attractor.job_search_java_25.model.Category;
 import kg.attractor.job_search_java_25.model.Vacancy;
 import org.springframework.data.domain.Page;
@@ -139,4 +138,5 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
     Page<Vacancy> findAllByAuthor_IdAndCategory_Id(Long authorId, Long categoryId, Pageable pageable);
 
+    Page<VacancyListItemDto> getVacanciesByAuthor_Id(Long authorId, Pageable pageable);
 }

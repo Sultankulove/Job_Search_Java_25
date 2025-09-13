@@ -5,8 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.AccountType;
-import kg.attractor.job_search_java_25.dto.RegistrationRequestDto;
+import kg.attractor.job_search_java_25.dto.userDtos.AccountType;
+import kg.attractor.job_search_java_25.dto.userDtos.RegistrationRequestDto;
 import kg.attractor.job_search_java_25.exceptions.types.ConflictException;
 import kg.attractor.job_search_java_25.exceptions.types.UserNotFoundException;
 import kg.attractor.job_search_java_25.model.User;

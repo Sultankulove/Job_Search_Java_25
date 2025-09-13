@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 public class ActiveDto {
 
     @NotNull
-    private boolean isActive;
+    private Boolean Active;
 }

@@ -1,6 +1,6 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import kg.attractor.job_search_java_25.dto.CategoryDto;
+import kg.attractor.job_search_java_25.dto.CategoryDtos.CategoryDto;
 import kg.attractor.job_search_java_25.mappers.CategoryMapper;
 import kg.attractor.job_search_java_25.repository.CategoryRepository;
 import kg.attractor.job_search_java_25.service.CategoryService;

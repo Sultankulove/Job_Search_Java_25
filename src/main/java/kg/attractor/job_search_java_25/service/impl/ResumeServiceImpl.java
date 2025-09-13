@@ -1,7 +1,10 @@
 package kg.attractor.job_search_java_25.service.impl;
 
 import kg.attractor.job_search_java_25.dao.ResumeDao;
-import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.dto.contactDros.ContactInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
+import kg.attractor.job_search_java_25.dto.userDtos.UserProfileDto;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.mappers.ResumeMapper;

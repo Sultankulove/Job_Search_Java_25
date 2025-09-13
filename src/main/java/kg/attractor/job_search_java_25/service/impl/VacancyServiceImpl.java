@@ -1,7 +1,11 @@
 package kg.attractor.job_search_java_25.service.impl;
 
 import kg.attractor.job_search_java_25.dao.VacancyDao;
-import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.dto.ActiveDto;
+import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.ResponseDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyUpsertDto;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.mappers.VacancyMapper;
@@ -9,7 +13,9 @@ import kg.attractor.job_search_java_25.model.Category;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.model.User;
 import kg.attractor.job_search_java_25.model.Vacancy;
+import kg.attractor.job_search_java_25.repository.CategoryRepository;
 import kg.attractor.job_search_java_25.repository.RespondedApplicantRepository;
+import kg.attractor.job_search_java_25.repository.UserRepository;
 import kg.attractor.job_search_java_25.repository.VacancyRepository;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -29,21 +35,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class VacancyServiceImpl implements VacancyService {
-    private final VacancyDao vacancyDao;
     private final VacancyRepository vacancyRepository;
     private final RespondedApplicantRepository respondedApplicantRepository;
+    private final VacancyMapper vacancyMapper;
+    private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public List<VacancyShortDto> getShortVacanciesList(Long employerId, Pageable p) {
-        log.debug("VacancyService.getShortVacanciesList(employerId={})", employerId);
-        List<VacancyShortDto> shortVacancies;
-
-        shortVacancies = vacancyRepository.findAllByAuthor_Id(employerId, p)
-                .stream()
-                .map(vacancy -> new VacancyShortDto(vacancy.getName(), vacancy.getUpdateTime()))
-                .toList();
-        log.info("Вакансии: короткий список size={}", shortVacancies.size());
-        return shortVacancies;
+    public Page<VacancyListItemDto> getShortVacanciesList(Long authorId, Pageable pageable) {
+        return vacancyRepository.getVacanciesByAuthor_Id(authorId, pageable);
     }
 
     @Override
@@ -53,27 +53,35 @@ public class VacancyServiceImpl implements VacancyService {
         return ResponseEntity.noContent().build();
     }
 
-    @Override
-    public void editVacancy(VacancyEditDto editVacancyEditDto, Long vacancyId, Long userId) {
-        log.info("Вакансии: редактирование id={}, authorId={}", vacancyId, userId);
-        Vacancy vacancy = new Vacancy();
-        vacancy.setName(editVacancyEditDto.getName());
-        vacancy.setDescription(editVacancyEditDto.getDescription());
-        vacancy.getCategory().setId(editVacancyEditDto.getCategoryId());
-        vacancy.setSalary(editVacancyEditDto.getSalary());
-        vacancy.setExpFrom(editVacancyEditDto.getExpFrom());
-        vacancy.setExpTo(editVacancyEditDto.getExpTo());
-        vacancy.setIsActive(editVacancyEditDto.isActive());
 
-        vacancyRepository.saveVacancy_IdUser_Id(vacancy, vacancyId, userId);
-        log.debug("Вакансии: отредактировано id={}", vacancyId);
+    @Override
+    public void edtVacancy(VacancyUpsertDto v, Long vacancyId, Long userId) {
+        Vacancy vacancy = vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new ForbiddenException("Нет вакансии с id" + vacancyId));
+        Category category = categoryRepository.getCategoryById(v.getCategoryId());
+
+        User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new NotFoundException("User not found"));
+
+        vacancyRepository.saveVacancy_IdUser_Id(vacancyMapper.applyUpsert(v, vacancy, category, user), vacancyId, userId);
     }
 
     @Override
-    public void vacancyIsActiveById(Long vacancyId, VacancyIsActiveDto vacancyIsActiveDto) {
-        boolean isActive = vacancyIsActiveDto.getIsActive();
-        log.info("Вакансии: публикация id={}, isActive={}", vacancyId, isActive);
-        vacancyRepository.vacancyIsActive(vacancyId, isActive);
+    public void vacancyIsActive(Long vacancyId, ActiveDto activeDto) {
+        vacancyRepository.vacancyIsActive(vacancyId, activeDto.getActive());
+    }
+
+
+    public void createVacancy(VacancyUpsertDto v, Long userId) {
+
+        vacancyRepository.save(
+                vacancyMapper.applyUpsert(v,
+                        new Vacancy(),
+                        categoryRepository.getCategoryById(v.getCategoryId()),
+                        userRepository.findUserById(userId)
+                                .orElseThrow(() -> new NotFoundException("User not found"))
+                )
+        );
     }
 
     @Override
