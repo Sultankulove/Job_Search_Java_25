@@ -9,9 +9,13 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ResumeShortDto {
+@AllArgsConstructor
+public class VacancyListItemDto {
+    private Long id;
     private String name;
+    private String categoryName;
+    private Float salary;
+    private Boolean active;
     private LocalDateTime updateTime;
 }
