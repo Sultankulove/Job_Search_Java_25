@@ -8,10 +8,14 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class VacancyShortDto {
+@AllArgsConstructor
+@Builder
+public class ResumeListItemDto {
+    private Long id;
     private String name;
+    private String categoryName;
+    private Float salary;
+    private Boolean active;
     private LocalDateTime updateTime;
 }
