@@ -13,19 +13,9 @@ import java.time.LocalDate;
 @Builder
 public class EducationInfoDto {
 
-
-    private Long id;
-
-    private Long resume_id;
-
     private String institution;
-
     private String program;
-
-    private LocalDate startDate;
-
-    private LocalDate endDate;
-
     private String degree;
-
+    private LocalDate startDate;
+    private LocalDate endDate;
 }
