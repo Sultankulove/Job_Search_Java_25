@@ -1,17 +1,21 @@
 package kg.attractor.job_search_java_25.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VacancyIsActiveDto {
+@Builder
+public class ContactTypeDto {
 
-    @NotNull
-    private Boolean isActive;
+    private Long id;
+
+    private String name;
+
+    private List<ContactInfoDto> contacts;
 }
