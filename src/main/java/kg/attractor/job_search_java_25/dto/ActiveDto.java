@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResumeIsActiveDto {
+public class ActiveDto {
 
     @NotNull
-    private Boolean isActive;
+    private boolean isActive;
 }
