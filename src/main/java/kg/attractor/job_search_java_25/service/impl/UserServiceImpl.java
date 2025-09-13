@@ -77,7 +77,6 @@ public class UserServiceImpl implements UserService {
         user.setAccountType(String.valueOf(rrd.getAccountType()));
         user.setEnabled(true);
         userRepository.save(user);
-        log.info("Пользователь зарегистрирован email={}", rrd.getEmail());
     }
 
 

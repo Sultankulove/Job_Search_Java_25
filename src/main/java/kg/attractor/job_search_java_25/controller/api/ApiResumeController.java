@@ -57,7 +57,7 @@ public class ApiResumeController {
                                                       Authentication authentication) {
         Long applicantId = userService.findUserIdByEmail(authentication.getName());
         log.info("POST /api/list — создание резюме, applicantId={}", applicantId);
-        ResumeEditDto saved = resumeService.createResume(applicantId, resumeEditDto);
+        ResumeEditDto saved = resumeService.saveResume(applicantId, resumeEditDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 

@@ -18,7 +18,7 @@ public interface ResumeService {
 
     void resumeIsActiveById(Long resumeId, ResumeIsActiveDto resumeIsActiveDto);
 
-    ResumeEditDto createResume(Long applicantId, ResumeEditDto resumeEditDto);
+    ResumeEditDto saveResume(Long applicantId, ResumeEditDto resumeEditDto);
 
     ResponseEntity<?> getResumeById(Long id);
 

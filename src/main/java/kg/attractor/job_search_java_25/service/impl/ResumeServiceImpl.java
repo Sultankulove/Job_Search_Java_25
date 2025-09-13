@@ -3,6 +3,8 @@ package kg.attractor.job_search_java_25.service.impl;
 import kg.attractor.job_search_java_25.dao.ResumeDao;
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
+import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
+import kg.attractor.job_search_java_25.mappers.ResumeMapper;
 import kg.attractor.job_search_java_25.model.*;
 import kg.attractor.job_search_java_25.repository.*;
 import kg.attractor.job_search_java_25.service.ResumeService;
@@ -35,26 +37,21 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public List<ResumeShortDto> getShortResumesList(Long applicantId) {
-        log.debug("ResumeService.getShortResumesList(applicantId={})", applicantId);
-        List<ResumeShortDto> shortResumes;
-        shortResumes = resumeRepository.findAllByApplicant_Id(applicantId)
-                .stream()
-                .map(r -> new ResumeShortDto(r.getName(), r.getUpdateTime()))
-                .toList();
-        log.info("Резюме: короткий список size={}", shortResumes.size());
-        return shortResumes;
+        return resumeRepository.getAllByApplicant_Id(applicantId)
+                .stream().map(ResumeMapper::toShortDto).toList();
     }
 
     @Override
     public ResponseEntity<?> updateTime(Long resumeId) {
-        log.info("Резюме: обновление времени id={}", resumeId);
-        Resume resume = resumeRepository.findById(resumeId).orElse(null);
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new ForbiddenException("resume not found"));
         if (resume == null) {
-            System.out.println("updateTime resumeId=" + resumeId + "not found");
-            return ResponseEntity.notFound().build();
+            throw new ForbiddenException("resume not found");
         }
+
         resume.setUpdateTime(LocalDateTime.now());
         resumeRepository.save(resume);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -62,9 +59,11 @@ public class ResumeServiceImpl implements ResumeService {
     public void editResume(ResumeEditDto resumeEditDto, Long resumeId, Long applicantId) {
         log.info("Резюме: редактирование id={}, applicantId={}", resumeId, applicantId);
         Resume resume = new Resume();
-        User user = userRepository.findById(applicantId).orElse(null);
+        UserProfileDto userProfileDto = userRepository.findById(applicantId)
+                .orElseThrow(() -> new NotFoundException("userProfileDto not found"));
+
         resume.setId(resumeId);
-        resume.setApplicant(user);
+        resume.setApplicant(userProfileDto);
         resume.setName(resumeEditDto.getName());
         resume.getCategory().setId(resumeEditDto.getCategoryId());
         resume.setSalary(resumeEditDto.getSalary());
@@ -84,19 +83,16 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     @Transactional
-    public ResumeEditDto createResume(Long applicantId, ResumeEditDto dto) {
+    public ResumeEditDto saveResume(Long applicantId, ResumeEditDto dto) {
         if (dto.getCategoryId() == null) {
             throw new IllegalArgumentException("categoryId is required");
         }
 
-        log.info("Резюме: создание applicantId={}", applicantId);
-
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Категория не найдена: id=" + dto.getCategoryId()));
-        User applicant = userRepository.findById(applicantId)
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден: id=" + applicantId));
 
-        LocalDateTime now = LocalDateTime.now();
+        UserProfileDto applicant = userRepository.findById(applicantId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден: id=" + applicantId));
 
         var resume = new Resume();
         resume.setName(dto.getName());
@@ -104,8 +100,8 @@ public class ResumeServiceImpl implements ResumeService {
         resume.setActive(Boolean.TRUE.equals(dto.isActive()));
         resume.setCategory(category);
         resume.setApplicant(applicant);
-        resume.setCreatedDate(now);
-        resume.setUpdateTime(now);
+        resume.setCreatedDate(LocalDateTime.now());
+        resume.setUpdateTime(LocalDateTime.now());
         resume = resumeRepository.save(resume);
 
         log.debug("Резюме: создано id={}, name='{}', categoryId={}",
@@ -167,6 +163,7 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public ResponseEntity<?> getResumeById(Long id) {
         Optional<Resume> resume = resumeRepository.findById(id);
+
         if (resume.isPresent()) {
             log.info("Резюме: найдено id={}", id);
             ResumeDto dto = new ResumeDto();
@@ -186,22 +183,17 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public void deleteResumeById(Long id) {
-        log.warn("Резюме: удаление id={}", id);
         resumeRepository.deleteById(id);
     }
 
     @Override
     public void updateTimeOwned(Long resumeId, Long applicantId) {
-        log.debug("updateTimeOwned(resumeId={}, applicantId={})", resumeId, applicantId);
         requireResumeOwner(resumeId, applicantId);
-        Resume resume = resumeRepository.findById(resumeId).orElse(null);
-        if (resume == null) {
-            log.error("updateTimeOwned resumeId={}not found", resumeId);
-        }
+
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new NotFoundException("Resume not found"));
         resume.setUpdateTime(LocalDateTime.now());
-        resumeRepository.save(resume);
-        log.info("Время обновления резюме {} изменено владельцем {}", resumeId, applicantId);
-    }
+        resumeRepository.save(resume);}
 
     @Override
     public void editResumeOwned(ResumeEditDto dto, Long resumeId, Long applicantId) {
@@ -209,8 +201,8 @@ public class ResumeServiceImpl implements ResumeService {
         requireResumeOwner(resumeId, applicantId);
         Resume resume = new Resume();
         resume.setId(resumeId);
-        User user = userRepository.findById(applicantId).orElse(null);
-        resume.setApplicant(user);
+        UserProfileDto userProfileDto = userRepository.findById(applicantId).orElse(null);
+        resume.setApplicant(userProfileDto);
         resume.setName(dto.getName());
         resume.getCategory().setId(dto.getCategoryId());
         resume.setSalary(dto.getSalary());
@@ -222,10 +214,8 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public void resumeIsActiveOwned(Long resumeId, ResumeIsActiveDto dto, Long applicantId) {
-        log.debug("resumeIsActiveOwned(resumeId={}, applicantId={})", resumeId, applicantId);
         requireResumeOwner(resumeId, applicantId);
         resumeRepository.resumeIsActive(resumeId, dto.getIsActive());
-        log.info("Статус активности резюме {} изменён владельцем {} на {}", resumeId, applicantId, dto.getIsActive());
     }
 
     private void requireResumeOwner(Long resumeId, Long userId) {
@@ -237,61 +227,22 @@ public class ResumeServiceImpl implements ResumeService {
     public List<ResumeDto> searchResumes(ResumeSearchDto criteria) {
         log.debug("ResumeService.searchResumes(criteria={})", criteria);
         List<Resume> results = resumeDao.searchResumes(criteria);
-        return results.stream().map(r -> {
-            ResumeDto dto = new ResumeDto();
-            dto.setApplicantId(r.getApplicant().getId());
-            dto.setName(r.getName());
-            dto.setCategoryId(r.getCategory().getId());
-            dto.setSalary(r.getSalary());
-            dto.setIsActive(r.getIsActive());
-            dto.setCreatedDate(r.getCreatedDate());
-            dto.setUpdateTime(r.getUpdateTime());
-            return dto;
-        }).toList();
+        return results.stream().map(ResumeMapper::toDto).toList();
     }
 
     @Override
     public List<ResumeListViewDto> findAllForList(Long applicantId) {
-        log.debug("ResumeService.findAllForList(applicantId={})", applicantId);
-
-        return resumeRepository.findAllForList(applicantId)
-                .stream().map(v -> {
-                    ResumeListViewDto dto = new ResumeListViewDto();
-                    dto.setApplicantId(v.getApplicantId());
-                    dto.setCategoryId(v.getCategoryId());
-                    dto.setName(v.getName());
-                    dto.setSalary(v.getSalary());
-                    dto.setIsActive(Boolean.TRUE.equals(v.getIsActive()));
-                    dto.setCreatedDate(v.getCreatedDate());
-                    dto.setUpdateTime(v.getUpdateTime());
-                    return dto;
-                }).toList();
+        return ResumeMapper.toListViewDtoList(resumeRepository.getAllByApplicant_Id(applicantId));
     }
 
     @Override
     public List<ResumeDto> findResumesById(Long applicantId) {
-        return resumeRepository.findAllByApplicant_Id(applicantId)
-                .stream().map(r -> {
-                    ResumeDto dto = new ResumeDto();
-                    dto.setApplicantId(r.getApplicant().getId());
-                    dto.setName(r.getName());
-                    dto.setCategoryId(r.getCategory().getId());
-                    dto.setSalary(r.getSalary());
-                    dto.setIsActive(r.getIsActive());
-                    dto.setCreatedDate(r.getCreatedDate());
-                    dto.setUpdateTime(r.getUpdateTime());
-                    return dto;
-                }).toList();
-
+        return ResumeMapper.toDtoList(resumeRepository.findAllByApplicant_Id(applicantId));
     }
 
     @Override
     public List<ResumeDto> findAll() {
-
-        List<ResumeDto> resumes = resumeRepository.findAllResumes();
-        log.debug("resumes: {}", resumes);
-        return resumes;
-
+        return ResumeMapper.toDtoList(resumeRepository.findAll());
     }
 
     @Override
@@ -302,83 +253,31 @@ public class ResumeServiceImpl implements ResumeService {
 
     @Override
     public List<ResumeDto> findByAuthor(Long userId) {
-        return resumeRepository.findAllByApplicant_Id(userId)
-                .stream()
-                .map(r -> {
-                    ResumeDto dto = new ResumeDto();
-                    dto.setApplicantId(r.getApplicant().getId());
-                    dto.setName(r.getName());
-                    dto.setCategoryId(r.getCategory().getId());
-                    dto.setSalary(r.getSalary());
-                    dto.setIsActive(r.getIsActive());
-                    dto.setCreatedDate(r.getCreatedDate());
-                    dto.setUpdateTime(r.getUpdateTime());
-                    return dto;
-                }).toList();
+        return ResumeMapper.toDtoList(resumeRepository.findAllByApplicant_Id(userId));
     }
 
     @Override
     public Page<ResumeDto> getResumes(Pageable pageble) {
-
         return resumeRepository.findAll(pageble)
-                .map(resume -> {
-                    ResumeDto dto = new ResumeDto();
-                    dto.setApplicantId(resume.getApplicant().getId());
-                    dto.setName(resume.getName());
-                    dto.setCategoryId(resume.getCategory().getId());
-                    dto.setSalary(resume.getSalary());
-                    dto.setIsActive(resume.getIsActive());
-                    dto.setCreatedDate(resume.getCreatedDate());
-                    dto.setUpdateTime(resume.getUpdateTime());
-                    return dto;
-                });
+                .map(ResumeMapper::toDto);
     }
 
     @Override
     public Page<ResumeDto> getResumesByCategory(Long categoryId, PageRequest of) {
         return resumeRepository.findByCategory_Id(categoryId, of)
-                .map(resume -> {
-                    ResumeDto dto = new ResumeDto();
-                    dto.setApplicantId(resume.getApplicant().getId());
-                    dto.setName(resume.getName());
-                    dto.setCategoryId(resume.getCategory().getId());
-                    dto.setSalary(resume.getSalary());
-                    dto.setIsActive(resume.getIsActive());
-                    dto.setCreatedDate(resume.getCreatedDate());
-                    dto.setUpdateTime(resume.getUpdateTime());
-                    return dto;
-                });
+                .map(ResumeMapper::toDto);
     }
 
     @Override
     public Page<ResumeDto> getResumesByAuthor(Long userId, Pageable pageable) {
         return resumeRepository.findAllByApplicant_Id(userId, pageable)
-                .map(resume -> {
-                    ResumeDto dto = new ResumeDto();
-                    dto.setApplicantId(resume.getApplicant().getId());
-                    dto.setName(resume.getName());
-                    dto.setCategoryId(resume.getCategory().getId());
-                    dto.setSalary(resume.getSalary());
-                    dto.setIsActive(resume.getIsActive());
-                    dto.setCreatedDate(resume.getCreatedDate());
-                    dto.setUpdateTime(resume.getUpdateTime());
-                    return dto;
-                });
+                .map(ResumeMapper::toDto);
     }
 
     @Override
     public Page<ResumeDto> getResumesByAuthorAndCategory(Long userId, Long categoryId, Pageable pageable) {
         return resumeRepository.findAllByApplicant_IdAndCategory_Id(userId, categoryId, pageable)
-                .map(resume -> {
-                    ResumeDto dto = new ResumeDto();
-                    dto.setApplicantId(resume.getApplicant().getId());
-                    dto.setName(resume.getName());
-                    dto.setCategoryId(resume.getCategory().getId());
-                    dto.setSalary(resume.getSalary());
-                    dto.setIsActive(resume.getIsActive());
-                    dto.setCreatedDate(resume.getCreatedDate());
-                    dto.setUpdateTime(resume.getUpdateTime());
-                    return dto;
-                });
+                .map(ResumeMapper::toDto);
     }
+
 }

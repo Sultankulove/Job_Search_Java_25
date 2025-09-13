@@ -9,11 +9,11 @@ import java.util.List;
 public interface ProfileService {
     void addAvatar(AvatarDto avatarDto);
 
-    ResponseEntity<?> getAvatarByUserId(Long userId);
+    ResponseEntity<?> findAvatarById(Long userId);
 
-    MyProfileDto getMyProfile(Long auth);
+    UserProfileDto getMyProfile(Long auth);
 
-    MyProfileDto editProfile(EditProfileDto epd, Long auth);
+    UserProfileDto updateProfileByUserId(EditProfileDto epd, Long auth);
 
     ResponseEntity<List<RespondedApplicantDto>> getMyResponses(Long auth);
 

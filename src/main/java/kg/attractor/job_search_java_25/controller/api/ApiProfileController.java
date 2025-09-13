@@ -39,25 +39,24 @@ public class ApiProfileController {
     }
 
     @GetMapping
-    public MyProfileDto getMyProfile(Authentication authentication) {
+    public UserProfileDto getMyProfile(Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
         log.debug("GET /api/profile/{} — получить профиль", authentication.getName());
         return profileService.getMyProfile(authId);
     }
 
     @PutMapping
-    public ResponseEntity<MyProfileDto> editProfile(@RequestBody @Valid EditProfileDto epd, Authentication authentication) {
+    public ResponseEntity<UserProfileDto> editProfile(@RequestBody @Valid EditProfileDto epd, Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
         log.info("PUT /api/profile — редактирование профиля userId={}", authId);
 
-        MyProfileDto update = profileService.editProfile(epd, authId);
+        UserProfileDto update = profileService.updateProfileByUserId(epd, authId);
         return ResponseEntity.ok(update);
     }
 
 
     @PostMapping("avatar")
     public void uploadAvatar(@RequestPart("avatar")MultipartFile avatar, Principal principal) {
-//        if (principal == null) return HttpStatus.UNAUTHORIZED;
         Long authId = userService.findUserIdByEmail(principal.getName());
         AvatarDto avatarDto = new AvatarDto();
         avatarDto.setUserId(authId);
@@ -65,14 +64,13 @@ public class ApiProfileController {
 
         log.info("POST /api/profile/avatar — загрузка аватара пользователем");
         profileService.addAvatar(avatarDto);
-//        return HttpStatus.CREATED;
     }
 
     @GetMapping("avatar")
     public ResponseEntity<?> getAvatar(Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
         log.debug("GET /api/profile/avatar?userId={} — получение аватара", authId);
-        return profileService.getAvatarByUserId(authId);
+        return profileService.findAvatarById(authId);
     }
 
 

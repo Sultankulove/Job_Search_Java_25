@@ -4,6 +4,7 @@ import kg.attractor.job_search_java_25.dao.VacancyDao;
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
+import kg.attractor.job_search_java_25.mappers.VacancyMapper;
 import kg.attractor.job_search_java_25.model.Category;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.model.User;
@@ -160,7 +161,6 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(Long vacancyId) {
-        log.debug("Отклики: запрос списка по vacancyId={}", vacancyId);
         List<RespondedApplicant> responded = respondedApplicantRepository.getResponsesByVacancy(vacancyId);
         List<RespondedApplicantDto> dtos = responded.stream()
                 .map(entity -> RespondedApplicantDto.builder()
@@ -170,20 +170,17 @@ public class VacancyServiceImpl implements VacancyService {
                         .confirmation(entity.getConfirmation())
                         .build())
                 .toList();
-        log.info("Отклики: найдено {}", dtos.size());
         return ResponseEntity.ok(dtos);
     }
 
     @Override
     public List<VacancyShortDto> getPublicShortVacancies() {
         var list = vacancyRepository.getActiveShortVacancies();
-        log.info("Публичные вакансии: {}", list.size());
         return list;
     }
 
     @Override
     public void editVacancyOwned(VacancyEditDto dto, Long vacancyId, Long employerId) {
-        log.debug("editVacancyOwned(vacancyId={}, employerId={})", vacancyId, employerId);
         requireVacancyOwner(vacancyId, employerId);
         Vacancy v = new Vacancy();
         v.setName(dto.getName());
@@ -194,15 +191,12 @@ public class VacancyServiceImpl implements VacancyService {
         v.setExpTo(dto.getExpTo());
         v.setIsActive(dto.isActive());
         vacancyRepository.saveVacancy_IdUser_Id(v, vacancyId, employerId);
-        log.info("Вакансия {} отредактирована работодателем {}", vacancyId, employerId);
     }
 
     @Override
     public void vacancyIsActiveOwned(Long vacancyId, VacancyIsActiveDto dto, Long employerId) {
-        log.debug("vacancyIsActiveOwned(vacancyId={}, employerId={})", vacancyId, employerId);
         requireVacancyOwner(vacancyId, employerId);
         vacancyRepository.vacancyIsActive(vacancyId, dto.getIsActive());
-        log.info("Статус активности вакансии {} изменён работодателем {} на {}", vacancyId, employerId, dto.getIsActive());
     }
 
     private void requireVacancyOwner(Long vacancyId, Long employerId) {
@@ -212,43 +206,15 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public List<VacancyDto> searchVacancies(VacancySearchDto criteria) {
-        log.debug("VacancyService.searchVacancies(criteria={})", criteria);
         List<Vacancy> found = vacancyDao.searchVacancies(criteria);
-        return found.stream().map(v -> {
-            VacancyDto dto = new VacancyDto();
-            dto.setId(v.getId());
-            dto.setName(v.getName());
-            dto.setDescription(v.getDescription());
-            dto.setCategoryId(v.getCategory().getId());
-            dto.setSalary(v.getSalary());
-            dto.setExpFrom(v.getExpFrom());
-            dto.setExpTo(v.getExpTo());
-            dto.setIsActive(v.getIsActive());
-            dto.setAuthorId(v.getAuthor().getId());
-            dto.setCreatedDate(v.getCreatedDate());
-            dto.setUpdateTime(v.getUpdateTime());
-            return dto;
-        }).toList();
+        return found.stream().map(VacancyMapper::toDto).toList();
     }
 
     @Override
     public List<VacancyDto> findVacanciesById(Long userId) {
 
         return vacancyRepository.findAllByAuthor_Id((userId))
-                .stream().map(v -> {
-                    VacancyDto dto = new VacancyDto();
-                    dto.setId(v.getId());
-                    dto.setName(v.getName());
-                    dto.setCategoryId(v.getCategory().getId());
-                    dto.setDescription(v.getDescription());
-                    dto.setSalary(v.getSalary());
-                    dto.setExpFrom(v.getExpFrom());
-                    dto.setExpTo(v.getExpTo());
-                    dto.setIsActive(v.getIsActive());
-                    dto.setUpdateTime(v.getUpdateTime());
-                    dto.setCreatedDate(v.getCreatedDate());
-                    return dto;
-                }).toList();
+                .stream().map(VacancyMapper::toDto).toList();
     }
 
     @Override
@@ -260,60 +226,34 @@ public class VacancyServiceImpl implements VacancyService {
     public List<VacancyDto> findAllVacancies() {
         return vacancyRepository.findAll()
                 .stream()
-                .map(vacancy -> {
-                    VacancyDto dto = new VacancyDto();
-                    dto.setId(vacancy.getId());
-                    dto.setName(vacancy.getName());
-                    dto.setDescription(vacancy.getDescription());
-                    dto.setSalary(vacancy.getSalary());
-                    dto.setExpFrom(vacancy.getExpFrom());
-                    dto.setExpTo(vacancy.getExpTo());
-                    dto.setIsActive(vacancy.getIsActive());
-                    dto.setUpdateTime(vacancy.getUpdateTime());
-                    dto.setCreatedDate(vacancy.getCreatedDate());
-                    return dto;
-                }).toList();
+                .map(VacancyMapper::toDto).toList();
     }
 
     @Override
     public Page<VacancyDto> getVacancies(Pageable pageable) {
         return vacancyRepository.findAll(pageable)
-                .map(this::mapToDto);
+                .map(VacancyMapper::toDto);
     }
 
     @Override
     public Page<VacancyDto> getVacanciesByCategory(Long categoryId, PageRequest of) {
         return vacancyRepository.findByCategory_Id(categoryId, of)
-                .map(this::mapToDto);
+                .map(VacancyMapper::toDto);
     }
 
     @Override
     public Page<VacancyDto> findByEmployerId(Long employerId, Pageable pageable) {
 
         return vacancyRepository.findAllByAuthor_Id(employerId, pageable)
-                .map(this::mapToDto);
+                .map(VacancyMapper::toDto);
     }
 
     @Override
     public Page<VacancyDto> findByEmployerIdAndCategory(Long employerId, Long categoryId, Pageable pageable) {
         return vacancyRepository.findAllByAuthor_IdAndCategory_Id(employerId, categoryId, pageable)
-                .map(this::mapToDto);
+                .map(VacancyMapper::toDto);
     }
 
 
-    private VacancyDto mapToDto(Vacancy vacancy) {
-        VacancyDto dto = new VacancyDto();
-        dto.setId(vacancy.getId());
-        dto.setName(vacancy.getName());
-        dto.setDescription(vacancy.getDescription());
-        dto.setCategoryId(vacancy.getCategory().getId());
-        dto.setSalary(vacancy.getSalary());
-        dto.setExpFrom(vacancy.getExpFrom());
-        dto.setExpTo(vacancy.getExpTo());
-        dto.setIsActive(vacancy.getIsActive());
-        dto.setAuthorId(vacancy.getAuthor().getId());
-        dto.setCreatedDate(vacancy.getCreatedDate());
-        dto.setUpdateTime(vacancy.getUpdateTime());
-        return dto;
-    }
+
 }

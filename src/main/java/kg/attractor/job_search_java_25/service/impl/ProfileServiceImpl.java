@@ -2,6 +2,7 @@ package kg.attractor.job_search_java_25.service.impl;
 
 import kg.attractor.job_search_java_25.dto.*;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
+import kg.attractor.job_search_java_25.mappers.UserMapper;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.model.Resume;
 import kg.attractor.job_search_java_25.model.User;
@@ -17,22 +18,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProfileServiceImpl implements ProfileService {
 
-
     private final UserRepository userRepository;
-
     private final VacancyRepository vacancyRepository;
-
-    private final PasswordEncoder passwordEncoder;
     private static final String SUB_DIR = "avatar";
     private final ResumeRepository resumeRepository;
     private final RespondedApplicantRepository respondedApplicantRepository;
@@ -40,67 +38,46 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public void addAvatar(AvatarDto avatarDto) {
-        // надо проверить, она заменяет или удаляет?
+
         log.info("Профиль: загрузка аватара userId={}", avatarDto.getUserId());
         String avatar = FileUtil.saveUploadedFile(avatarDto.getAvatar(), SUB_DIR);
-        userRepository.uploadAvatar(avatar, avatarDto.getUserId());
+        userRepository.saveAvatar(avatar, avatarDto.getUserId());
         log.debug("Аватар сохранён: {}", avatar);
     }
 
     @Override
-    public ResponseEntity<?> getAvatarByUserId(Long userId) {
+    public ResponseEntity<?> findAvatarById(Long userId) {
         log.debug("Профиль: получение аватара userId={}", userId);
-        String avatar = userRepository.getAvatarByUserId(userId);
-        return FileUtil.downloadImage(avatar, SUB_DIR);
+        UserProfileDto avatar = userRepository.findAvatarById(userId);
+        String avatarStr = avatar.getAvatar();
+        return FileUtil.downloadImage(avatarStr, SUB_DIR);
     }
 
     @Override
-    public MyProfileDto getMyProfile(Long id) {
-
-        log.debug("Профиль: getMyProfile(auth={})", id);
+    public UserProfileDto getMyProfile(Long id) {
         try {
-            MyProfileDto myProfileDto = userRepository.getMyProfile(id);
-            return myProfileDto;
+            Optional<UserProfileDto> user = userRepository.getUserById(id);
+            UserProfileDto userProfileDto = new UserProfileDto();
+            return userProfileDto;
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             throw new NotFoundException("User id=" + id);
         }
     }
 
+    @Transactional
     @Override
-    public MyProfileDto editProfile(EditProfileDto dto, Long authId) {
-        log.info("Профиль: редактирование userId={}", authId);
+    public UserProfileDto updateProfileByUserId(EditProfileDto dto, Long id) {
+        UserProfileDto userProfileDto = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("UserProfileDto id=" + id));
 
-        User user = new User();
-        user.setName(dto.getName());
-        user.setSurname(dto.getSurname());
-        user.setAge(dto.getAge());
-        user.setEmail(dto.getEmail());
-        user.setPhoneNumber(dto.getPhoneNumber());
+        UserProfileDto getUserProfileDto = userRepository.save(userProfileDto);
 
 
-        User u = userRepository.findById(authId).orElseThrow();
-        u.setName(dto.getName());
-        u.setSurname(dto.getSurname());
-        u.setAge(dto.getAge());
-        u.setEmail(dto.getEmail());
-        u.setPhoneNumber(dto.getPhoneNumber());
-        userRepository.save(u);
-
-        if (authId == 0) throw new NotFoundException("User id=" + authId);
-
-        User fresh = userRepository.findUserById(authId);
-
-        MyProfileDto dto1 = new MyProfileDto();
-        dto1.setName(fresh.getName());
-        dto1.setSurname(fresh.getSurname());
-        dto1.setAge(fresh.getAge());
-        dto1.setEmail(fresh.getEmail());
-        dto1.setPhoneNumber(fresh.getPhoneNumber());
-        dto1.setAvatar(fresh.getAvatar());
-
-        log.debug("Профиль обновлён userId={}", authId);
-        return dto1;
+        return UserMapper.toDto(getUserProfileDto);
     }
+
+
+
 
 
     @Override
@@ -166,16 +143,18 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public UserProfileDto getUserProfile(Long id) {
-        return userRepository.getUserProfileById(id);
+
+        User user = userRepository.findUserById(id)
+                .orElseThrow(() -> new NotFoundException("UserProfileDto not found"));
+
+        return kg.attractor.job_search_java_25.dto.UserProfileDto.builder()
+                .name(user.getName())
+                .surname(user.getSurname())
+                .age(user.getAge())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .avatar(user.getAvatar())
+                .accountType(AccountType.valueOf(user.getAccountType()))
+                .build();
     }
-
-//    @Override
-//    public UserProfileDto getMyUserProfile(Long id) {
-//        MyProfileDto src = userRepository.getMyProfile(id);
-//        UserProfileDto dto = new UserProfileDto(
-//                src.getName(), src.getSurname(), src.getAge(),
-//                src.getEmail(), src.getPhoneNumber(), src.getAvatar(),
-//        );
-//    }
-
 }

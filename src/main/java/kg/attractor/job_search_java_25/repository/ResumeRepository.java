@@ -33,14 +33,11 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
               set r.isActive = :isActive
             where r.id = :resumeId
            """)
-    int resumeIsActive(@Param("resumeId") Long resumeId,
+    void resumeIsActive(@Param("resumeId") Long resumeId,
                        @Param("isActive") Boolean isActive);
-
-
 
     @Query("select r.applicant.id from Resume r where r.id = :resumeId")
     Long getOwnerId(@Param("resumeId") Long resumeId);
-
 
     @Query("""
     select new kg.attractor.job_search_java_25.dto.ResumeShortDto(
@@ -71,6 +68,8 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
         order by r.updateTime desc
         """)
     List<ResumeListViewDto> findAllForList(@Param("applicantId") Long applicantId);
+
+    List<Resume> getAllByApplicant_Id(Long id);
 
     @Query("""
         select new kg.attractor.job_search_java_25.dto.ResumeDto(

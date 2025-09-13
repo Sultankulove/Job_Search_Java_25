@@ -31,7 +31,7 @@ public class ProfileController {
         }
 
         Long userId = userService.findUserIdByEmail(auth.getName());
-        MyProfileDto user = profileService.getMyProfile(userId);
+        UserProfileDto user = profileService.getMyProfile(userId);
         model.addAttribute("user", user);
         return "profile";
     }
@@ -76,7 +76,7 @@ public class ProfileController {
             return "edit_profile";
         }
         Long authId = userService.findUserIdByEmail(principal.getName());
-        profileService.editProfile(dto, authId);
+        profileService.updateProfileByUserId(dto, authId);
         return "redirect:/profile";
     }
 }

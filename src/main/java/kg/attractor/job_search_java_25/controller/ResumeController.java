@@ -127,7 +127,7 @@ public class ResumeController {
 
         Long applicantId = userService.findUserIdByEmail(auth.getName());
 
-        resumeService.createResume(applicantId, dto);
+        resumeService.saveResume(applicantId, dto);
 
         return "redirect:/resumes";
     }
