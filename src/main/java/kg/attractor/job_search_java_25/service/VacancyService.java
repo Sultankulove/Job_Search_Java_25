@@ -3,7 +3,7 @@ package kg.attractor.job_search_java_25.service;
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.ActiveDto;
 import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.nested.ResponseDto;
+import kg.attractor.job_search_java_25.dto.ResponseDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyUpsertDto;
 import org.springframework.data.domain.Page;
@@ -27,9 +27,15 @@ public interface VacancyService {
 
     ResponseEntity<?> getVacancyById(Long id);
 
+    void createVacancy(VacancyUpsertDto v, Long userId);
+
+    ResponseEntity<?> findVacancyById(Long id);
+
     void deleteVacancyById(Long id);
 
     void respondToVacancy(ResponseDto dto, Long userId);
+
+    void respondToVacancy(ResponseDto dto);
 
     ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(Long vacancyId);
 

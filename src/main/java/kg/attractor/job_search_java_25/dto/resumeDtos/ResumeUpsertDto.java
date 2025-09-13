@@ -1,7 +1,7 @@
 package kg.attractor.job_search_java_25.dto.resumeDtos;
 
 import jakarta.validation.constraints.*;
-import kg.attractor.job_search_java_25.dto.contactDros.ContactInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
 import lombok.AllArgsConstructor;

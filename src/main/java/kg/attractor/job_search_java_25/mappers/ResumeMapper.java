@@ -1,7 +1,7 @@
 package kg.attractor.job_search_java_25.mappers;
 
 import kg.attractor.job_search_java_25.dto.ActiveDto;
-import kg.attractor.job_search_java_25.dto.contactDros.ContactInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeUpsertDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeViewDto;

@@ -3,20 +3,18 @@ package kg.attractor.job_search_java_25.service.impl;
 import kg.attractor.job_search_java_25.dao.VacancyDao;
 import kg.attractor.job_search_java_25.dto.ActiveDto;
 import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.nested.ResponseDto;
+import kg.attractor.job_search_java_25.dto.ResponseDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyUpsertDto;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
+import kg.attractor.job_search_java_25.mappers.RespondedApplicantMapper;
 import kg.attractor.job_search_java_25.mappers.VacancyMapper;
 import kg.attractor.job_search_java_25.model.Category;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.model.User;
 import kg.attractor.job_search_java_25.model.Vacancy;
-import kg.attractor.job_search_java_25.repository.CategoryRepository;
-import kg.attractor.job_search_java_25.repository.RespondedApplicantRepository;
-import kg.attractor.job_search_java_25.repository.UserRepository;
-import kg.attractor.job_search_java_25.repository.VacancyRepository;
+import kg.attractor.job_search_java_25.repository.*;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +34,10 @@ public class VacancyServiceImpl implements VacancyService {
     private final VacancyRepository vacancyRepository;
     private final RespondedApplicantRepository respondedApplicantRepository;
     private final VacancyMapper vacancyMapper;
+    private final RespondedApplicantMapper respondedApplicantMapper;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ResumeRepository resumeRepository;
 
     @Override
     public Page<VacancyListItemDto> getShortVacanciesList(Long authorId, Pageable pageable) {
@@ -56,14 +54,20 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public void edtVacancy(VacancyUpsertDto v, Long vacancyId, Long userId) {
-        Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new ForbiddenException("Нет вакансии с id" + vacancyId));
-        Category category = categoryRepository.getCategoryById(v.getCategoryId());
 
-        User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new NotFoundException("User not found"));
 
-        vacancyRepository.saveVacancy_IdUser_Id(vacancyMapper.applyUpsert(v, vacancy, category, user), vacancyId, userId);
+        vacancyRepository.saveVacancy_IdUser_Id(
+                vacancyMapper.applyUpsert(
+                        v,
+                        vacancyRepository.findById(vacancyId)
+                                .orElseThrow(() -> new ForbiddenException("Нет вакансии с id" + vacancyId)),
+                        categoryRepository.getCategoryById(v.getCategoryId()),
+                        userRepository.findById(userId)
+                                .orElseThrow(() -> new NotFoundException("User not found"))
+                ),
+                vacancyId,
+                userId
+        );
     }
 
     @Override
@@ -72,6 +76,7 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
 
+    @Override
     public void createVacancy(VacancyUpsertDto v, Long userId) {
 
         vacancyRepository.save(
@@ -85,86 +90,31 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public VacancyDto createVacancies(Long authorId, VacancyEditDto createVacancyEditDto) {
-        log.info("Вакансии: создание authorId={}", authorId);
-        Vacancy v = new Vacancy();
-        v.setName(createVacancyEditDto.getName());
-        v.setDescription(createVacancyEditDto.getDescription());
-
-        Category category = new Category();
-        category.setId(createVacancyEditDto.getCategoryId());
-        v.setCategory(category);
-
-        v.setSalary(createVacancyEditDto.getSalary());
-        v.setExpFrom(createVacancyEditDto.getExpFrom());
-        v.setExpTo(createVacancyEditDto.getExpTo());
-        v.setIsActive(createVacancyEditDto.isActive());
-        v.setCreatedDate(LocalDateTime.now());
-        v.setUpdateTime(LocalDateTime.now());
-
-        User author = new User();
-        author.setId(authorId);
-        v.setAuthor(author);
-
-        Vacancy vacancy = vacancyRepository.save(v);
-
-        v.setId(vacancy.getId());
-
-        log.debug("Вакансии: создано (name={}, categoryId={})", v.getName(), v.getCategory().getId());
-        return VacancyDto.builder()
-                .id(v.getId())
-                .name(v.getName())
-                .description(v.getDescription())
-                .categoryId(v.getCategory().getId())
-                .salary(v.getSalary())
-                .expFrom(v.getExpFrom())
-                .expTo(v.getExpTo())
-                .isActive(v.getIsActive())
-                .authorId(v.getAuthor().getId())
-                .createdDate(v.getCreatedDate())
-                .updateTime(v.getUpdateTime())
-                .build();
+    public ResponseEntity<?> findVacancyById(Long id) {
+        return ResponseEntity.ok(
+                vacancyMapper.toListItem(
+                        vacancyRepository.findVacancyById(id)
+                                .orElseThrow(() -> new NotFoundException("Vacancy not found"))
+                )
+        );
     }
 
-    @Override
-    public ResponseEntity<?> getVacancyById(Long id) {
-        Optional<Vacancy> vacancy = vacancyRepository.findVacancyById(id);
-        if (vacancy.isPresent()) {
-            log.info("Вакансии: найдено id={}", id);
-            VacancyDto dto = new VacancyDto();
-            dto.setId(vacancy.get().getId());
-            dto.setName(vacancy.get().getName());
-            dto.setDescription(vacancy.get().getDescription());
-            dto.setCategoryId(vacancy.get().getCategory().getId());
-            dto.setSalary(vacancy.get().getSalary());
-            dto.setExpFrom(vacancy.get().getExpFrom());
-            dto.setExpTo(vacancy.get().getExpTo());
-            dto.setIsActive(vacancy.get().getIsActive());
-            dto.setAuthorId(vacancy.get().getAuthor().getId());
-            dto.setCreatedDate(vacancy.get().getCreatedDate());
-            dto.setUpdateTime(vacancy.get().getUpdateTime());
-            return ResponseEntity.ok(dto);
-        } else {
-            log.warn("Вакансии: не найдено id={}", id);
-            throw new NotFoundException("Vacancy with id=" + id + " not found");
-        }
-    }
 
     @Override
     public void deleteVacancyById(Long id) {
-        log.warn("Вакансии: удаление id={}", id);
         vacancyRepository.deleteById(id);
     }
 
+
     @Override
-    public void respondToVacancy(ResponseDto dto, Long userId) {
-        log.info("Отклик: vacancyId={}, resumeId={}, userId={}", dto.getVacancyId(), dto.getResumeId(), userId);
-        RespondedApplicant respondedApplicant = new RespondedApplicant();
-        respondedApplicant.getResume().setId(dto.getResumeId());
-        respondedApplicant.getVacancy().setId(dto.getVacancyId());
-        respondedApplicant.setConfirmation(false);
-        respondedApplicantRepository.save(respondedApplicant);
-        log.debug("Отклик: сохранён");
+    public void respondToVacancy(ResponseDto dto) {
+        respondedApplicantRepository.save(
+                respondedApplicantMapper.applyUpsert(
+                        new RespondedApplicant(),
+                        vacancyRepository.getVacancyById(dto.getVacancyId()),
+                        resumeRepository.getResumeById(dto.getResumeId()),
+                        false)
+        );
     }
 
     @Override

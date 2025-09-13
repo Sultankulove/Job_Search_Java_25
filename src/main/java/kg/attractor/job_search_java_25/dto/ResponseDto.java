@@ -1,4 +1,4 @@
-package kg.attractor.job_search_java_25.dto.resumeDtos.nested;
+package kg.attractor.job_search_java_25.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
