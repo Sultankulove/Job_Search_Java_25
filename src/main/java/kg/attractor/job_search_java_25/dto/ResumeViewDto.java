@@ -11,13 +11,14 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResumeListViewDto {
+public class ResumeViewDto {
+    private Long id;
     private Long applicantId;
     private Long categoryId;
     private String categoryName;
     private String name;
     private Float salary;
-    private Boolean isActive;
+    private boolean active;
     private LocalDateTime createdDate;
     private LocalDateTime updateTime;
 }
