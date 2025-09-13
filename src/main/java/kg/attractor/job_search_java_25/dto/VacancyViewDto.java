@@ -1,6 +1,5 @@
 package kg.attractor.job_search_java_25.dto;
 
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,21 +11,17 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResumeDto {
-    private Long applicantId;
-
-    @NotBlank
-    @Size(max = 64)
-    private String name;
-
-    @NotNull
-    @Positive
+public class VacancyViewDto {
+    private Long id;
+    private Long authorId;
     private Long categoryId;
-
-    @PositiveOrZero
+    private String categoryName;
+    private String name;
+    private String description;
     private Float salary;
-
-    private Boolean isActive;
+    private Integer expFrom;
+    private Integer expTo;
+    private Boolean active;
     private LocalDateTime createdDate;
     private LocalDateTime updateTime;
-}
+};
