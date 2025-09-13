@@ -6,14 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResumeEditDto {
+public class ResumeUpsertDto {
     @NotBlank
     @Size(max = 64)
     private String name;
@@ -25,9 +24,10 @@ public class ResumeEditDto {
     @PositiveOrZero
     private Float salary;
 
-    private boolean active;
+    @NotNull
+    private Boolean active;
 
-    private List<WorkExperienceInfoDto> workExperiences = new ArrayList<>();
-    private List<EducationInfoDto> educationInfos = new ArrayList<>();
-    private List<ContactInfoDto> contactInfos = new ArrayList<>();
+    private List<WorkExperienceInfoDto> workExperiences;
+    private List<EducationInfoDto> educationInfos;
+    private List<ContactInfoDto> contactInfos;
 }
