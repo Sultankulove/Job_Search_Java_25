@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 public interface RespondedApplicantRepository extends JpaRepository<RespondedApplicant, Long> {
 
+    boolean existsByVacancy_IdAndResume_Id(Long vacancyId, Long resumeId);
+
     @Query("""
            select r
              from RespondedApplicant r
@@ -27,13 +29,8 @@ public interface RespondedApplicantRepository extends JpaRepository<RespondedApp
            """)
     List<RespondedApplicant> getRespondedApplicantsByVacancyIds(@Param("vacancyIds") List<Long> vacancyIds);
 
-    @Query("""
-           select r
-             from RespondedApplicant r
-            where r.vacancy.id = :vacancyId
-           """)
+    @Query("select r from RespondedApplicant r where r.vacancy.id = :vacancyId order by r.id desc")
     List<RespondedApplicant> getResponsesByVacancy(@Param("vacancyId") Long vacancyId);
-
     boolean existsByResume_IdAndVacancy_Id(Long resumeId, Long vacancyId);
 
     default List<RespondedApplicant> getRespondedApplicantsByResumesIdSafe(List<Long> resumeIds) {
