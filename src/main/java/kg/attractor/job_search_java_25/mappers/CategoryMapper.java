@@ -2,23 +2,24 @@ package kg.attractor.job_search_java_25.mappers;
 
 import kg.attractor.job_search_java_25.dto.CategoryDtos.CategoryDto;
 import kg.attractor.job_search_java_25.model.Category;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class CategoryMapper {
 
-    public static CategoryDto toDto(Category category) {
-        if (category == null) return null;
-
-        CategoryDto dto = new CategoryDto();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
+    public CategoryDto toDto(Category c) {
+        if (c == null) return null;
+        var dto = new CategoryDto();
+        dto.setId(c.getId());
+        dto.setName(c.getName());
         return dto;
     }
 
-    public static List<CategoryDto> toDtoList(List<Category> categories) {
+    public List<CategoryDto> toDtoList(List<Category> categories) {
         return categories.stream()
-                .map(CategoryMapper::toDto)
+                .map(this::toDto)
                 .toList();
     }
 }
