@@ -23,6 +23,8 @@ public class Message {
     @Column(name = "content", length = 2048)
     private String content;
 
+    private Timestamp createdAt;
+
     @Column(name = "timestamp")
     private Timestamp timestamp;
 }
