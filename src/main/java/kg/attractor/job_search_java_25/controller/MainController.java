@@ -1,8 +1,10 @@
 package kg.attractor.job_search_java_25.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
 import kg.attractor.job_search_java_25.service.CategoryService;
 import kg.attractor.job_search_java_25.service.ResumeService;
-import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,65 +26,55 @@ public class MainController {
     private final ResumeService resumeService;
     private final VacancyService vacancyService;
     private final CategoryService categoryService;
-    private final UserService userService;
 
     @GetMapping
     public String index(@RequestParam(defaultValue = "0") int page,
                         @RequestParam(required = false) Long categoryId,
-                        Model model,
-                        Authentication auth) {
+                        Model model, Authentication auth, HttpServletRequest req) {
 
         if (auth == null || auth.getAuthorities() == null || auth.getAuthorities().isEmpty()) {
-            Page<VacancyDto> vacancies = (categoryId == null)
+            Page<VacancyListItemDto> vacancies = (categoryId == null)
                     ? vacancyService.getVacancies(PageRequest.of(page, 15))
                     : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
 
-            model.addAttribute("title", "Список вакансий");
-            model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
-            model.addAttribute("list", vacancies);
-
-            model.addAttribute("currentPage", vacancies.getNumber());
-            model.addAttribute("totalPages", vacancies.getTotalPages());
-            model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
-
+            fillListModel(req, model, "Список вакансий", vacancies, categoryId);
             return "index";
         }
 
-        String userRole = auth.getAuthorities().iterator().next().getAuthority();
+        String role = auth.getAuthorities().iterator().next().getAuthority();
 
-        if ("ROLE_APPLICANT".equals(userRole)) {
-            Page<ResumeDto> resumes = (categoryId == null)
+        if ("ROLE_APPLICANT".equals(role)) {
+            Page<ResumeListItemDto> resumes = (categoryId == null)
                     ? resumeService.getResumes(PageRequest.of(page, 15))
                     : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15));
 
-            model.addAttribute("title", "Список резюме");
-            model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
-            model.addAttribute("list", resumes);
-            model.addAttribute("currentPage", resumes.getNumber());
-            model.addAttribute("totalPages", resumes.getTotalPages());
-            model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+            fillListModel(req, model, "Список резюме", resumes, categoryId);
 
-        } else if ("ROLE_EMPLOYER".equals(userRole)) {
-            Page<VacancyDto> vacancies = (categoryId == null)
+        } else if ("ROLE_EMPLOYER".equals(role)) {
+            Page<VacancyListItemDto> vacancies = (categoryId == null)
                     ? vacancyService.getVacancies(PageRequest.of(page, 15))
                     : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
 
-            model.addAttribute("title", "Список вакансий");
-            model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
-            model.addAttribute("list", vacancies);
-            model.addAttribute("currentPage", vacancies.getNumber());
-            model.addAttribute("totalPages", vacancies.getTotalPages());
-            model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+            fillListModel(req, model, "Список вакансий", vacancies, categoryId);
 
         } else {
-            System.err.println("Unknown role: " + userRole);
+            log.warn("Unknown role: {}", role);
         }
 
         return "index";
     }
 
+    private void fillListModel(HttpServletRequest req, Model model, String title, Page<?> page, Long categoryId) {
+
+        model.addAttribute("title", title);
+        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+
+        model.addAttribute("list", page);
+        model.addAttribute("currentPage", page.getNumber());
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+        model.addAttribute("filterAction", req.getRequestURI());
+    }
 
 }
