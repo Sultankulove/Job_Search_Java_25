@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.function.Function;
 
 @Component
 public class ResumeMapper {
@@ -43,11 +44,11 @@ public class ResumeMapper {
         );
     }
 
-    public void applyUpsert(ResumeUpsertDto d, Resume e, Category category, User applicant) {
+    public void applyUpsert(ResumeUpsertDto d, Resume e, Category cat, User applicant, Function<Long, ContactType> contactTypeById) {
         e.setName(d.getName());
         e.setSalary(d.getSalary());
         e.setActive(Boolean.TRUE.equals(d.getActive()));
-        e.setCategory(category);
+        e.setCategory(cat);
         if (applicant != null) e.setApplicant(applicant);
 
         if (d.getWorkExperiences() != null) {
@@ -64,12 +65,20 @@ public class ResumeMapper {
                     .peek(ed -> ed.setResume(e))
                     .toList());
         }
-        if (d.getContactInfos() != null) {
+        if (d.getContactInfos()!=null) {
             e.getContactInfos().clear();
-            e.getContactInfos().addAll(d.getContactInfos().stream()
-                    .map(ci -> toContactEntity(ci, null)) // тип подставим позже
-                    .peek(ci -> ci.setResume(e))
-                    .toList());
+            e.getContactInfos().addAll(
+                    d.getContactInfos().stream()
+                            .map(ci -> {
+                                var contact = new ContactInfo();
+                                contact.setContactValue(ci.getContactValue());
+                                if (ci.getTypeId()!=null) {
+                                    contact.setType(contactTypeById.apply(ci.getTypeId()));
+                                }
+                                contact.setResume(e);
+                                return contact;
+                            }).toList()
+            );
         }
     }
 
