@@ -30,15 +30,15 @@ public class VacancyMapper {
         );
     }
 
-    public VacancyListItemDto toListItem(Vacancy r) {
-        if (r == null) return null;
+    public VacancyListItemDto toListItem(Vacancy v) {
+        if (v == null) return null;
         return new VacancyListItemDto(
-                r.getId(),
-                r.getName(),
-                r.getCategory() != null ? r.getCategory().getName() : null,
-                r.getSalary(),
-                r.getIsActive(),
-                r.getUpdateTime()
+                v.getId(),
+                v.getName(),
+                v.getCategory() != null ? v.getCategory().getName() : null,
+                v.getSalary(),
+                v.getIsActive(),
+                v.getUpdateTime()
         );
     }
 
@@ -58,7 +58,6 @@ public class VacancyMapper {
     public void applyActive(ActiveDto dto, Vacancy e) {
         if (dto != null && dto.getActive() != null) e.setIsActive(dto.getActive());
     }
-
 
     public List<VacancyListItemDto> toListItems(List<Vacancy> list) {
         return list == null ? List.of() : list.stream().map(this::toListItem).toList();
