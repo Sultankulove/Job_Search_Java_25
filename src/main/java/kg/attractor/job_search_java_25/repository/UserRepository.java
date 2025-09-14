@@ -13,25 +13,19 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByResetPasswordToken(String resetPasswordToken);
-
+    Optional<User> findByResetPasswordToken(String token);
     Optional<User> findByEmail(String email);
 
-    void saveAvatar(@Param("avatar") String avatar, @Param("userId") Long userId);
-
-    User findAvatarById(@Param("id") Long userId);
-
-    void saveUser(User user);
-    
-    @Query("select u.id from User u where lower(u.email) = lower(:email)")
-    Optional<Long> findUserIdByEmailIgnoreCase(@Param("email") String email);
-
     boolean existsByEmail(String email);
-
-
     boolean existsByPhoneNumber(String phoneNumber);
 
-    Optional<User> findUserById(Long id);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("update User u set u.avatar = :avatar where u.id = :userId")
+    int saveAvatar(@Param("avatar") String avatar, @Param("userId") Long userId);
+
+    @Query("select u.avatar from User u where u.id = :id")
+    Optional<String> findAvatarPathById(@Param("id") Long id);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
@@ -47,11 +41,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     int editProfile(@Param("id") Long id,
                     @Param("name") String name,
                     @Param("surname") String surname,
-                    @Param("age") Short age,
+                    @Param("age") Byte age,
                     @Param("email") String email,
                     @Param("phoneNumber") String phoneNumber);
 
-    User findUserByEmail(String email);
-
-    Optional<User> getUserById(Long id);
+    @Query("select u.id from User u where lower(u.email) = lower(:email)")
+    Optional<Long> findUserIdByEmailIgnoreCase(@Param("email") String email);
 }
