@@ -26,37 +26,36 @@ public class ApiChatController {
     private final UserService userService;
 
     @PostMapping("responses")
-    public String respondToVacancy(@RequestBody @Valid ResponseDto dto, Authentication authentication) {
-        Long userId = userService.findUserIdByEmail(authentication.getName());
-        log.info("POST /api/responses — отклик на вакансию, applicantId={}", userId);
-        vacancyService.respondToVacancy(dto, userId);
-
-        log.info("Отклик отправлен: vacancyId={}, applicantId={}", dto.getVacancyId(), userId);
-        return "OK";
+    public ResponseEntity<Void> respondToVacancy(@RequestBody @Valid ResponseDto dto,
+                                                 Authentication auth) {
+        Long applicantId = userService.findUserIdByEmail(auth.getName());
+        log.info("POST /api/responses — отклик, applicantId={}", applicantId);
+        vacancyService.respondToVacancy(dto, applicantId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("vacancies/{vacancyId}/responses")
-    public ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(@PathVariable Long vacancyId) {
-        log.debug("GET /api/vacancies/{}/responses", vacancyId);
-        return vacancyService.getResponsesByVacancy(vacancyId);
+    public ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(@PathVariable Long vacancyId,
+                                                                             Authentication auth) {
+        Long employerId = userService.findUserIdByEmail(auth.getName());
+        log.debug("GET /api/vacancies/{}/responses — employerId={}", vacancyId, employerId);
+        return ResponseEntity.ok(vacancyService.getResponsesByVacancy(vacancyId, employerId));
     }
 
     @GetMapping("chat/{responseId}")
-    public ResponseEntity<List<MessageDto>> getChat(@PathVariable Long responseId) {
-
-        log.debug("GET /api/chat/{} — получить чат по отклику", responseId);
-        List<MessageDto> chat = chatService.getChatByResponseId(responseId);
-
-        log.info("Чат {} сообщений для responseId={}", chat.size(), responseId);
-        return ResponseEntity.ok(chat);
+    public ResponseEntity<List<MessageDto>> getChat(@PathVariable Long responseId, Authentication auth) {
+        Long userId = userService.findUserIdByEmail(auth.getName());
+        log.debug("GET /api/chat/{} — userId={}", responseId, userId);
+        return ResponseEntity.ok(chatService.getChatByResponseId(responseId, userId));
     }
 
-    @PostMapping("chat/{chatId}/message")
-    public ResponseEntity<String> sendMessage(@PathVariable Long chatId, @RequestBody @Valid MessageDto dto) {
-        log.info("POST /api/chat/{}/message — отправка сообщения", chatId);
-        chatService.sendMessage(chatId, dto);
-
-        log.debug("Сообщение отправлено в чат={}, длина={}", chatId, dto.getContent() != null ? dto.getContent().length() : 0);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Message sent");
+    @PostMapping("chat/{responseId}/message")
+    public ResponseEntity<Void> sendMessage(@PathVariable Long responseId,
+                                            @RequestBody @Valid MessageDto dto,
+                                            Authentication auth) {
+        Long userId = userService.findUserIdByEmail(auth.getName());
+        log.info("POST /api/chat/{}/message — userId={}", responseId, userId);
+        chatService.sendMessage(responseId, userId, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
