@@ -1,6 +1,10 @@
 package kg.attractor.job_search_java_25.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeUpsertDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeViewDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
@@ -19,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -33,21 +36,22 @@ public class ResumeController {
 
     @GetMapping("/resumes")
     public String listResumes(@RequestParam(defaultValue = "0") int page,
-                              @RequestParam(required=false) Long categoryId,
-                              Model model) {
+                              @RequestParam(required = false) Long categoryId,
+                              Model model,
+                              HttpServletRequest req) {
 
-        Page<ResumeDto> resumes = (categoryId == null)
+        Page<ResumeListItemDto> resumes = (categoryId == null)
                 ? resumeService.getResumes(PageRequest.of(page, 15))
                 : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15));
 
-        log.info("resumes: {}", resumes);
         model.addAttribute("title", "Список резюме");
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("filterAction", req.getRequestURI());
         model.addAttribute("list", resumes);
-        model.addAttribute("currentPage",resumes.getNumber());
-        model.addAttribute("totalPages",resumes.getTotalPages());
+        model.addAttribute("currentPage", resumes.getNumber());
+        model.addAttribute("totalPages", resumes.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("params", Map.of("categoryId", String.valueOf(categoryId==null?"":categoryId)));
+        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
         return "list";
     }
 
@@ -60,24 +64,17 @@ public class ResumeController {
                             Model model) {
         Long userId = userService.findUserIdByEmail(auth.getName());
 
-        Page<ResumeDto> resumes;
-
-        if (categoryId == null) {
-            resumes = resumeService.getResumesByAuthor(userId, PageRequest.of(page, 15));
-        } else {
-            resumes = resumeService.getResumesByAuthorAndCategory(userId, categoryId, PageRequest.of(page, 15));
-        }
-
-        var cats = categoryService.findAll();
+        Page<ResumeListItemDto> resumes = (categoryId == null)
+                ? resumeService.getResumesByAuthor(userId, PageRequest.of(page, 15))
+                : resumeService.getResumesByAuthorAndCategory(userId, categoryId, PageRequest.of(page, 15));
 
         model.addAttribute("title", "Мои резюме");
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", resumes);
-        model.addAttribute("categories", cats);
+        model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
         model.addAttribute("currentPage", resumes.getNumber());
         model.addAttribute("totalPages", resumes.getTotalPages());
-
         return "list";
     }
 
@@ -85,12 +82,10 @@ public class ResumeController {
 
     @GetMapping("/resume/new")
     public String showResumeCreateForm(Model model) {
-        ResumeEditDto dto = new ResumeEditDto();
-
-        dto.getWorkExperiences().add(new WorkExperienceInfoDto());
-        dto.getEducationInfos().add(new EducationInfoDto());
-        dto.getContactInfos().add(new ContactInfoDto());
-
+        ResumeUpsertDto dto = new ResumeUpsertDto();
+        dto.setWorkExperiences(List.of(new WorkExperienceInfoDto()));
+        dto.setEducationInfos(List.of(new EducationInfoDto()));
+        dto.setContactInfos(List.of(new ContactInfoDto()));
 
         model.addAttribute("dto", dto);
         model.addAttribute("categories", categoryService.findAll());
@@ -102,22 +97,23 @@ public class ResumeController {
 
 
     @PostMapping("/resume/new")
-    public String createResume(@ModelAttribute("dto") ResumeEditDto dto,
+    public String createResume(@ModelAttribute("dto") @Valid ResumeUpsertDto dto,
                                BindingResult bindingResult,
                                Authentication auth,
                                Model model) {
 
-        dto.setWorkExperiences(dto.getWorkExperiences().stream()
-                .filter(we -> we.getCompanyName() != null && !we.getCompanyName().isBlank())
-                .collect(Collectors.toList()));
-
-        dto.setEducationInfos(dto.getEducationInfos().stream()
-                .filter(edu -> edu.getInstitution() != null && !edu.getInstitution().isBlank())
-                .collect(Collectors.toList()));
-
-        dto.setContactInfos(dto.getContactInfos().stream()
-                .filter(c -> c.getContactValue() != null && !c.getContactValue().isBlank())
-                .collect(Collectors.toList()));
+        dto.setWorkExperiences( dto.getWorkExperiences()==null ? List.of() :
+                dto.getWorkExperiences().stream()
+                        .filter(we -> we.getCompanyName()!=null && !we.getCompanyName().isBlank())
+                        .toList());
+        dto.setEducationInfos( dto.getEducationInfos()==null ? List.of() :
+                dto.getEducationInfos().stream()
+                        .filter(edu -> edu.getInstitution()!=null && !edu.getInstitution().isBlank())
+                        .toList());
+        dto.setContactInfos( dto.getContactInfos()==null ? List.of() :
+                dto.getContactInfos().stream()
+                        .filter(c -> c.getContactValue()!=null && !c.getContactValue().isBlank())
+                        .toList());
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("formAction", "/resume/new");
@@ -128,31 +124,43 @@ public class ResumeController {
         }
 
         Long applicantId = userService.findUserIdByEmail(auth.getName());
-
         resumeService.saveResume(applicantId, dto);
-
         return "redirect:/resumes";
     }
 
 
     @GetMapping("/resume/{id}/edit")
-    public String editResume(@PathVariable Long id, Model model) {
-        ResumeEditDto dto = new ResumeEditDto();
-        model.addAttribute("resume", dto);
-        return "resume_form";
+    public String editResume(@PathVariable Long id, Model model, Authentication auth) {
+        ResumeViewDto view = resumeService.getResumeById(id);
+        var dto = ResumeUpsertDto.builder()
+                .name(view.getName())
+                .categoryId(view.getCategoryId())
+                .salary(view.getSalary())
+                .active(view.isActive())
+                .build();
+        model.addAttribute("dto", dto);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("formAction", "/resume/" + id + "/edit");
+        model.addAttribute("dtoName", "dto");
+        model.addAttribute("formType", "resume");
+        return "form";
     }
 
     @PostMapping("/resume/{id}/edit")
-    public String updateResume(@PathVariable Long id, @ModelAttribute("resume") @Valid ResumeEditDto resumeDto, BindingResult bindingResult, Authentication authentication, Model model) {
+    public String updateResume(@PathVariable Long id,
+                               @ModelAttribute("dto") @Valid ResumeUpsertDto dto,
+                               BindingResult bindingResult,
+                               Authentication authentication,
+                               Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("errors", bindingResult.getAllErrors());
-            return "resume_form";
+            model.addAttribute("categories", categoryService.findAll());
+            model.addAttribute("formAction", "/resume/" + id + "/edit");
+            model.addAttribute("dtoName", "dto");
+            model.addAttribute("formType", "resume");
+            return "form";
         }
-        Long applicantId = null;
-        if (authentication != null) {
-            applicantId = userService.findUserIdByEmail(authentication.getName());
-        }
-        resumeService.editResume(resumeDto, id, applicantId);
-        return "redirect:/resumes";
+        Long applicantId = userService.findUserIdByEmail(authentication.getName());
+        resumeService.editResumeOwned(dto, id, applicantId);
+        return "redirect:/profile/resumes";
     }
 }
