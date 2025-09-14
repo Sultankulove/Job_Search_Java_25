@@ -1,50 +1,69 @@
 package kg.attractor.job_search_java_25.service.impl;
 
 import kg.attractor.job_search_java_25.dto.messageDto.MessageDto;
+import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
+import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.model.Message;
+import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.repository.MessageRepository;
+import kg.attractor.job_search_java_25.repository.RespondedApplicantRepository;
 import kg.attractor.job_search_java_25.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.List;
-
-import static java.lang.System.currentTimeMillis;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ChatServiceImpl implements ChatService {
     private final MessageRepository messageRepository;
+    private final RespondedApplicantRepository respondedApplicantRepository;
+
     @Override
-    public List<MessageDto> getChatByResponseId(Long responseId) {
+    public List<MessageDto> getChatByResponseId(Long responseId, Long userId) {
+        log.debug("Chat.get(responseId={}, userId={})", responseId, userId);
+        RespondedApplicant ra = respondedApplicantRepository.findById(responseId)
+                .orElseThrow(() -> new NotFoundException("Response not found"));
 
-        log.debug("ChatService.getChatByResponseId(responseId={}) — start", responseId);
-        List<Message> messages = messageRepository.getMessagesByRespondedApplicant_IdOrderByTimestampAsc(responseId);
-        log.info("Чат: получено сообщений {}", messages.size());
+        Long applicantId = ra.getResume().getApplicant().getId();
+        Long employerId  = ra.getVacancy().getAuthor().getId();
+        if (!userId.equals(applicantId) && !userId.equals(employerId))
+            throw new ForbiddenException("Not your chat");
 
-        return messages.stream()
-                .map(msg -> MessageDto.builder()
-                        .id(msg.getId())
-                        .content(msg.getContent())
-                        .timestamp(msg.getTimestamp())
+        return messageRepository.getMessagesByRespondedApplicant_IdOrderByTimestampAsc(responseId)
+                .stream()
+                .map(m -> MessageDto.builder()
+                        .id(m.getId())
+                        .content(m.getContent())
+                        .timestamp(m.getTimestamp())
                         .build())
                 .toList();
     }
 
+    @Transactional
     @Override
-    public void sendMessage(Long chatId, MessageDto dto) {
+    public void sendMessage(Long responseId, Long userId, MessageDto dto) {
+        log.info("Chat.send(responseId={}, userId={})", responseId, userId);
+        RespondedApplicant ra = respondedApplicantRepository.findById(responseId)
+                .orElseThrow(() -> new NotFoundException("Response not found"));
 
-        log.info("ChatService.sendMessage(chatId={})", chatId);
+        Long applicantId = ra.getResume().getApplicant().getId();
+        Long employerId  = ra.getVacancy().getAuthor().getId();
+        if (!userId.equals(applicantId) && !userId.equals(employerId))
+            throw new ForbiddenException("Not your chat");
+
+        if (dto.getContent() == null || dto.getContent().isBlank())
+            throw new IllegalArgumentException("Empty message");
+
         Message msg = new Message();
-        msg.getRespondedApplicant().setId(chatId);
-        msg.setContent(dto.getContent());
-        msg.setTimestamp(new Timestamp(currentTimeMillis()));
+        msg.setRespondedApplicant(ra);
+        msg.setContent(dto.getContent().trim());
+        msg.setTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
 
         messageRepository.save(msg);
-        log.debug("Сообщение сохранено (len={})", dto.getContent() == null ? 0 : dto.getContent().length());
-
+        log.debug("Message saved (len={})", msg.getContent().length());
     }
 }
