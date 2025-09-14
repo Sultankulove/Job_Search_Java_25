@@ -1,13 +1,16 @@
 package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
+import kg.attractor.job_search_java_25.dto.ActiveDto;
 import kg.attractor.job_search_java_25.dto.userDtos.AvatarDto;
 import kg.attractor.job_search_java_25.dto.userDtos.EditProfileDto;
-import kg.attractor.job_search_java_25.dto.userDtos.UserProfileDto;
 import kg.attractor.job_search_java_25.service.ProfileService;
+import kg.attractor.job_search_java_25.service.ResumeService;
 import kg.attractor.job_search_java_25.service.UserService;
+import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -25,31 +28,37 @@ import java.security.Principal;
 public class ProfileController {
     private final UserService userService;
     private final ProfileService profileService;
+    private final ResumeService resumeService;
+    private final VacancyService vacancyService;
 
     @GetMapping
     public String profile(Model model, Authentication auth) {
         if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
             return "redirect:/login";
         }
-
         Long userId = userService.findUserIdByEmail(auth.getName());
-        UserProfileDto user = profileService.getMyProfile(userId);
+        var user = profileService.getMyProfile(userId);
         model.addAttribute("user", user);
+
+        boolean isEmployer = auth.getAuthorities().stream().anyMatch(a -> "ROLE_EMPLOYER".equals(a.getAuthority()));
+        boolean isApplicant = auth.getAuthorities().stream().anyMatch(a -> "ROLE_APPLICANT".equals(a.getAuthority()));
+        model.addAttribute("isEmployer", isEmployer);
+        model.addAttribute("isApplicant", isApplicant);
+
+        if (isEmployer) {
+            model.addAttribute("myVacancies", profileService.getMyShortVacancies(userId));
+        }
+        if (isApplicant) {
+            model.addAttribute("myResumes", profileService.getMyShortResumes(userId));
+        }
         return "profile";
     }
 
+
     @PostMapping("avatar")
-    public String uploadAvatar(
-            @RequestPart("avatar") MultipartFile avatar,
-            Authentication authentication
-    ) {
+    public String uploadAvatar(@RequestParam("avatar") MultipartFile avatar, Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
-        AvatarDto avatarDto = new AvatarDto(avatar, authId);
-
-
-        log.info("POST /api/profile/avatar — загрузка аватара пользователем");
-        profileService.addAvatar(avatarDto);
-
+        profileService.addAvatar(new AvatarDto(avatar, authId));
         return "redirect:/profile/edit";
     }
 
@@ -59,26 +68,57 @@ public class ProfileController {
         if (principal == null) return "redirect:/auth/login";
         if (!model.containsAttribute("dto")) {
             Long id = userService.findUserIdByEmail(principal.getName());
-            var user = profileService.getMyProfile(id);
-            model.addAttribute("dto", new EditProfileDto(
-                    user.getName(), user.getSurname(), user.getAge(),
-                    user.getEmail(), user.getPhoneNumber()
-            ));
-    }
+            var u = profileService.getMyProfile(id);
+            model.addAttribute("dto", EditProfileDto.builder()
+                    .name(u.getName()).surname(u.getSurname()).age(u.getAge())
+                    .email(u.getEmail()).phoneNumber(u.getPhoneNumber()).build());
+        }
         return "edit_profile";
     }
 
 
     @PostMapping("/edit")
     public String updateProfile(@ModelAttribute("dto") @Valid EditProfileDto dto,
-                                BindingResult br,
-                                Model model,
-                                Principal principal) {
-        if (br.hasErrors()) {
-            return "edit_profile";
-        }
+                                BindingResult br, Principal principal) {
+        if (br.hasErrors()) return "edit_profile";
         Long authId = userService.findUserIdByEmail(principal.getName());
         profileService.updateProfileByUserId(dto, authId);
         return "redirect:/profile";
+    }
+
+    @PatchMapping("/resume/{id}/touch")
+    @ResponseBody
+    public ResponseEntity<Void> touchResume(@PathVariable Long id, Authentication auth) {
+        Long uid = userService.findUserIdByEmail(auth.getName());
+        resumeService.updateTimeOwned(id, uid);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/resume/{id}/publish")
+    @ResponseBody
+    public ResponseEntity<Void> publishResume(@PathVariable Long id,
+                                              @RequestParam("active") boolean active,
+                                              Authentication auth) {
+        Long uid = userService.findUserIdByEmail(auth.getName());
+        resumeService.resumeIsActiveOwned(id, new ActiveDto(active), uid);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/vacancy/{id}/touch")
+    @ResponseBody
+    public ResponseEntity<Void> touchVacancy(@PathVariable Long id, Authentication auth) {
+        Long uid = userService.findUserIdByEmail(auth.getName());
+        vacancyService.touchOwned(id, uid);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/vacancy/{id}/publish")
+    @ResponseBody
+    public ResponseEntity<Void> publishVacancy(@PathVariable Long id,
+                                               @RequestParam("active") boolean active,
+                                               Authentication auth) {
+        Long uid = userService.findUserIdByEmail(auth.getName());
+        vacancyService.setActiveOwned(id, new ActiveDto(active), uid);
+        return ResponseEntity.noContent().build();
     }
 }
