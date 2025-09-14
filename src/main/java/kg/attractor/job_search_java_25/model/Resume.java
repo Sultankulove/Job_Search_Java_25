@@ -3,6 +3,8 @@ package kg.attractor.job_search_java_25.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,14 +19,14 @@ public class Resume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "applicant_id")
     private User applicant;
 
     @Column(name = "name", length = 64)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;;
 
@@ -34,12 +36,13 @@ public class Resume {
     @Column(name = "is_active")
     private boolean isActive = false;
 
-    @Column(name = "created_date")
+    @CreationTimestamp
+    @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
-    @Column(name = "update_time")
+    @UpdateTimestamp
+    @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
-
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkExperienceInfo> workExperiences;
