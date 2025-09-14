@@ -1,63 +1,45 @@
 package kg.attractor.job_search_java_25.service;
 
-import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.ActiveDto;
-import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
 import kg.attractor.job_search_java_25.dto.ResponseDto;
+import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancySearchDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyUpsertDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyViewDto;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface VacancyService {
 
-    Page<VacancyListItemDto> getShortVacanciesList(Long employerId, Pageable p);
+    Page<VacancyListItemDto> getVacancies(Pageable pageable);
 
-    ResponseEntity<?> updateTime(Long id);
+    Page<VacancyListItemDto> getVacanciesByCategory(Long categoryId, Pageable pageable);
 
-    void edtVacancy(VacancyUpsertDto v, Long vacancyId, Long userId);
+    Page<VacancyListItemDto> findByEmployerId(Long employerId, Pageable pageable);
 
-    void vacancyIsActive(Long vacancyId, ActiveDto activeDto);
+    Page<VacancyListItemDto> findByEmployerIdAndCategory(Long employerId, Long categoryId, Pageable pageable);
 
-    VacancyDto createVacancies(Long authorId, VacancyEditDto createVacancyEditDto);
+    List<VacancyListItemDto> search(VacancySearchDto c);
 
-    ResponseEntity<?> getVacancyById(Long id);
+    Page<VacancyListItemDto> findList(Long authorId, Pageable pageable);
 
-    void createVacancy(VacancyUpsertDto v, Long userId);
+    void touchOwned(Long vacancyId, Long authorId);
 
-    ResponseEntity<?> findVacancyById(Long id);
+    void editVacancyOwned(VacancyUpsertDto dto, Long vacancyId, Long authorId);
 
-    void deleteVacancyById(Long id);
+    void setActiveOwned(Long vacancyId, ActiveDto activeDto, Long authorId);
 
-    void respondToVacancy(ResponseDto dto, Long userId);
+    VacancyViewDto create(VacancyUpsertDto dto, Long authorId);
 
-    void respondToVacancy(ResponseDto dto);
+    VacancyViewDto getById(Long id);
 
-    ResponseEntity<List<RespondedApplicantDto>> getResponsesByVacancy(Long vacancyId);
+    void deleteOwned(Long vacancyId, Long authorId);
 
-    List<VacancyShortDto> getPublicShortVacancies();
+    void respondToVacancy(ResponseDto dto, Long applicantId);
+    List<RespondedApplicantDto> getResponsesByVacancy(Long vacancyId, Long employerId);
 
-    void editVacancyOwned(@Valid VacancyEditDto editVacancyEditDto, Long vacancyId, Long authorId);
-
-    void vacancyIsActiveOwned(Long vacancyId, @Valid VacancyIsActiveDto vacancyIsActiveDto, Long authorId);
-
-    List<VacancyDto> searchVacancies(VacancySearchDto criteria);
-
-    List<VacancyDto> findVacanciesById(Long userId);
-
-    List<VacancyDto> findByEmployer(Long employerId);
-
-    List<VacancyDto> findAllVacancies();
-
-    Page<VacancyDto> getVacancies(Pageable pageable);
-
-    Page<VacancyDto> getVacanciesByCategory(Long categoryId, PageRequest of);
-
-    Page<VacancyDto> findByEmployerId(Long employerId, Pageable pageable);
-
-    Page<VacancyDto> findByEmployerIdAndCategory(Long employerId, Long categoryId, Pageable pageable);
 }
+
