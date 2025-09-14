@@ -1,7 +1,10 @@
 package kg.attractor.job_search_java_25.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyUpsertDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyViewDto;
 import kg.attractor.job_search_java_25.service.CategoryService;
 import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
@@ -28,32 +31,26 @@ public class VacancyController {
 
 
 
-@GetMapping("/vacancies")
-public String listVacancies(@RequestParam(defaultValue = "0") int page,
-                            @RequestParam(value = "categoryId", required = false) Long categoryId,
-                            Model model) {
+    @GetMapping("/vacancies")
+    public String listVacancies(@RequestParam(defaultValue = "0") int page,
+                                @RequestParam(required = false) Long categoryId,
+                                Model model,
+                                HttpServletRequest req) {
 
-    Page<VacancyDto> vacancies = (categoryId == null)
-            ? vacancyService.getVacancies(PageRequest.of(page, 15))
-            : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
+        Page<VacancyListItemDto> vacancies = (categoryId == null)
+                ? vacancyService.getVacancies(PageRequest.of(page, 15))
+                : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
 
-    model.addAttribute("title", "Список вакансий");
-    model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
-    model.addAttribute("list", vacancies);
-
-    model.addAttribute("currentPage", vacancies.getNumber());
-    model.addAttribute("totalPages",vacancies.getTotalPages());
-    model.addAttribute("categories", categoryService.findAll());
-
-    model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId));
-
-    return "list";
-}
-
-
-
-
-
+        model.addAttribute("title", "Список вакансий");
+        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("filterAction", req.getRequestURI());
+        model.addAttribute("list", vacancies);
+        model.addAttribute("currentPage", vacancies.getNumber());
+        model.addAttribute("totalPages", vacancies.getTotalPages());
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+        return "list";
+    }
 
     @GetMapping("/profile/vacancies")
     public String myVacancies(Authentication auth,
@@ -63,32 +60,29 @@ public String listVacancies(@RequestParam(defaultValue = "0") int page,
 
         Long employerId = userService.findUserIdByEmail(auth.getName());
 
-        Page<VacancyDto> vacancies = (categoryId == null)
+        Page<VacancyListItemDto> vacancies = (categoryId == null)
                 ? vacancyService.findByEmployerId(employerId, PageRequest.of(page, 15))
                 : vacancyService.findByEmployerIdAndCategory(employerId, categoryId, PageRequest.of(page, 15));
+
         model.addAttribute("title", "Мои вакансии");
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", vacancies);
-
         model.addAttribute("categories", categoryService.findAll());
-
         model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
-
+        model.addAttribute("currentPage", vacancies.getNumber());
+        model.addAttribute("totalPages", vacancies.getTotalPages());
         return "list";
     }
 
-
-
     @GetMapping("vacancy/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("dto", new VacancyEditDto());
+        model.addAttribute("dto", new VacancyUpsertDto());
         model.addAttribute("categories", categoryService.findAll());
         return "CreatedForm";
     }
 
-
     @PostMapping("/vacancy/new")
-    public String createVacancy(@ModelAttribute("dto") @Valid VacancyEditDto vacancyDto,
+    public String createVacancy(@ModelAttribute("dto") @Valid VacancyUpsertDto dto,
                                 BindingResult bindingResult,
                                 Authentication authentication,
                                 Model model) {
@@ -96,37 +90,49 @@ public String listVacancies(@RequestParam(defaultValue = "0") int page,
             model.addAttribute("categories", categoryService.findAll());
             return "CreatedForm";
         }
-        Long authorId = null;
-        if (authentication != null) {
-            authorId = userService.findUserIdByEmail(authentication.getName());
-        }
-        vacancyService.createVacancies(authorId, vacancyDto);
+        Long authorId = userService.findUserIdByEmail(authentication.getName());
+        vacancyService.create(dto, authorId);
         return "redirect:/vacancies";
     }
 
     @GetMapping("/vacancy/{id}/edit")
     public String editVacancy(@PathVariable Long id, Model model) {
-        VacancyEditDto dto = new VacancyEditDto();
-        dto.setId(id);
-        model.addAttribute("vacancy", dto);
+        VacancyViewDto view = vacancyService.getById(id);
+        var dto = VacancyUpsertDto.builder()
+                .name(view.getName())
+                .description(view.getDescription())
+                .categoryId(view.getCategoryId())
+                .salary(view.getSalary())
+                .expFrom(view.getExpFrom())
+                .expTo(view.getExpTo())
+                .active(view.getActive())
+                .build();
+
+        model.addAttribute("dto", dto);
+        model.addAttribute("categories", categoryService.findAll());
+
+        model.addAttribute("dtoName", "dto");
+        model.addAttribute("formAction", "/vacancy/" + id + "/edit");
+        model.addAttribute("formType", "vacancy");
         return "vacancy_form";
     }
 
     @PostMapping("/vacancy/{id}/edit")
     public String updateVacancy(@PathVariable Long id,
-                                @ModelAttribute("vacancy") @Valid VacancyEditDto vacancyDto,
-                                BindingResult bindingResult,
-                                Authentication authentication,
+                                @ModelAttribute("dto") @Valid VacancyUpsertDto dto,
+                                BindingResult br,
+                                Authentication auth,
                                 Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("errors", bindingResult.getAllErrors());
+        if (br.hasErrors()) {
+            model.addAttribute("categories", categoryService.findAll());
+            model.addAttribute("dtoName", "dto");
+            model.addAttribute("formAction", "/vacancy/" + id + "/edit");
+            model.addAttribute("formType", "vacancy");
             return "vacancy_form";
         }
-        Long authorId = null;
-        if (authentication != null) {
-            authorId = userService.findUserIdByEmail(authentication.getName());
-        }
-        vacancyService.editVacancy(vacancyDto, id, authorId);
-        return "redirect:/vacancies";
+
+        Long authorId = userService.findUserIdByEmail(auth.getName());
+        vacancyService.editVacancyOwned(dto, id, authorId);
+        return "redirect:/profile/vacancies";
     }
 }
