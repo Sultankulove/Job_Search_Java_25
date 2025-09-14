@@ -1,16 +1,16 @@
 package kg.attractor.job_search_java_25.service.impl;
 
 import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
-import kg.attractor.job_search_java_25.dto.userDtos.AccountType;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
 import kg.attractor.job_search_java_25.dto.userDtos.AvatarDto;
 import kg.attractor.job_search_java_25.dto.userDtos.EditProfileDto;
 import kg.attractor.job_search_java_25.dto.userDtos.UserProfileDto;
+import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.mappers.UserMapper;
 import kg.attractor.job_search_java_25.model.RespondedApplicant;
 import kg.attractor.job_search_java_25.model.Resume;
 import kg.attractor.job_search_java_25.model.User;
-import kg.attractor.job_search_java_25.model.Vacancy;
 import kg.attractor.job_search_java_25.repository.RespondedApplicantRepository;
 import kg.attractor.job_search_java_25.repository.ResumeRepository;
 import kg.attractor.job_search_java_25.repository.UserRepository;
@@ -19,14 +19,13 @@ import kg.attractor.job_search_java_25.service.ProfileService;
 import kg.attractor.job_search_java_25.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,130 +34,100 @@ public class ProfileServiceImpl implements ProfileService {
 
     private final UserRepository userRepository;
     private final VacancyRepository vacancyRepository;
-    private static final String SUB_DIR = "avatar";
     private final ResumeRepository resumeRepository;
     private final RespondedApplicantRepository respondedApplicantRepository;
+    private final UserMapper userMapper;
 
+    private static final String SUB_DIR = "avatar";
 
+    private static final int SHORT_LIMIT = 10;
+
+    @Transactional
     @Override
     public void addAvatar(AvatarDto avatarDto) {
-
         log.info("Профиль: загрузка аватара userId={}", avatarDto.getUserId());
+        User user = userRepository.findById(avatarDto.getUserId())
+                .orElseThrow(() -> new NotFoundException("User id=" + avatarDto.getUserId()));
         String avatar = FileUtil.saveUploadedFile(avatarDto.getAvatar(), SUB_DIR);
-        userRepository.saveAvatar(avatar, avatarDto.getUserId());
+        int updated = userRepository.saveAvatar(avatar, user.getId());
+        if (updated == 0) throw new NotFoundException("User id=" + user.getId());
         log.debug("Аватар сохранён: {}", avatar);
     }
 
     @Override
     public ResponseEntity<?> findAvatarById(Long userId) {
         log.debug("Профиль: получение аватара userId={}", userId);
-        UserProfileDto avatar = userRepository.findAvatarById(userId);
-        String avatarStr = avatar.getAvatar();
-        return FileUtil.downloadImage(avatarStr, SUB_DIR);
+        String avatar = userRepository.findAvatarPathById(userId)
+                .orElseThrow(() -> new NotFoundException("Avatar for user id=" + userId));
+        return FileUtil.downloadImage(avatar, SUB_DIR);
     }
 
     @Override
     public UserProfileDto getMyProfile(Long id) {
-        try {
-            Optional<UserProfileDto> user = userRepository.getUserById(id);
-            UserProfileDto userProfileDto = new UserProfileDto();
-            return userProfileDto;
-        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
-            throw new NotFoundException("User id=" + id);
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User id=" + id));
+        return userMapper.toProfile(user);
     }
 
     @Transactional
     @Override
     public UserProfileDto updateProfileByUserId(EditProfileDto dto, Long id) {
-        UserProfileDto userProfileDto = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("UserProfileDto id=" + id));
-
-        UserProfileDto getUserProfileDto = userRepository.save(userProfileDto);
-
-
-        return UserMapper.toDto(getUserProfileDto);
-    }
-
-
-
-
-
-    @Override
-    public ResponseEntity<List<RespondedApplicantDto>> getMyResponses(Long auth) {
-
-        log.debug("Профиль: мои отклики userId={}", auth);
-        List<Resume> resumes = resumeRepository.findAllByApplicant_Id(auth);
-        List<Long> resumeIds = resumes.stream().map(Resume::getId).toList();
-        List<RespondedApplicant> responded = respondedApplicantRepository.getRespondedApplicantsByResumesId(resumeIds);
-
-        List<RespondedApplicantDto> dtos = responded.stream()
-                .map(entity -> RespondedApplicantDto.builder()
-                        .id(entity.getId())
-                        .resumeId(entity.getResume().getId())
-                        .vacancyId(entity.getVacancy().getId())
-                        .confirmation(entity.getConfirmation())
-                        .build())
-                .toList();
-
-        log.info("Профиль: найдено {} откликов по {} резюме", dtos.size(), resumeIds.size());
-        return ResponseEntity.ok(dtos);    }
-
-    @Override
-    public ResponseEntity<List<RespondedApplicantDto>> getMyVacanciesResponses(Long auth, Pageable p) {
-        log.debug("Профиль: отклики на мои вакансии employerId={}", auth);
-
-        Page<Vacancy> vacancies = vacancyRepository.findAllByAuthor_Id(auth, p);
-        List<Long> vacancyIds = vacancies.stream().map(Vacancy::getId).toList();
-
-        List<RespondedApplicant> responses = respondedApplicantRepository.getRespondedApplicantsByVacancyIds(vacancyIds);
-
-        List<RespondedApplicantDto> dtos = responses.stream()
-                .map(entity -> RespondedApplicantDto.builder()
-                        .id(entity.getId())
-                        .resumeId(entity.getResume().getId())
-                        .vacancyId(entity.getVacancy().getId())
-                        .confirmation(entity.getConfirmation())
-                        .build())
-                .toList();
-
-        log.debug("Профиль: отклики на мои вакансии employerId={}", auth);
-        return ResponseEntity.ok(dtos);
+        int updated = userRepository.editProfile(
+                id, dto.getName(), dto.getSurname(), dto.getAge(), dto.getEmail(), dto.getPhoneNumber()
+        );
+        if (updated == 0) throw new NotFoundException("User id=" + id);
+        var user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User id=" + id));
+        return userMapper.toProfile(user);
     }
 
     @Override
-    public List<VacancyShortDto> getMyShortVacancies(Long userId) {
-        log.debug("Профиль: получение краткого списка вакансий userId={}", userId);
+    public List<RespondedApplicantDto> getMyResponses(Long authUserId) {
+        log.debug("Профиль: мои отклики userId={}", authUserId);
+        var resumeIds = resumeRepository.findAllByApplicant_Id(authUserId)
+                .stream().map(Resume::getId).toList();
 
-        return vacancyRepository.getShortVacanciesByAuthorId(userId)
-                .stream()
-                .map(v -> new VacancyShortDto(v.getName(), v.getUpdateTime()))
+        var responded = resumeIds.isEmpty()
+                ? List.<RespondedApplicant>of()
+                : respondedApplicantRepository.getRespondedApplicantsByResumesId(resumeIds);
+
+        return responded.stream()
+                .map(r -> new RespondedApplicantDto(
+                        r.getId(),
+                        r.getResume() != null ? r.getResume().getId() : null,
+                        r.getVacancy()!= null ? r.getVacancy().getId(): null,
+                        r.getConfirmation()))
                 .toList();
     }
 
     @Override
-    public List<ResumeShortDto> getMyShortResumes(Long userId) {
-        log.debug("Профиль: получение краткого списка резюме userId={}", userId);
-        return resumeRepository.getShortResumesByApplicantId(userId)
-                .stream()
-                .map(r -> new ResumeShortDto(r.getName(), r.getUpdateTime()))
+    public List<RespondedApplicantDto> getMyVacanciesResponses(Long authUserId, Pageable p) {
+        log.debug("Профиль: отклики на мои вакансии employerId={}", authUserId);
+        var vacancyIds = vacancyRepository.findList(authUserId, p)
+                .map(v -> v.getId())
+                .getContent();
+
+        var responses = vacancyIds.isEmpty()
+                ? List.<RespondedApplicant>of()
+                : respondedApplicantRepository.getRespondedApplicantsByVacancyIds(vacancyIds);
+
+        return responses.stream()
+                .map(r -> new RespondedApplicantDto(
+                        r.getId(),
+                        r.getResume()  != null ? r.getResume().getId()  : null,
+                        r.getVacancy() != null ? r.getVacancy().getId() : null,
+                        r.getConfirmation()))
                 .toList();
     }
 
     @Override
-    public UserProfileDto getUserProfile(Long id) {
+    public List<VacancyListItemDto> getMyShortVacancies(Long userId) {
+        log.debug("Профиль: короткий список вакансий userId={}", userId);
+        return vacancyRepository.findList(userId, PageRequest.of(0, SHORT_LIMIT)).getContent();
+    }
 
-        User user = userRepository.findUserById(id)
-                .orElseThrow(() -> new NotFoundException("UserProfileDto not found"));
-
-        return UserProfileDto.builder()
-                .name(user.getName())
-                .surname(user.getSurname())
-                .age(user.getAge())
-                .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
-                .avatar(user.getAvatar())
-                .accountType(AccountType.valueOf(user.getAccountType()))
-                .build();
+    @Override
+    public List<ResumeListItemDto> getMyShortResumes(Long userId) {
+        log.debug("Профиль: короткий список резюме userId={}", userId);
+        return resumeRepository.findList(userId, PageRequest.of(0, SHORT_LIMIT)).getContent();
     }
 }
