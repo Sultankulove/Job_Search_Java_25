@@ -3,6 +3,8 @@ package kg.attractor.job_search_java_25.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,10 +46,12 @@ public class Vacancy {
     @JoinColumn(name = "author_id")
     private User author;
 
-    @Column(name = "created_date")
+    @CreationTimestamp
+    @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
-    @Column(name = "update_time")
+    @UpdateTimestamp
+    @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
 
     @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, orphanRemoval = true)
