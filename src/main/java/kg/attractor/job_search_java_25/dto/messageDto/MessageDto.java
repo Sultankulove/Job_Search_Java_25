@@ -17,7 +17,6 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class MessageDto {
     private Long id;
-
     @NotNull(message = "ID отклика обязателен")
     @Positive(message = "ID отклика должен быть положительным")
     private Long respondedApplicants;
@@ -25,6 +24,6 @@ public class MessageDto {
     @NotBlank(message = "Сообщение не может быть пустым")
     @Size(max = 1000, message = "Сообщение не должно превышать 1000 символов")
     private String content;
-
+    private Timestamp createdAt;
     private Timestamp timestamp;
 }
