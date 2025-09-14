@@ -2,8 +2,6 @@ package kg.attractor.job_search_java_25.repository;
 
 
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
-import kg.attractor.job_search_java_25.model.Category;
-import kg.attractor.job_search_java_25.model.Resume;
 import kg.attractor.job_search_java_25.model.Vacancy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,131 +13,64 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 
 @Repository
 public interface VacancyRepository extends JpaRepository<Vacancy, Long> {
 
+    Page<Vacancy> findByCategory_Id(Long categoryId, Pageable pageable);
 
-    Page<Vacancy> findAllByAuthor_Id(Long authorId, Pageable p);
+    Page<Vacancy> findByAuthor_IdAndCategory_Id(Long authorId, Long categoryId, Pageable pageable);
 
-    @Modifying
-    @Transactional
-    @Query("update Vacancy v set v.updateTime = CURRENT_TIMESTAMP where v.id = :id")
-    void updateTime(@Param("id") Long id);
-
-    @Transactional
-    @Modifying
     @Query("""
-       update Vacancy v
-          set v.name        = :name,
-              v.description = :description,
-              v.category  = :Category,
-              v.salary      = :salary,
-              v.expFrom     = :expFrom,
-              v.expTo       = :expTo,
-              v.isActive    = :isActive,
-              v.updateTime  = CURRENT_TIMESTAMP
-        where v.id = :id and v.author.id = :userId
-       """)
-    int editVacancy(@Param("name") String name,
-                     @Param("description") String description,
-                     @Param("category") Category category,
-                     @Param("salary") Float salary,
-                     @Param("expFrom") Integer expFrom,
-                     @Param("expTo") Integer expTo,
-                     @Param("isActive") Boolean isActive,
-                     @Param("id") Long id,
-                     @Param("userId") Long userId);
-
-
-    @Transactional
-    @Modifying(clearAutomatically = true)
-    @Query("update Vacancy v set v.isActive = :isActive where v.id = :vacancyId")
-    int vacancyIsActive(@Param("vacancyId") Long vacancyId,
-                        @Param("isActive") Boolean isActive);
-
-
-
-    void deleteById(Long id);
-
-    long deleteByIdAndAuthorId(Long id, Long authorId);
-
+      select v
+      from Vacancy v
+      left join v.category c
+      where (:categoryId is null or c.id = :categoryId)
+        and (:activeOnly is null or (:activeOnly = true and v.isActive = true) or (:activeOnly = false))
+        and (:minSalary is null or v.salary >= :minSalary)
+        and (:maxSalary is null or v.salary <= :maxSalary)
+        and (:expFrom   is null or v.expFrom >= :expFrom)
+        and (:expTo     is null or v.expTo   <= :expTo)
+        and (
+            :term is null or :term = '' or
+            lower(v.name) like lower(concat('%', :term, '%')) or
+            lower(v.description) like lower(concat('%', :term, '%')) or
+            lower(c.name) like lower(concat('%', :term, '%'))
+        )
+    """)
+    Page<Vacancy> search(@Param("categoryId") Long categoryId,
+                         @Param("activeOnly") Boolean activeOnly,
+                         @Param("minSalary")  Float minSalary,
+                         @Param("maxSalary")  Float maxSalary,
+                         @Param("expFrom")    Integer expFrom,
+                         @Param("expTo")      Integer expTo,
+                         @Param("term")       String term,
+                         Pageable pageable);
 
     @Query("select v.author.id from Vacancy v where v.id = :vacancyId")
     Long getOwnerId(@Param("vacancyId") Long vacancyId);
 
+    @Modifying @Transactional
+    @Query("update Vacancy v set v.updateTime = CURRENT_TIMESTAMP where v.id = :id")
+    int touch(@Param("id") Long id);
+
+    @Modifying @Transactional
+    @Query("update Vacancy v set v.isActive = :isActive where v.id = :id")
+    int setActive(@Param("id") Long id, @Param("isActive") Boolean isActive);
+
     @Query("""
-            select new kg.attractor.job_search_java_25.dto.VacancyShortDto(
-                        v.name,
-                        v.updateTime
-                  )
-                  from Vacancy v
-                  where v.isActive = true
-                  order by v.updateTime desc
+              select new kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto(
+                v.id, v.name, c.name, v.salary, v.isActive, v.updateTime
+              )
+              from Vacancy v
+              left join v.category c
+              where (:authorId is null or v.author.id = :authorId)
+              order by v.updateTime desc
             """)
-    List<VacancyShortDto> getActiveShortVacancies();
+    Page<VacancyListItemDto> findList(@Param("authorId") Long authorId, Pageable pageable);
 
-    @Transactional(readOnly = true)
-    @Query("""
-    select new kg.attractor.job_search_java_25.dto.VacancyShortDto(
-        v.name,
-        v.updateTime
-    )
-    from Vacancy v
-    where v.author.id = :authorId
-    order by v.updateTime desc
-    """)
-    List<VacancyShortDto> getShortVacanciesByAuthorId(@Param("authorId") Long authorId);
+    Optional<Vacancy> findById(Long id);
 
-    @Modifying
-    @Query(
-            """
-        UPDATE Vacancy v SET v.name = :name,
-        v.description = :description,
-        v.category = :Category,
-        v.salary = :salary,
-        v.expFrom  = :expFrom,
-        v.expTo  = :expTo,
-        v.isActive  = :isActive,
-        v.updateTime  = CURRENT_TIMESTAMP where v.id = :vacancyId and v.author.id = :userId
-"""
-    )
-    void saveVacancy_IdUser_Id(Vacancy vacancy, Long vacancyId, Long userId);
-
-    Optional<Vacancy> findVacancyById(Long vacancyId);
-
-
-    List<VacancyDto> findVacanciesById(Long id);
-
-    List<Vacancy> findAllByAuthor_Id(Long userId);
-
-    Page<Vacancy> findByCategory_Id(Long categoryId, Pageable pageable);
-
-    @Query(
-            """
-        select new kg.attractor.job_search_java_25.dto.VacancyDto(
-           v.id,
-           v.name,
-           v.description,
-           v.category.id,
-           v.salary,
-           v.expFrom,
-           v.expTo,
-           v.isActive,
-           v.author.id,
-           v.createdDate,
-           v.updateTime
-           ) from Vacancy v where v.author.id = :employerId
-"""
-    )
-    List<VacancyDto> findAllByAuthorId(@Param("employerId") Long employerId);
-
-    Page<Vacancy> findAllByAuthor_IdAndCategory_Id(Long authorId, Long categoryId, Pageable pageable);
-
-    Page<VacancyListItemDto> getVacanciesByAuthor_Id(Long authorId, Pageable pageable);
-
-    Resume getVacancyById(Long id);
 }
