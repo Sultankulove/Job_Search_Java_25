@@ -15,8 +15,10 @@
 
                 <#assign params = params!{'categoryId': ''}>
                 <#assign selectedCategoryId = (params.categoryId!'')?string>
+                <#assign filterAction = (filterAction)!springMacroRequestContext.requestUri>
 
-                <form method="get" action="/resumes" class="row g-2 align-items-center">
+                <form method="get" action="${filterAction}" class="row g-2 align-items-center">
+
                     <div class="col-md-4">
                         <label for="categoryId" class="form-label"><@spring.message "list.filter.category"/></label>
                         <select class="form-select" id="categoryId" name="categoryId">
@@ -59,18 +61,8 @@
                         <tr>
                             <td>${item.name!'-'}</td>
 
-                            <td>
-                                <#assign catName = '—'>
-                                <#if item.categoryId??>
-                                    <#list categories as c>
-                                        <#if c.id?string == item.categoryId?string>
-                                            <#assign catName = c.name>
-                                            <#break>
-                                        </#if>
-                                    </#list>
-                                </#if>
-                                ${catName}
-                            </td>
+                            <td>${item.categoryName!'—'}</td>
+
 
                             <td>
                                 <#if item.salary??>
