@@ -13,11 +13,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public List<CategoryDto> findAll() {
         return categoryRepository.findAll()
                 .stream()
-                .map(CategoryMapper::toDto).toList();
+                .map(categoryMapper::toDto)
+                .toList();
     }
 }
