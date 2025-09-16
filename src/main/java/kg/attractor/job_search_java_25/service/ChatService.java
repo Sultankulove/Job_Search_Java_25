@@ -7,8 +7,10 @@ import java.util.List;
 
 public interface ChatService {
 
+    Long startChat(Long responseId, Long userId);
+
     List<MessageDto> getChatByResponseId(Long responseId, Long userId);
 
     @Transactional
-    void sendMessage(Long responseId, Long userId, MessageDto dto);
+    MessageDto sendMessage(Long responseId, Long userId, MessageDto dto);
 }
