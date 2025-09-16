@@ -31,7 +31,7 @@ public class ApiVacancyController {
 
     @GetMapping
     public List<VacancyListItemDto> list(@RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "10") int size) {
+                                         @RequestParam(defaultValue = "15") int size) {
         Pageable p = PageRequest.of(page, size);
         log.debug("GET /api/vacancies?page={}&size={}", page, size);
         return vacancyService.findList(null, p).getContent();
