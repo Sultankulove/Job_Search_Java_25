@@ -74,14 +74,14 @@ public class ApiResumeController {
     public ResponseEntity<Void> delete(@PathVariable Long id, Authentication auth) {
         Long applicantId = userService.findUserIdByEmail(auth.getName());
         log.warn("DELETE /api/resumes/{} — удаление, by={}", id, applicantId);
-        resumeService.deleteResumeById(id);
+        resumeService.deleteOwned(id, applicantId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public List<ResumeListItemDto> myResumes(Authentication auth,
                                              @RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(defaultValue = "10") int size) {
+                                             @RequestParam(defaultValue = "15") int size) {
         Long applicantId = userService.findUserIdByEmail(auth.getName());
         Pageable pageable = PageRequest.of(page, size);
         log.debug("GET /api/resumes?page={}&size={} — мои резюме, applicantId={}", page, size, applicantId);
