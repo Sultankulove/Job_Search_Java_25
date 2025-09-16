@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.sql.DataSource;
 
+@EnableMethodSecurity(prePostEnabled = true)
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -21,6 +23,9 @@ public class SecurityConfig {
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
 //                .httpBasic(Customizer.withDefaults())
+//                .csrf(csrf -> csrf
+//                        .ignoringRequestMatchers("/ws/**", "/topic/**", "/app/**"));
+//                )
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/login")
@@ -39,6 +44,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/auth/**", "/error", "/auth/reset-password").permitAll()
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/topic/**", "/app/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/vacancies/**").hasRole("EMPLOYER")
                         .requestMatchers(HttpMethod.PATCH, "/api/resumes/**").hasRole("APPLICANT")
                         .requestMatchers(HttpMethod.PUT,   "/api/vacancies/**").hasRole("EMPLOYER")
@@ -51,9 +58,9 @@ public class SecurityConfig {
                         .requestMatchers("/profile/**").authenticated()
                         .requestMatchers("/api/profile/avatar").authenticated()
 
-                        .requestMatchers("/resumes/**", "/resume/**", "/profile/resumes").hasRole("EMPLOYER")
+                        .requestMatchers("/resumes/**", "/profile/vacancies", "/vacancy/*/edit","/vacancy/new", "/chat/start/*", "/chat/*").hasRole("EMPLOYER")
 
-                        .requestMatchers("/vacancies/**", "/vacancy/**", "/profile/vacancies").hasRole("APPLICANT")
+                        .requestMatchers("/vacancies/**", "/vacancy/**", "/profile/resumes", "/resumes/*/edit", "resume/new").hasRole("APPLICANT")
 
                         .anyRequest().authenticated()
                 );
