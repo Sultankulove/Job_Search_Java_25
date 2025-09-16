@@ -3,7 +3,6 @@ package kg.attractor.job_search_java_25.repository;
 
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
 import kg.attractor.job_search_java_25.model.Resume;
-import kg.attractor.job_search_java_25.model.Vacancy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ResumeRepository extends JpaRepository<Resume, Long> {
@@ -45,5 +45,8 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
     @Query("select r.applicant.id from Resume r where r.id = :resumeId")
     Long getOwnerId(@Param("resumeId") Long resumeId);
 
+    Optional<Resume> findFirstByApplicantIdAndIsActiveTrueOrderByUpdateTimeDesc(Long applicantId);
+
+    List<Resume> findAllByApplicantId(Long applicantId);
 
 }
