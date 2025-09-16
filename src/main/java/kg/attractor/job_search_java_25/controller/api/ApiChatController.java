@@ -1,9 +1,9 @@
 package kg.attractor.job_search_java_25.controller.api;
 
 import jakarta.validation.Valid;
+import kg.attractor.job_search_java_25.dto.ResponseDto;
 import kg.attractor.job_search_java_25.dto.messageDto.MessageDto;
 import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
-import kg.attractor.job_search_java_25.dto.ResponseDto;
 import kg.attractor.job_search_java_25.service.ChatService;
 import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
