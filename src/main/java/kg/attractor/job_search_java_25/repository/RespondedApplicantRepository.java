@@ -8,9 +8,15 @@ import org.springframework.stereotype.Repository;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RespondedApplicantRepository extends JpaRepository<RespondedApplicant, Long> {
+    Optional<RespondedApplicant> findByVacancyIdAndResumeId(Long vacancyId, Long resumeId);
+
+    List<RespondedApplicant> findAllByVacancyId(Long vacancyId);
+
+    List<RespondedApplicant> findAllByResumeIdIn(List<Long> resumeIds);
 
     boolean existsByVacancy_IdAndResume_Id(Long vacancyId, Long resumeId);
 
