@@ -6,7 +6,11 @@
     <form action="${formAction}" method="post" class="form">
 
         <#if _csrf??>
-            <input type="hidden" name="${(_csrf.parameterName)!'csrf-param-name'}" value="${(_csrf.token)!'csrf-token'}"/>
+            <input
+                    type="hidden"
+                    name="${(_csrf.parameterName)!'csrf-param-name'}"
+                    value="${(_csrf.token)!'csrf-token'}"/>
+
         </#if>
 
         <@spring.bind "${dtoName}.name"/>
