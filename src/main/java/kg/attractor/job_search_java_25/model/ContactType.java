@@ -19,6 +19,6 @@ public class ContactType {
     @Column(name = "type", length = 64, unique = true)
     private String type;
 
-    @OneToMany(mappedBy = "type", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "type")
     private List<ContactInfo> contacts;
 }
