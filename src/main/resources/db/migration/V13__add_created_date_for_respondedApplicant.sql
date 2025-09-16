@@ -1,0 +1,1 @@
+ALTER TABLE RESPONDED_APPLICANTS add column created_date timestamp not null default current_timestamp();
