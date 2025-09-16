@@ -9,6 +9,7 @@ import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.Contact
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
 import kg.attractor.job_search_java_25.service.CategoryService;
+import kg.attractor.job_search_java_25.service.ContactTypeService;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class ResumeController {
     private final ResumeService resumeService;
     private final UserService userService;
     private final CategoryService categoryService;
-
+    private final ContactTypeService contactTypeService;
 
 
     @GetMapping("/resumes")
@@ -56,7 +57,6 @@ public class ResumeController {
     }
 
 
-
     @GetMapping("/profile/resumes")
     public String myResumes(Authentication auth,
                             @RequestParam(defaultValue = "0") int page,
@@ -78,23 +78,22 @@ public class ResumeController {
         return "list";
     }
 
-
-
     @GetMapping("/resume/new")
     public String showResumeCreateForm(Model model) {
         ResumeUpsertDto dto = new ResumeUpsertDto();
+        dto.setActive(Boolean.TRUE);
         dto.setWorkExperiences(List.of(new WorkExperienceInfoDto()));
         dto.setEducationInfos(List.of(new EducationInfoDto()));
         dto.setContactInfos(List.of(new ContactInfoDto()));
 
         model.addAttribute("dto", dto);
         model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("contactTypes", contactTypeService.findAll());
         model.addAttribute("formAction", "/resume/new");
         model.addAttribute("dtoName", "dto");
         model.addAttribute("formType", "resume");
-        return "form";
+        return "resume_form";
     }
-
 
     @PostMapping("/resume/new")
     public String createResume(@ModelAttribute("dto") @Valid ResumeUpsertDto dto,
@@ -102,30 +101,31 @@ public class ResumeController {
                                Authentication auth,
                                Model model) {
 
-        dto.setWorkExperiences( dto.getWorkExperiences()==null ? List.of() :
+        dto.setWorkExperiences(dto.getWorkExperiences() == null ? List.of() :
                 dto.getWorkExperiences().stream()
-                        .filter(we -> we.getCompanyName()!=null && !we.getCompanyName().isBlank())
+                        .filter(we -> we.getCompanyName() != null && !we.getCompanyName().isBlank())
                         .toList());
-        dto.setEducationInfos( dto.getEducationInfos()==null ? List.of() :
+        dto.setEducationInfos(dto.getEducationInfos() == null ? List.of() :
                 dto.getEducationInfos().stream()
-                        .filter(edu -> edu.getInstitution()!=null && !edu.getInstitution().isBlank())
+                        .filter(edu -> edu.getInstitution() != null && !edu.getInstitution().isBlank())
                         .toList());
-        dto.setContactInfos( dto.getContactInfos()==null ? List.of() :
+        dto.setContactInfos(dto.getContactInfos() == null ? List.of() :
                 dto.getContactInfos().stream()
-                        .filter(c -> c.getContactValue()!=null && !c.getContactValue().isBlank())
+                        .filter(c -> c.getContactValue() != null && !c.getContactValue().isBlank())
                         .toList());
 
         if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(err -> log.debug("Validation error: {}", err));
             model.addAttribute("formAction", "/resume/new");
             model.addAttribute("formType", "resume");
-            model.addAttribute("dtoName", "dto");
             model.addAttribute("categories", categoryService.findAll());
-            return "form";
+            model.addAttribute("contactTypes", contactTypeService.findAll());
+            return "resume_form";
         }
 
         Long applicantId = userService.findUserIdByEmail(auth.getName());
         resumeService.saveResume(applicantId, dto);
-        return "redirect:/resumes";
+        return "redirect:/profile";
     }
 
 
@@ -140,10 +140,11 @@ public class ResumeController {
                 .build();
         model.addAttribute("dto", dto);
         model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("contactTypes", contactTypeService.findAll()); // <—
         model.addAttribute("formAction", "/resume/" + id + "/edit");
         model.addAttribute("dtoName", "dto");
         model.addAttribute("formType", "resume");
-        return "form";
+        return "resume_form";
     }
 
     @PostMapping("/resume/{id}/edit")
@@ -154,10 +155,11 @@ public class ResumeController {
                                Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryService.findAll());
+            model.addAttribute("contactTypes", contactTypeService.findAll());
             model.addAttribute("formAction", "/resume/" + id + "/edit");
             model.addAttribute("dtoName", "dto");
             model.addAttribute("formType", "resume");
-            return "form";
+            return "resume_form";
         }
         Long applicantId = userService.findUserIdByEmail(authentication.getName());
         resumeService.editResumeOwned(dto, id, applicantId);
