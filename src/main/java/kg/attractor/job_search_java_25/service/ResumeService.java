@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface ResumeService {
 
+    void deleteOwned(Long resumeId, Long ownerId);
+
     Page<ResumeListItemDto> getResumesByAuthorAndCategory(Long applicantId, Long categoryId, Pageable pageable);
 
 
