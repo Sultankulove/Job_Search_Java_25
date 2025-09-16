@@ -13,11 +13,15 @@ import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.util.Utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,6 +31,43 @@ public class UserServiceImpl implements UserService {
     private final ApplicationConfig applicationConfig;
     private final UserRepository userRepository;
     private final EmailService emailService;
+
+    @Override
+    public Long getUserIdOrNull() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User springUser) {
+            String email = springUser.getUsername();
+            return userRepository.findUserIdByEmailIgnoreCase(email).orElse(null);
+        }
+        return null;
+    }
+
+    @Override
+    public String getCurrentRole() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            return auth.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean hasRole(String role) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(role));
+    }
+
+
+    @Override
+    public Long getRequiredUserId() {
+        return Optional.ofNullable(getUserIdOrNull())
+                .orElseThrow(() -> new IllegalStateException("Пользователь не аутентифицирован"));
+    }
+
 
     @Override
     public void makeResetPasswordLink(HttpServletRequest request) throws UserNotFoundException, MessagingException, UnsupportedEncodingException {

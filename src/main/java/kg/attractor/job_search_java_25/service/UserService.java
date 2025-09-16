@@ -10,6 +10,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.io.UnsupportedEncodingException;
 
 public interface UserService extends UserDetailsService {
+    Long getUserIdOrNull();
+
+    String getCurrentRole();
+
+    boolean hasRole(String role);
+
+    Long getRequiredUserId();
+
     void makeResetPasswordLink(HttpServletRequest request) throws UsernameNotFoundException, MessagingException, UnsupportedEncodingException;
 
     void updateResetPasswordToken(String token, String email);
@@ -21,4 +29,5 @@ public interface UserService extends UserDetailsService {
     void registration(RegistrationRequestDto rrd);
 
     Long findUserIdByEmail(String name);
+
 }
