@@ -22,6 +22,20 @@ public class ChatServiceImpl implements ChatService {
     private final MessageRepository messageRepository;
     private final RespondedApplicantRepository respondedApplicantRepository;
 
+    @Transactional
+    @Override
+    public Long startChat(Long responseId, Long userId) {
+        RespondedApplicant ra = respondedApplicantRepository.findById(responseId)
+                .orElseThrow(() -> new NotFoundException("Response not found"));
+
+        Long employerId = ra.getVacancy().getAuthor().getId();
+        if (!userId.equals(employerId)) {
+            throw new ForbiddenException("Only vacancy author can start the chat");
+        }
+
+        return responseId;
+    }
+
     @Override
     public List<MessageDto> getChatByResponseId(Long responseId, Long userId) {
         log.debug("Chat.get(responseId={}, userId={})", responseId, userId);
@@ -45,8 +59,9 @@ public class ChatServiceImpl implements ChatService {
 
     @Transactional
     @Override
-    public void sendMessage(Long responseId, Long userId, MessageDto dto) {
+    public MessageDto sendMessage(Long responseId, Long userId, MessageDto dto) {
         log.info("Chat.send(responseId={}, userId={})", responseId, userId);
+
         RespondedApplicant ra = respondedApplicantRepository.findById(responseId)
                 .orElseThrow(() -> new NotFoundException("Response not found"));
 
@@ -63,7 +78,14 @@ public class ChatServiceImpl implements ChatService {
         msg.setContent(dto.getContent().trim());
         msg.setTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
 
-        messageRepository.save(msg);
-        log.debug("Message saved (len={})", msg.getContent().length());
+        msg = messageRepository.save(msg);
+        log.debug("Message saved (id={}, len={})", msg.getId(), msg.getContent().length());
+
+        return MessageDto.builder()
+                .id(msg.getId())
+                .content(msg.getContent())
+                .timestamp(msg.getTimestamp())
+                .build();
     }
+
 }
