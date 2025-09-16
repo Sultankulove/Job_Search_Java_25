@@ -37,17 +37,19 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                <#assign _auth = (SPRING_SECURITY_CONTEXT.authentication)!>
+                <#assign _isAuth = (_auth?? && _auth.principal?has_content && _auth.principal != 'anonymousUser')>
+                <#assign _authorities = (_auth.authorities)![]>
+                <#assign _roleNames = []>
+                <#list _authorities as a>
+                    <#assign _roleNames = _roleNames + [(a.authority!'')?string]>
+                </#list>
+                <#assign _isApplicant = _roleNames?seq_contains('ROLE_APPLICANT')>
+                <#assign _isEmployer  = _roleNames?seq_contains('ROLE_EMPLOYER')>
+                <#assign _accountTypeLabel = _isApplicant?then('Соискатель', _isEmployer?then('Работодатель',''))>
+
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/vacancies">
-                            <i class="bi bi-card-list"></i> <@spring.message "layout.vacancy"/>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/resumes">
-                            <i class="bi bi-person-lines-fill"></i> <@spring.message "layout.resume"/>
-                        </a>
-                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-translate"></i> <@spring.message "layout.navbar.chng_lang"/>
@@ -58,11 +60,24 @@
                         </ul>
                     </li>
 
+                    <#if _isAuth>
 
-                    <#if SPRING_SECURITY_CONTEXT?? &&
-                    SPRING_SECURITY_CONTEXT.authentication?? &&
-                    SPRING_SECURITY_CONTEXT.authentication.principal?has_content &&
-                    SPRING_SECURITY_CONTEXT.authentication.principal != 'anonymousUser'>
+                        <#if !_isApplicant>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/resumes">
+                                    <i class="bi bi-person-lines-fill"></i> <@spring.message "layout.resume"/>
+                                </a>
+                            </li>
+                        </#if>
+
+
+                        <#if !_isEmployer>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/vacancies">
+                                    <i class="bi bi-card-list"></i> <@spring.message "layout.vacancy"/>
+                                </a>
+                            </li>
+                        </#if>
 
                         <li class="nav-item">
                             <a class="nav-link" href="/profile">
@@ -70,48 +85,39 @@
                             </a>
                         </li>
 
-                        <#assign roles = (SPRING_SECURITY_CONTEXT.authentication.authorities)![]>
+                        <#if _isEmployer>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/vacancy/new">
+                                    <i class="bi bi-plus-square"></i> <@spring.message "layout.create_vacancy"/>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/profile/vacancies">
+                                    <i class="bi bi-folder"></i> <@spring.message "layout.my_vacancies"/>
+                                </a>
+                            </li>
+                        </#if>
 
-                        <#list roles as a>
-                            <#if a.authority?string == 'ROLE_EMPLOYER'>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/vacancy/new">
-                                        <i class="bi bi-plus-square"></i> <@spring.message "layout.create_vacancy"/>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/profile/vacancies">
-                                        <i class="bi bi-folder"></i> <@spring.message "layout.my_vacancies"/>
-                                    </a>
-                                </li>
-                                <#break>
-                            </#if>
-                        </#list>
-
-                        <#list roles as a>
-                            <#if a.authority?string == 'ROLE_APPLICANT'>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/resume/new">
-                                        <i class="bi bi-plus-square"></i> <@spring.message "layout.create_resume"/>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/profile/resumes">
-                                        <i class="bi bi-folder"></i> <@spring.message "layout.my_resume"/>
-                                    </a>
-
-                                </li>
-                                <#break>
-                            </#if>
-                        </#list>
+                        <#if _isApplicant>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/resume/new">
+                                    <i class="bi bi-plus-square"></i> <@spring.message "layout.create_resume"/>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/profile/resumes">
+                                    <i class="bi bi-folder"></i> <@spring.message "layout.my_resume"/>
+                                </a>
+                            </li>
+                        </#if>
                     </#if>
                 </ul>
 
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <#if SPRING_SECURITY_CONTEXT?? &&
-                    SPRING_SECURITY_CONTEXT.authentication?? &&
-                    SPRING_SECURITY_CONTEXT.authentication.principal?has_content &&
-                    SPRING_SECURITY_CONTEXT.authentication.principal != 'anonymousUser'>
+                    <#if _isAuth>
+                        <li class="nav-item">
+                            <span class="nav-link disabled">${_accountTypeLabel}</span>
+                        </li>
                         <li class="nav-item">
                             <form action="/logout" method="post" class="d-inline">
                                 <#if _csrf??>
@@ -120,7 +126,6 @@
                                             name="${(_csrf.parameterName)!'csrf-param-name'}"
                                             value="${(_csrf.token)!'csrf-token'}"
                                     />
-
                                 </#if>
                                 <button type="submit" class="btn btn-outline-light btn-sm">
                                     <i class="bi bi-box-arrow-right"></i> <@spring.message "layout.logout"/>
