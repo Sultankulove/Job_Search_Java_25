@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/logout").authenticated()
                         .requestMatchers("/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
 
                         .requestMatchers("/", "/auth/**", "/error", "/auth/reset-password").permitAll()
