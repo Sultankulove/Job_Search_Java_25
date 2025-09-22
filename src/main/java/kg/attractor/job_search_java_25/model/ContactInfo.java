@@ -15,7 +15,7 @@ public class ContactInfo {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "type_id")
+    @JoinColumn(name = "type_id", nullable = false)
     private ContactType type;
 
     @ManyToOne(optional = false)
