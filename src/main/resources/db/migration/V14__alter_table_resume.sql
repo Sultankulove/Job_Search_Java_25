@@ -1,0 +1,2 @@
+-- H2
+ALTER TABLE resumes ALTER COLUMN salary DECIMAL(38,2);
