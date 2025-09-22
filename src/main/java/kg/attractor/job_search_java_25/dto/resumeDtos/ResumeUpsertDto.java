@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -25,7 +26,7 @@ public class ResumeUpsertDto {
     private Long categoryId;
 
     @PositiveOrZero
-    private Float salary;
+    private BigDecimal salary;
 
     @NotNull
     private Boolean active;
