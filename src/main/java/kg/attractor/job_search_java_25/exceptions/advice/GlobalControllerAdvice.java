@@ -1,18 +1,41 @@
 package kg.attractor.job_search_java_25.exceptions.advice;
 
+
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import kg.attractor.job_search_java_25.exceptions.types.*;
-import kg.attractor.job_search_java_25.exceptions.types.NullPointerException;
+import kg.attractor.job_search_java_25.service.ErrorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpServerErrorException;
 
+import java.lang.NullPointerException;
+
 @ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalControllerAdvice {
+
+    private final ErrorService errorService;
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public String handleValidation(MethodArgumentNotValidException ex,
+                                   Model model,
+                                   HttpServletResponse response) {
+
+        var body = errorService.fromBindingResult(ex.getBindingResult());
+        model.addAttribute("status", HttpStatus.BAD_REQUEST.value());
+        model.addAttribute("reason", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        model.addAttribute("errors", body.getResponse());
+        model.addAttribute("title", body.getTitle());
+
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+        return "errors/error";
+    }
 
     @ExceptionHandler(NullPointerException.class)
     public String handleNullPointerException(NullPointerException ex, Model model) {
@@ -55,13 +78,7 @@ public class GlobalControllerAdvice {
         return "errors/error";
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public String handleMethodArgumentNotValidException(HttpServletRequest request, Model model) {
-        model.addAttribute("status", HttpStatus.BAD_REQUEST.value());
-        model.addAttribute("reason", HttpStatus.BAD_REQUEST.getReasonPhrase());
-        model.addAttribute("details", request);
-        return "errors/error";
-    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public String handleConstraintViolationException(HttpServletRequest request, Model model) {
         model.addAttribute("status", HttpStatus.BAD_REQUEST.value());
@@ -102,15 +119,6 @@ public class GlobalControllerAdvice {
         return "errors/error";
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    public String handleNotFoundException(HttpServletRequest request, Model model) {
-        model.addAttribute("status", HttpStatus.NOT_FOUND.value());
-        model.addAttribute("reason", HttpStatus.NOT_FOUND.getReasonPhrase());
-        model.addAttribute("details", request);
-        return "errors/error";
-    }
-
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     public String handleDataIntegrityViolationException(HttpServletRequest request, Model model) {
         model.addAttribute("status", HttpStatus.CONFLICT.value());
@@ -136,6 +144,16 @@ public class GlobalControllerAdvice {
         model.addAttribute("reason", "Internal Server Error");
         model.addAttribute("details", request);
         model.addAttribute("message", ex.getMessage());
+        return "errors/error";
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public String notFound(HttpServletRequest request, Model model, NotFoundException ex) {
+        model.addAttribute("status", HttpStatus.NOT_FOUND.value());
+        model.addAttribute("reason", HttpStatus.NOT_FOUND.getReasonPhrase());
+        model.addAttribute("details", request);
+        model.addAttribute("message", ex.getMessage());
+
         return "errors/error";
     }
 
