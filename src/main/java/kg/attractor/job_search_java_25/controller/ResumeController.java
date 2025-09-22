@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,7 @@ public class ResumeController {
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("filterAction", req.getRequestURI());
         model.addAttribute("list", resumes);
+        model.addAttribute("type", "resume");
         model.addAttribute("currentPage", resumes.getNumber());
         model.addAttribute("totalPages", resumes.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());
@@ -80,103 +82,58 @@ public class ResumeController {
 
     @GetMapping("/resume/new")
     public String showResumeCreateForm(Model model) {
-        ResumeUpsertDto dto = new ResumeUpsertDto();
-        dto.setActive(Boolean.TRUE);
-        dto.setWorkExperiences(List.of(new WorkExperienceInfoDto()));
-        dto.setEducationInfos(List.of(new EducationInfoDto()));
-        dto.setContactInfos(List.of(new ContactInfoDto()));
-
-        model.addAttribute("dto", dto);
+        model.addAttribute("dto", new ResumeUpsertDto());
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("contactTypes", contactTypeService.findAll());
         model.addAttribute("formAction", "/resume/new");
-        model.addAttribute("dtoName", "dto");
-        model.addAttribute("formType", "resume");
+
         return "resume_form";
     }
 
     @PostMapping("/resume/new")
     public String createResume(@ModelAttribute("dto") @Valid ResumeUpsertDto dto,
-                               BindingResult bindingResult,
+                               BindingResult br,
                                Authentication auth,
-                               Model model) {
-
-        if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(
-                    err -> log.debug("Validation error: {}", err));
-            log.debug("Errors: {}", bindingResult.getAllErrors());
-            model.addAttribute("dto", dto);
-            model.addAttribute("formAction", "/resume/new");
-            model.addAttribute("formType", "resume");
+                               Model model,
+                               RedirectAttributes ra) {
+        if (br.hasErrors()) {
             model.addAttribute("categories", categoryService.findAll());
             model.addAttribute("contactTypes", contactTypeService.findAll());
+            model.addAttribute("br", br);
+            model.addAttribute("errors", br.getFieldErrors());
+            model.addAttribute("formAction", "/resume/new");
             return "resume_form";
         }
 
-        dto.setWorkExperiences(dto.getWorkExperiences() == null ? List.of() :
-                dto.getWorkExperiences().stream()
-                        .filter(we -> we != null && we.getCompanyName() != null && !we.getCompanyName().isBlank())
-                        .toList());
-
-        dto.setEducationInfos(dto.getEducationInfos() == null ? List.of() :
-                dto.getEducationInfos().stream()
-                        .filter(edu -> edu != null && edu.getInstitution() != null && !edu.getInstitution().isBlank())
-                        .toList());
-
-        dto.setContactInfos(dto.getContactInfos() == null ? List.of() :
-                dto.getContactInfos().stream()
-                        .filter(c -> c != null && c.getContactValue() != null && !c.getContactValue().isBlank())
-                        .toList());
-
-
-
-        try {
-            Long applicantId = userService.findUserIdByEmail(auth.getName());
-            resumeService.saveResume(applicantId, dto);
-            return "redirect:/profile";
-        } catch (Exception ex) {
-            log.error("Failed to save resume", ex);
-            model.addAttribute("dto", dto);
-            model.addAttribute("globalError", "Не удалось сохранить резюме: " + ex.getMessage());
-            model.addAttribute("formAction", "/resume/new");
-            model.addAttribute("formType", "resume");
-            model.addAttribute("categories", categoryService.findAll());
-            model.addAttribute("contactTypes", contactTypeService.findAll());
-            return "resume_form";
-        }
+        Long applicantId = userService.findUserIdByEmail(auth.getName());
+        resumeService.saveResume(applicantId, dto);
+        ra.addFlashAttribute("success", "Резюме создано");
+        return "redirect:/profile/resumes";
     }
 
 
     @GetMapping("/resume/{id}/edit")
     public String editResume(@PathVariable Long id, Model model, Authentication auth) {
-        ResumeViewDto view = resumeService.getResumeById(id);
-        var dto = ResumeUpsertDto.builder()
-                .name(view.getName())
-                .categoryId(view.getCategoryId())
-                .salary(view.getSalary())
-                .active(view.isActive())
-                .build();
+        ResumeUpsertDto dto = resumeService.getResumeByIdForEdit(id);
         model.addAttribute("dto", dto);
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("contactTypes", contactTypeService.findAll()); // <—
+        model.addAttribute("contactTypes", contactTypeService.findAll());
         model.addAttribute("formAction", "/resume/" + id + "/edit");
-        model.addAttribute("dtoName", "dto");
-        model.addAttribute("formType", "resume");
         return "resume_form";
     }
 
     @PostMapping("/resume/{id}/edit")
     public String updateResume(@PathVariable Long id,
                                @ModelAttribute("dto") @Valid ResumeUpsertDto dto,
-                               BindingResult bindingResult,
+                               BindingResult br,
                                Authentication authentication,
                                Model model) {
-        if (bindingResult.hasErrors()) {
+        if (br.hasErrors()) {
             model.addAttribute("categories", categoryService.findAll());
             model.addAttribute("contactTypes", contactTypeService.findAll());
+            model.addAttribute("br", br);
+            model.addAttribute("errors", br.getFieldErrors());
             model.addAttribute("formAction", "/resume/" + id + "/edit");
-            model.addAttribute("dtoName", "dto");
-            model.addAttribute("formType", "resume");
             return "resume_form";
         }
         Long applicantId = userService.findUserIdByEmail(authentication.getName());

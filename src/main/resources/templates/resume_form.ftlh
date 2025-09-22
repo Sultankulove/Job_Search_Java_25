@@ -1,369 +1,564 @@
-<#import "layout.ftlh" as main>
+<#import "layout.ftlh" as l>
 
-<@main.layout title="Создание резюме">
-    <section class="container" style="max-width:1100px;margin:24px auto;">
-        <h1 style="color:#d9534f;margin:0 0 18px 0;">Создание резюме:</h1>
+<@l.layout title="<@spring.message 'form.title'! 'Создание/Редактирование резюме'/>">
 
-        <form action="${formAction!'/resume/new'}" method="post" id="resumeForm" autocomplete="on">
+<head>
+    <title>${(formAction?contains("/edit"))?then("Редактирование резюме","Создание резюме")}</title>
+    <style>
+        .err{color:#b00020;margin:4px 0}
+        .edu-item{border:1px solid #ccc;padding:8px;margin:8px 0}
+        .row{display:flex;gap:8px;flex-wrap:wrap}
+        .col{display:flex;flex-direction:column;min-width:220px}
+        /*.rm{align-self:flex-end;margin-top:20px}*/
 
-            <#if (errors?? && errors?size > 0) || (bindingResult?? && bindingResult.hasErrors())>
-                <div class="alert alert-danger">
-                    <strong>Исправьте ошибки в форме:</strong>
-                    <ul style="margin:8px 0 0 20px;">
+        body {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-                        <#if bindingResult??>
-                            <#list bindingResult.fieldErrors![] as fe>
-                                <li>${fe.field}: ${fe.defaultMessage}</li>
-                            </#list>
-                            <#list bindingResult.globalErrors![] as ge>
-                                <li>${ge.defaultMessage}</li>
-                            </#list>
-                        <#else>
-                            <#list errors![] as e>
-                                <li>${e}</li>
+        label, select, input, h2, h3, button {
+            color: #e0e0e0;
+        }
+
+        select, input[type="text"], input[type="number"], input[type="date"], input[type="email"] {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 6px;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 6px;
+        }
+
+        select:focus, input:focus {
+            outline: 2px solid #00acc1;
+            background-color: #2f2f2f;
+        }
+
+        button {
+            background-color: #00acc1;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0097a7;
+        }
+
+        button.rm {
+            background-color: #c62828;
+            color: #fff;
+        }
+
+        button.rm:hover {
+            background-color: #b71c1c;
+        }
+
+        .edu-item, .contact-item {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .err {
+            color: #ff5252;
+        }
+
+        h2, h3 {
+            color: #ffb300;
+            margin-top: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            min-width: 220px;
+            flex-grow: 1;
+        }
+
+        ::placeholder {
+            color: #999;
+        }
+
+        select option {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+        }
+
+        i, svg, img {
+            filter: invert(90%);
+        }
+
+        /*button.rm {*/
+        /*    font-size: 12px;*/
+        /*    padding: 4px 8px;*/
+        /*    background-color: #c62828;*/
+        /*    color: #fff;*/
+        /*    border-radius: 4px;*/
+        /*    border: none;*/
+        /*    cursor: pointer;*/
+        /*}*/
+
+        /*button.rm:hover {*/
+        /*    background-color: #b71c1c;*/
+        /*}*/
+
+        .rm {
+            padding: 0.25rem 0.5rem;
+            /*margin: 20px;*/
+            font-size: 0.8rem;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .rm:hover {
+            background-color: #bb2d3b;
+        }
+
+
+
+
+    </style>
+</head>
+
+<h2>${(formAction?contains("/edit"))?then("Редактирование резюме","Создание резюме")}</h2>
+
+<#if (br?? && br.hasErrors()) || (errors?? && errors?size > 0)>
+    <div class="err">
+        <ul>
+            <#if br??>
+                <#list br.globalErrors as e>
+                    <li>${e.defaultMessage!e.code}</li>
+                </#list>
+            </#if>
+        </ul>
+    </div>
+</#if>
+
+<form id="resumeForm" action="${formAction!'/resume/new'}" method="post">
+    <#if _csrf??>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+    </#if>
+
+    <div class="col">
+        <label>Название резюме</label>
+        <input type="text" name="name" value="${(dto.name)!}">
+        <#if errors??>
+            <#list errors?filter(e -> e.field == "name") as err>
+                <div class="err">${err.defaultMessage!}</div>
+            </#list>
+        </#if>
+    </div>
+
+    <div class="col">
+        <label>Ожидаемый уровень оклада</label>
+        <input type="number"
+               name="salary"
+               min="0" step="0.01"
+               value="${(dto.salary?c)!}">
+        <#if errors??>
+            <#list errors?filter(e -> e.field == "salary") as err>
+                <div class="err">${err.defaultMessage!}</div>
+            </#list>
+        </#if>
+    </div>
+
+    <div class="col">
+        <label>Категория</label>
+        <select name="categoryId" required>
+            <option value="">— выберите —</option>
+            <#list categories![] as c>
+                <#assign selected = (dto.categoryId?? && (dto.categoryId?long == c.id))>
+                <option value="${c.id}" <#if selected>selected</#if>>${c.name}</option>
+            </#list>
+        </select>
+        <#if errors??>
+            <#list errors?filter(e -> e.field == "categoryId") as err>
+                <div class="err">${err.defaultMessage!}</div>
+            </#list>
+        </#if>
+    </div>
+
+    <div class="col">
+        <label>
+            <input type="checkbox" name="active" <#if dto.active>checked</#if> > Активное резюме
+
+        </label>
+        <#if errors??>
+            <#list errors?filter(e -> e.field == "active") as err>
+                <div class="err">${err.defaultMessage!}</div>
+            </#list>
+        </#if>
+    </div>
+
+    <h3>Образование</h3>
+
+    <div id="eduContainer">
+        <#assign eduList = dto.educationInfos![]>
+        <#if eduList?size == 0>
+            <#assign eduList = [ {} ]>
+        </#if>
+
+        <#list eduList as ed>
+            <#assign i = ed?index>
+            <div class="edu-item" data-index="${i}">
+                <div class="row">
+                    <div class="col">
+                        <label>Учебное заведение</label>
+                        <input type="text" name="educationInfos[${i}].institution" value="${(ed.institution)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "educationInfos[" + i + "].institution") as err>
+                                <div class="err">${err.defaultMessage!}</div>
                             </#list>
                         </#if>
-                    </ul>
-                </div>
-            </#if>
-
-
-            <#if _csrf??>
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-            </#if>
-
-            <div class="mb-3">
-                <label class="form-label">Название резюме:</label>
-                <input class="form-control" type="text" name="name" required
-                       placeholder="Введите название"
-                       value="${(dto.name)!}">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Категория:</label>
-                <select class="form-select" name="categoryId" required>
-                    <option value="">Выберите категорию</option>
-                    <#list categories![] as c>
-                        <option value="${c.id}"
-                                <#if dto.categoryId?has_content && (dto.categoryId?long == c.id)>selected</#if>>
-                            ${c.name}
-                        </option>
-                    </#list>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Ожидаемый уровень оклада:</label>
-                <input class="form-control" type="number" min="0" step="1"
-                       name="salary" placeholder="Введите оклад"
-                       value="${(dto.salary)!}">
-            </div>
-
-            <hr class="my-4"/>
-
-            <h3 class="h5">О себе:</h3>
-
-
-            <div class="row g-3 align-items-start">
-                <div class="col-12 col-md-9">
-                    <div id="workExpContainer" data-next-index="${(dto.workExperiences![])?size}">
-                        <#list dto.workExperiences![] as we>
-                            <#assign i = we?index>
-                            <div class="card we-item mb-3" data-index="${i}">
-                                <div class="card-body">
-                                    <div class="row g-2">
-                                        <div class="col-12 col-md-3">
-                                            <label class="form-label small">Год(ы)</label>
-                                            <input type="number" inputmode="numeric" pattern="\\d*"
-                                                   min="0" step="1"
-                                                   name="workExperiences[${i}].years"
-                                                   value="${(we.years)!}"/>
-                                        </div>
-                                        <div class="col-12 col-md-4">
-                                            <label class="form-label small">Название компании</label>
-                                            <input class="form-control" required
-                                                   name="workExperiences[${i}].companyName"
-                                                   placeholder="Компания" value="${(we.companyName)!}">
-                                        </div>
-                                        <div class="col-12 col-md-5">
-                                            <label class="form-label small">Должность</label>
-                                            <input class="form-control" name="workExperiences[${i}].position"
-                                                   placeholder="Должность" value="${(we.position)!}">
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label small">Обязанности</label>
-                                            <textarea class="form-control" rows="3"
-                                                      name="workExperiences[${i}].responsibilities"
-                                                      placeholder="Ключевые задачи и достижения">${(we.responsibilities)!}</textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button" class="btn btn-light btn-remove-we"
-                                        title="Удалить опыт"
-                                        style="position:absolute;right:8px;top:8px;">✕
-                                </button>
-                            </div>
-                        </#list>
                     </div>
-                </div>
 
-                <div class="col-12 col-md-3">
-                    <button type="button" id="addWorkExp" class="btn btn-outline-primary w-100"
-                            style="height:74px;font-size:22px;">+
-                    </button>
+                    <div class="col">
+                        <label>Программа</label>
+                        <input type="text" name="educationInfos[${i}].program" value="${(ed.program)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "educationInfos[" + i + "].program") as err>
+                                <div class="err">${err.defaultMessage!}</div>
+                            </#list>
+                        </#if>
+                    </div>
+
+                    <div class="col">
+                        <label>Степень</label>
+                        <input type="text" name="educationInfos[${i}].degree" value="${(ed.degree)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "educationInfos[" + i + "].degree") as err>
+                                <div class="err">${err.defaultMessage!}</div>
+                            </#list>
+                        </#if>
+                    </div>
+
+                    <div class="col">
+                        <label>Дата начала</label>
+                        <input type="date" name="educationInfos[${i}].startDate" value="${(ed.startDate)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "educationInfos[" + i + "].startDate") as err>
+                                <div class="err">${err.defaultMessage!}</div>
+                            </#list>
+                        </#if>
+                    </div>
+
+                    <div class="col">
+                        <label>Дата окончания</label>
+                        <input type="date" name="educationInfos[${i}].endDate" value="${(ed.endDate)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "educationInfos[" + i + "].endDate") as err>
+                                <div class="err">${err.defaultMessage!}</div>
+                            </#list>
+                        </#if>
+                    </div>
+
+                    <button type="button" class="rm" onclick="removeEdu(this)">Удалить</button>
                 </div>
             </div>
+        </#list>
+    </div>
+
+    <button type="button" onclick="addEdu()">+ Добавить образование</button>
 
 
-            <div class="row g-3 align-items-start mt-2">
-                <div class="col-12 col-md-9">
-                    <div id="eduContainer" data-next-index="${(dto.educationInfos![])?size}">
-                        <#list dto.educationInfos![] as ed>
-                            <#assign j = ed?index>
-                            <div class="card edu-item mb-3" data-index="${j}">
-                                <div class="card-body">
-                                    <div class="row g-2">
-                                        <div class="col-12 col-md-6">
-                                            <label class="form-label small">Где учился</label>
-                                            <input class="form-control" required
-                                                   name="educationInfos[${j}].institution"
-                                                   placeholder="ВУЗ / Колледж" value="${(ed.institution)!}">
-                                        </div>
-                                        <div class="col-12 col-md-3">
-                                            <label class="form-label small">Образование</label>
-                                            <input class="form-control" name="educationInfos[${j}].degree"
-                                                   placeholder="Специальность / степень" value="${(ed.degree)!}">
-                                        </div>
-                                        <div class="col-12 col-md-3">
-                                            <label class="form-label small">Срок обучения</label>
-                                            <input type="date"
-                                                   name="dto.educationInfos[${i}].startDate"
-                                                   value="<#if ed.startDate??>
-                                                    <#if ed.startDate?is_date>
-                                                        ${ed.startDate?string('yyyy-MM-dd')}
-                                                    <#else>
-                                                        ${ed.startDate}
-                                                    </#if>
-                                                    </#if>">
+    <h3>Опыт работы</h3>
 
+    <div id="workContainer">
+        <#assign workList = dto.workExperiences![]>
+        <#if workList?size == 0>
+            <#assign workList = [ {} ]>
+        </#if>
 
-                                            <<input type="date"
-                                                    name="dto.educationInfos[${i}].endDate"
-                                                    value="<#if ed.endDate??>
-                                                    <#if ed.endDate?is_date>
-                                                        ${ed.endDate?string('yyyy-MM-dd')}
-                                                    <#else>
-                                                        ${ed.endDate}
-                                                    </#if>
-                                                    </#if>">
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button" class="btn btn-light btn-remove-edu"
-                                        title="Удалить образование"
-                                        style="position:absolute;right:8px;top:8px;">✕
-                                </button>
-                            </div>
-                        </#list>
+        <#list workList as w>
+            <#assign i = w?index>
+            <div class="edu-item" data-windex="${i}">
+                <div class="row">
+                    <div class="col">
+                        <label>Компания</label>
+                        <input type="text" name="workExperiences[${i}].companyName" value="${(w.companyName)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "workExperiences[" + i + "].companyName") as err>
+                                <div class="err">${err.defaultMessage!}</div>
+                            </#list>
+                        </#if>
                     </div>
-                </div>
 
-                <div class="col-12 col-md-3">
-                    <button type="button" id="addEducation" class="btn btn-outline-primary w-100"
-                            style="height:74px;font-size:22px;">+
-                    </button>
-                </div>
-            </div>
-
-            <hr class="my-4"/>
-
-
-            <h3 class="h5 mb-2">Ссылки на соц. сети / контакты:</h3>
-
-
-            <#assign existingContacts = {} />
-            <#list dto.contactInfos![] as ci0>
-                <#if ci0.typeId?has_content>
-                    <#assign existingContacts = existingContacts + { (ci0.typeId?long)?string : (ci0.contactValue!"") } >
-                </#if>
-            </#list>
-
-            <#assign contactIndex = 0>
-            <div class="row g-3">
-                <#list contactTypes![] as t>
-                    <#assign key = (t.id?long)?string>
-                    <#assign prefill = (existingContacts[key])!"" >
-                    <div class="col-12 col-md-6">
-                        <div class="input-group">
-            <span class="input-group-text" style="min-width:46px;">
-              <#switch t.name?lower_case>
-                  <#case "telegram">✈️<#break>
-                  <#case "facebook">f<#break>
-                  <#case "linkedin">in<#break>
-                  <#case "email">✉️<#break>
-                  <#case "phone">📞<#break>
-                  <#default>🔗
-              </#switch>
-            </span>
-                            <input type="hidden" name="dto.contactInfos[${contactIndex}].typeId" value="${t.id}">
-                            <input class="form-control" name="contactInfos[${contactIndex}].contactValue"
-                                   placeholder="${t.name}" value="${prefill}">
-                        </div>
+                    <div class="col">
+                        <label>Должность</label>
+                        <input type="text" name="workExperiences[${i}].position" value="${(w.position)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "workExperiences[" + i + "].position") as err>
+                                <div class="err">${err.defaultMessage!}</div>
+                            </#list>
+                        </#if>
                     </div>
-                    <#assign contactIndex = contactIndex + 1>
-                </#list>
-            </div>
 
-            <div class="form-check mt-4">
-                <input type="hidden" name="dto.active" value="false">
-                <input class="form-check-input" type="checkbox" id="activeCheck"
-                       name="active" value="true"
-                       <#if (dto.active)!false>checked</#if>>
-                <label class="form-check-label" for="activeCheck">Активно</label>
-
-            </div>
-
-            <div class="mt-4">
-                <button type="submit" class="btn btn-success px-4 py-2">Опубликовать</button>
-            </div>
-        </form>
-    </section>
-
-
-    <script type="text/template" id="tpl-work-exp">
-        <div class="card we-item mb-3" data-index="__INDEX__">
-            <div class="card-body">
-                <div class="row g-2">
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small">Год(ы)</label>
-                        <input class="form-control" name="workExperiences[__INDEX__].years"
-                               placeholder="Напр., 2022">
+                    <div class="col" style="min-width:320px">
+                        <label>Обязанности</label>
+                        <input type="text" name="workExperiences[${i}].responsibilities" value="${(w.responsibilities)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "workExperiences[" + i + "].responsibilities") as err>
+                                <div class="err">${err.defaultMessage!}</div>
+                            </#list>
+                        </#if>
                     </div>
-                    <div class="col-12 col-md-4">
-                        <label class="form-label small">Название компании</label>
-                        <input class="form-control" required
-                               name="workExperiences[__INDEX__].companyName"
-                               placeholder="Компания">
+
+                    <div class="col" style="min-width:160px">
+                        <label>Сколько лет</label>
+                        <input type="text" name="workExperiences[${i}].years" value="${(w.years)!}">
+                        <#if errors??>
+                            <#list errors?filter(e -> e.field == "workExperiences[" + i + "].years") as err>
+                                <div class="err">${err.defaultMessage!}</div>
+                            </#list>
+                        </#if>
                     </div>
-                    <div class="col-12 col-md-5">
-                        <label class="form-label small">Должность</label>
-                        <input class="form-control" name="workExperiences[__INDEX__].position"
-                               placeholder="Должность">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label small">Обязанности</label>
-                        <textarea class="form-control" rows="3"
-                                  name="workExperiences[__INDEX__].responsibilities"
-                                  placeholder="Ключевые задачи и достижения"></textarea>
-                    </div>
+
+                    <button type="button" class="rm" onclick="removeWork(this)">Удалить</button>
                 </div>
             </div>
-            <button type="button" class="btn btn-light btn-remove-we"
-                    title="Удалить опыт"
-                    style="position:absolute;right:8px;top:8px;">✕
-            </button>
-        </div>
-    </script>
+        </#list>
+    </div>
 
-    <script type="text/template" id="tpl-education">
-        <div class="card edu-item mb-3" data-index="__INDEX__">
-            <div class="card-body">
-                <div class="row g-2">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label small">Где учился</label>
-                        <input class="form-control" required
-                               name="educationInfos[__INDEX__].institution"
-                               placeholder="ВУЗ / Колледж">
+    <button type="button" onclick="addWork()">+ Добавить опыт</button>
+    <div style="margin-top:12px;">
+        <button type="submit">${(formAction?contains("/edit"))?then("Сохранить","Создать")}</button>
+    </div>
+
+
+    <h3>Контакты</h3>
+
+    <div id="contactContainer">
+        <#assign contactList = dto.contactInfos![]>
+        <#if contactList?size == 0>
+            <#assign contactList = [ {} ]>
+        </#if>
+
+        <#list contactList as c>
+            <#assign i = c?index>
+            <div class="contact-item" data-index="${i}">
+                <div class="row">
+                    <div class="col">
+                        <label>Тип контакта</label>
+                        <select name="contactInfos[${i}].typeId">
+                            <option value="">— выберите —</option>
+                            <#list contactTypes![] as t>
+                                <#assign selected = (c.typeId?? && (c.typeId?long == t.id))>
+                                <option value="${t.id}" <#if selected>selected</#if>>${t.name}</option>
+                            </#list>
+                        </select>
                     </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small">Образование</label>
-                        <input class="form-control" name="educationInfos[__INDEX__].degree"
-                               placeholder="Специальность / степень">
+
+                    <div class="col">
+                        <label>Значение</label>
+                        <input type="text" name="contactInfos[${i}].contactValue" value="${(c.contactValue)!}">
                     </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small">Срок обучения</label>
-                        <input class="form-control" name="educationInfos[__INDEX__].startDate"
-                               placeholder="Напр., 2019–2023">
-                        <input class="form-control" name="educationInfos[__INDEX__].endDate"
-                               placeholder="Напр., 2019–2023">
-                    </div>
+
+                    <button type="button" class="rm" onclick="removeContact(this)">Удалить</button>
                 </div>
             </div>
-            <button type="button" class="btn btn-light btn-remove-edu"
-                    title="Удалить образование"
-                    style="position:absolute;right:8px;top:8px;">✕
-            </button>
-        </div>
-    </script>
+        </#list>
+    </div>
 
-    <script>
-        (function () {
-            const weContainer = document.getElementById('workExpContainer');
-            const eduContainer = document.getElementById('eduContainer');
-            const weTpl = document.getElementById('tpl-work-exp').textContent.trim();
-            const eduTpl = document.getElementById('tpl-education').textContent.trim();
+    <button type="button" onclick="addContact()">+ Добавить контакт</button>
 
-            function nextIndex(el) {
-                const n = parseInt(el.getAttribute('data-next-index') || '0', 10);
-                el.setAttribute('data-next-index', String(n + 1));
-                return n;
-            }
+</form>
 
-            function addBlock(container, tpl) {
-                const idx = nextIndex(container);
-                const html = tpl.replaceAll('__INDEX__', idx);
-                const node = document.createElement('div');
-                node.innerHTML = html;
-                container.appendChild(node.firstElementChild);
-                renumber(container);
+<script>
+    const eduContainer = document.getElementById('eduContainer');
+    const workContainer = document.getElementById('workContainer');
+    const contactContainer = document.getElementById('contactContainer');
 
-            }
+    function addEdu() {
+        const idx = eduContainer.children.length;
+        const node = document.createElement('div');
+        node.className = 'edu-item';
+        node.dataset.index = String(idx);
+        node.innerHTML = '<div class="row"> ' +
+            '<div class="col"> ' +
+            '<label>Учебное заведение</label> ' +
+            '<input name="educationInfos[' + idx + '].institution"> ' +
+            '</div> ' +
+            '<div class="col"> ' +
+            '<label>Программа</label> ' +
+            '<input name="educationInfos[' + idx + '].program"> ' +
+            '</div> ' +
+            '<div class="col"> ' +
+            '<label>Степень</label> ' +
+            '<input name="educationInfos[' + idx + '].degree"> ' +
+            '</div> ' +
+            '<div class="col"> ' +
+            '<label>Дата начала</label> ' +
+            '<input type="date" name="educationInfos[' + idx + '].startDate"> ' +
+            '</div> ' +
+            '<div class="col">' +
+            '<label>Дата окончания</label> ' +
+            '<input type="date" name="educationInfos[' + idx + '].endDate"> ' +
+            '</div> ' +
+            '<button type="button" class="rm" onclick="removeEdu(this)">Удалить</button> ' +
+            '</div>';
+        eduContainer.appendChild(node);
+    }
 
-            function renumber(container) {
-                const items = Array.from(container.children);
-                items.forEach((card, newIdx) => {
-                    card.setAttribute('data-index', newIdx);
+    function removeEdu(btn) {
+        const card = btn.closest('.edu-item');
+        if (!card) return;
+        eduContainer.removeChild(card);
+        reindexEdu();
+    }
 
-                    card.querySelectorAll('input[name], textarea[name]').forEach(el => {
-                        el.name = el.name.replace(/\[(\d+)\]/g, '[' + newIdx + ']');
-                    });
-                });
-                container.setAttribute('data-next-index', String(items.length));
-            }
-
-            document.getElementById('addWorkExp').addEventListener('click', () => addBlock(weContainer, weTpl));
-            document.getElementById('addEducation').addEventListener('click', () => addBlock(eduContainer, eduTpl));
-
-            weContainer.addEventListener('click', function (e) {
-                if (e.target.classList.contains('btn-remove-we')) {
-                    e.target.closest('.we-item')?.remove();
-                    renumber(weContainer);
-                }
+    function reindexEdu() {
+        const items = eduContainer.querySelectorAll('.edu-item');
+        items.forEach((el, i) => {
+            el.dataset.index = String(i);
+            el.querySelectorAll('input[name]').forEach(inp => {
+                inp.name = inp.name
+                    .replace(/educationInfos\[\d+]\.institution/, 'educationInfos[' + i + '].institution')
+                    .replace(/educationInfos\[\d+]\.program/,     'educationInfos[' + i + '].program')
+                    .replace(/educationInfos\[\d+]\.degree/,      'educationInfos[' + i + '].degree')
+                    .replace(/educationInfos\[\d+]\.startDate/,   'educationInfos[' + i + '].startDate')
+                    .replace(/educationInfos\[\d+]\.endDate/,     'educationInfos[' + i + '].endDate');
             });
-            eduContainer.addEventListener('click', function (e) {
-                if (e.target.classList.contains('btn-remove-edu')) {
-                    e.target.closest('.edu-item')?.remove();
-                    renumber(eduContainer);
-                }
+        });
+    }
+
+    document.getElementById('resumeForm')
+        .addEventListener('submit', () => reindexEdu());
+
+
+    ///////
+
+
+    function workTemplate(idx) {
+        return '' +
+            '<div class="edu-item" data-windex="' + idx + '">' +
+            '<div class="row">' +
+            '<div class="col">' +
+            '<label>Компания</label>' +
+            '<input name="workExperiences[' + idx + '].companyName">' +
+            '</div>' +
+            '<div class="col">' +
+            '<label>Должность</label>' +
+            '<input name="workExperiences[' + idx + '].position">' +
+            '</div>' +
+            '<div class="col" style="min-width:320px">' +
+            '<label>Обязанности</label>' +
+            '<input name="workExperiences[' + idx + '].responsibilities">' +
+            '</div>' +
+            '<div class="col" style="min-width:160px">' +
+            '<label>Годы (например: 2021–2024)</label>' +
+            '<input name="workExperiences[' + idx + '].years">' +
+            '</div>' +
+            '<button type="button" class="rm" onclick="removeWork(this)">Удалить</button>' +
+            '</div>' +
+            '</div>';
+    }
+
+    function addWork() {
+        const idx = workContainer.children.length;
+        const wrap = document.createElement('div');
+        wrap.innerHTML = workTemplate(idx).trim();
+        workContainer.appendChild(wrap.firstElementChild);
+    }
+
+    function removeWork(btn) {
+        const card = btn.closest('.edu-item');
+        if (!card) return;
+        workContainer.removeChild(card);
+        reindexWork();
+    }
+
+    function reindexWork() {
+        const items = workContainer.querySelectorAll('.edu-item');
+        items.forEach((el, i) => {
+            el.dataset.windex = String(i);
+            el.querySelectorAll('input[name]').forEach(inp => {
+                inp.name = inp.name
+                    .replace(/workExperiences\[\d+]\.companyName/,    'workExperiences[' + i + '].companyName')
+                    .replace(/workExperiences\[\d+]\.position/,        'workExperiences[' + i + '].position')
+                    .replace(/workExperiences\[\d+]\.responsibilities/,'workExperiences[' + i + '].responsibilities')
+                    .replace(/workExperiences\[\d+]\.years/,           'workExperiences[' + i + '].years');
             });
-        })();
-    </script>
+        });
+    }
 
-    <style>
-        .form-label {
-            font-weight: 600;
-        }
+    document.getElementById('resumeForm')
+        .addEventListener('submit', () => {
+            reindexEdu();
+            reindexWork();
+        });
 
-        .card {
-            position: relative;
-            border: 1px solid rgba(0, 0, 0, .08);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-            border-radius: 12px;
-        }
 
-        .btn {
-            border-radius: 10px;
-        }
-    </style>
-</@main.layout>
+    function addContact() {
+        const idx = contactContainer.children.length;
+        const node = document.createElement('div');
+        node.className = 'contact-item';
+        node.dataset.index = String(idx);
+        node.innerHTML =
+            '<div class="row">' +
+            '<div class="col">' +
+            '<label>Тип контакта</label>' +
+            '<select name="contactInfos[' + idx + '].typeId">' +
+            '<option value="">— выберите —</option>' +
+            '<#list contactTypes![] as t>' +
+            '<option value="${t.id}">${t.name}</option>' +
+            '</#list>' +
+            '</select>' +
+            '</div>' +
+            '<div class="col">' +
+            '<label>Значение</label>' +
+            '<input type="text" name="contactInfos[' + idx + '].contactValue">' +
+            '</div>' +
+            '<button type="button" class="rm" onclick="removeContact(this)">Удалить</button>' +
+            '</div>';
+        contactContainer.appendChild(node);
+    }
 
+    function removeContact(btn) {
+        const card = btn.closest('.contact-item');
+        if (!card) return;
+        contactContainer.removeChild(card);
+        reindexContacts();
+    }
+
+    function reindexContacts() {
+        const items = contactContainer.querySelectorAll('.contact-item');
+        items.forEach((el, i) => {
+            el.dataset.index = String(i);
+            el.querySelectorAll('input,select').forEach(inp => {
+                inp.name = inp.name
+                    .replace(/contactInfos\[\d+]\.typeId/, 'contactInfos[' + i + '].typeId')
+                    .replace(/contactInfos\[\d+]\.value/,   'contactInfos[' + i + '].value');
+            });
+        });
+    }
+
+    document.getElementById('resumeForm')
+        .addEventListener('submit', () => {
+            reindexContacts();
+            reindexEdu();
+            reindexWorkExp();
+        });
+</script>
+
+</@l.layout>

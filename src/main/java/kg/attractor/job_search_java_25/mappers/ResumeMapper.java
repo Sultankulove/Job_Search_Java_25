@@ -47,7 +47,7 @@ public class ResumeMapper {
     public void applyUpsert(ResumeUpsertDto d, Resume e, Category cat, User applicant, Function<Long, ContactType> contactTypeById) {
         e.setName(d.getName());
         e.setSalary(d.getSalary());
-        e.setActive(Boolean.TRUE.equals(d.getActive()));
+        e.setActive(Boolean.TRUE.equals(d.isActive()));
         e.setCategory(cat);
         if (applicant != null) e.setApplicant(applicant);
 
@@ -83,7 +83,7 @@ public class ResumeMapper {
     }
 
     public void applyActive(ActiveDto dto, Resume e) {
-        if (dto != null && dto.getActive() != null) e.setActive(dto.getActive());
+        if (dto != null) e.setActive(dto.getActive());
     }
 
     private WorkExperienceInfo toWorkExpEntity(WorkExperienceInfoDto d) {

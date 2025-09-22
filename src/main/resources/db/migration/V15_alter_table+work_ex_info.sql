@@ -1,1 +1,0 @@
-ALTER TABLE work_experience_info ALTER COLUMN id RESTART WITH 239;

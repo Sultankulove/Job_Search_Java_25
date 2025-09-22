@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.service;
 
 import kg.attractor.job_search_java_25.dto.*;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeAllInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeUpsertDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeViewDto;
@@ -38,4 +39,10 @@ public interface ResumeService {
 
     @Transactional
     void deleteResumeById(Long id);
+
+    void checkResumeOwnership(Long resumeId, Long userId);
+
+    ResumeUpsertDto getResumeByIdForEdit(Long id);
+
+    ResumeAllInfoDto getResumeAllById(Long id);
 }

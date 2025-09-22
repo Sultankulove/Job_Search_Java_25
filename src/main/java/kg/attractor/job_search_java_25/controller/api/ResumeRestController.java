@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("api/resumes")
-public class ApiResumeController {
+public class ResumeRestController {
     private final ResumeService resumeService;
     private final UserService userService;
 

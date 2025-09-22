@@ -1,12 +1,20 @@
 package kg.attractor.job_search_java_25.service.impl;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import kg.attractor.job_search_java_25.dto.ActiveDto;
+import kg.attractor.job_search_java_25.dto.CategoryDtos.CategoryDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeAllInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeUpsertDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeViewDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoUpsertDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactInfoDto;
+import kg.attractor.job_search_java_25.dto.userDtos.AccountType;
+import kg.attractor.job_search_java_25.dto.userDtos.UserViewProfileDto;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.mappers.ResumeMapper;
@@ -37,6 +45,9 @@ public class ResumeServiceImpl implements ResumeService {
     private final UserRepository userRepository;
     private final ContactTypeRepository contactTypeRepository;
     private final ResumeMapper resumeMapper;
+    private final EducationInfoRepository educationInfoRepository;
+    private final WorkExperienceInfoRepository workExperienceInfoRepository;
+    private final ContactInfoRepository contactInfoRepository;
 
     @Override
     @Transactional
@@ -90,8 +101,8 @@ public class ResumeServiceImpl implements ResumeService {
 
         Resume resume = new Resume();
         resume.setName(trimToNull(dto.getName()));
-        resume.setSalary(normalizeSalary(dto.getSalary()));
-        resume.setActive(Boolean.TRUE.equals(dto.getActive()));
+        resume.setSalary(dto.getSalary());
+        resume.setActive(Boolean.TRUE.equals(dto.isActive()));
         resume.setCategory(category);
         resume.setApplicant(applicant);
 
@@ -330,5 +341,133 @@ public class ResumeServiceImpl implements ResumeService {
         Long ownerId = resumeRepository.getOwnerId(resumeId);
         if (ownerId == null) throw new NotFoundException("Resume not found");
         if (!ownerId.equals(userId)) throw new ForbiddenException("Not your resume");
+    }
+
+    @Override
+    public void checkResumeOwnership(Long resumeId, Long userId) {
+        Long ownerId = resumeRepository.findOwnerIdByResumeId(resumeId)
+                .orElseThrow(() -> new NotFoundException("Resume not found: " + resumeId));
+
+        if (!ownerId.equals(userId)) {
+            throw new ForbiddenException("Access denied: resume does not belong to current user");
+        }
+    }
+
+    @Override
+    public ResumeUpsertDto getResumeByIdForEdit(Long id) {
+        Resume r = resumeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Resume not found"));
+
+        List<EducationInfo> educationInfos = educationInfoRepository.getEducationInfosByResume_Id(r.getId());
+
+        List<EducationInfoDto> educationInfoDtos = educationInfos.stream()
+                .map(e -> EducationInfoDto.builder()
+                        .institution(e.getInstitution())
+                        .program(e.getProgram())
+                        .degree(e.getDegree())
+                        .startDate(e.getStartDate())
+                        .endDate(e.getEndDate())
+                        .build())
+                .toList();
+
+        List<WorkExperienceInfo> workExperienceInfos = workExperienceInfoRepository.getWorkExperienceInfosByResume_Id(r.getId());
+
+        List<WorkExperienceInfoDto> workExperienceInfoDtos = workExperienceInfos.stream()
+                .map(w -> WorkExperienceInfoDto.builder()
+                        .companyName(w.getCompanyName())
+                        .position(w.getPosition())
+                        .responsibilities(w.getResponsibilities())
+                        .years(w.getYears())
+                        .build())
+                .toList();
+
+        List<ContactInfo> contactInfos = contactInfoRepository.getContactInfosByResume_Id(r.getId());
+
+        List<ContactInfoDto> contactInfoDtos = contactInfos.stream()
+                .map(c -> ContactInfoDto.builder()
+                        .typeId(c.getType().getId())
+                        .contactValue(c.getContactValue())
+                        .build())
+                .toList();
+
+        return ResumeUpsertDto.builder()
+                .name(r.getName())
+                .categoryId(r.getCategory() != null ? r.getCategory().getId() : null)
+                .salary(r.getSalary())
+                .active(Boolean.TRUE.equals(r.getIsActive()))
+                .educationInfos(educationInfoDtos)
+                .workExperiences(workExperienceInfoDtos)
+                .contactInfos(contactInfoDtos)
+                .build();
+    }
+
+    @Override
+    public ResumeAllInfoDto getResumeAllById(Long id) {
+        Resume entity = resumeRepository.getResumeById(id);
+        ResumeAllInfoDto dto = new ResumeAllInfoDto();
+        User applicant = userRepository.findById(entity.getApplicant().getId())
+                .orElseThrow(() -> new NotFoundException("Applicant not found"));
+
+        UserViewProfileDto userDto = new UserViewProfileDto();
+        userDto.setId(applicant.getId());
+        userDto.setName(applicant.getName());
+        userDto.setUsername(applicant.getUsername());
+        userDto.setAge(applicant.getAge());
+        userDto.setEmail(applicant.getEmail());
+        userDto.setEmail(applicant.getEmail());
+        userDto.setAvatar(applicant.getAvatar());
+        userDto.setAccountType(AccountType.valueOf(applicant.getAccountType()));
+
+        dto.setUser(userDto);
+        dto.setName(entity.getName());
+        dto.setCreatedDate(entity.getCreatedDate());
+        dto.setUpdateTime(entity.getUpdateTime());
+        Category category = categoryRepository.findById(entity.getCategory().getId())
+                .orElseThrow(() -> new NotFoundException("Category not found"));
+
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setId(category.getId());
+        categoryDto.setName(category.getName());
+        dto.setCategory(categoryDto);
+        dto.setSalary(entity.getSalary());
+        dto.setActive(Boolean.TRUE.equals(entity.getIsActive()));
+
+        List<EducationInfo> educationInfos = educationInfoRepository.getEducationInfosByResume_Id(entity.getId());
+
+        List<EducationInfoDto> educationInfoDtos = educationInfos.stream()
+                .map(e -> EducationInfoDto.builder()
+                        .institution(e.getInstitution())
+                        .program(e.getProgram())
+                        .degree(e.getDegree())
+                        .startDate(e.getStartDate())
+                        .endDate(e.getEndDate())
+                        .build())
+                .toList();
+
+        List<WorkExperienceInfo> workExperienceInfos = workExperienceInfoRepository.getWorkExperienceInfosByResume_Id(entity.getId());
+
+        List<WorkExperienceInfoDto> workExperienceInfoDtos = workExperienceInfos.stream()
+                .map(w -> WorkExperienceInfoDto.builder()
+                        .companyName(w.getCompanyName())
+                        .position(w.getPosition())
+                        .responsibilities(w.getResponsibilities())
+                        .years(w.getYears())
+                        .build())
+                .toList();
+
+        List<ContactInfo> contactInfos = contactInfoRepository.getContactInfosByResume_Id(entity.getId());
+
+        List<ContactInfoDto> contactInfoDtos = contactInfos.stream()
+                .map(c -> ContactInfoDto.builder()
+                        .typeId(c.getType().getId())
+                        .contactValue(c.getContactValue())
+                        .build())
+                .toList();
+
+        dto.setEducationInfos(educationInfoDtos);
+        dto.setContactInfos(contactInfoDtos);
+        dto.setWorkExperiences(workExperienceInfoDtos);
+
+        return dto;
     }
 }

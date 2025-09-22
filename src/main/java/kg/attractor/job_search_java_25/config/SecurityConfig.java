@@ -59,7 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/profile/**").authenticated()
                         .requestMatchers("/api/profile/avatar").authenticated()
 
-                        .requestMatchers("/resumes/**", "/profile/vacancies", "/vacancy/*/edit","/vacancy/new", "/chat/start/*", "/chat/*").hasRole("EMPLOYER")
+                        .requestMatchers("/resumes/**", "/profile/vacancies", "/vacancy/*/edit","/vacancy/new", "/chat/start/*", "/chat/*", "vacancy/*/chat").hasRole("EMPLOYER")
 
                         .requestMatchers("/vacancies/**", "/vacancy/**", "/profile/resumes", "/resumes/*/edit", "resume/new").hasRole("APPLICANT")
 

@@ -95,7 +95,8 @@ public class ProfileServiceImpl implements ProfileService {
                         r.getId(),
                         r.getResume() != null ? r.getResume().getId() : null,
                         r.getVacancy()!= null ? r.getVacancy().getId(): null,
-                        r.getConfirmation()))
+                        r.getConfirmation(),
+                        r.getCreatedDate()))
                 .toList();
     }
 
@@ -115,7 +116,8 @@ public class ProfileServiceImpl implements ProfileService {
                         r.getId(),
                         r.getResume()  != null ? r.getResume().getId()  : null,
                         r.getVacancy() != null ? r.getVacancy().getId() : null,
-                        r.getConfirmation()))
+                        r.getConfirmation(),
+                        r.getCreatedDate()))
                 .toList();
     }
 

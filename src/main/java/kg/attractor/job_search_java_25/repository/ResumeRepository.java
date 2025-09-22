@@ -49,4 +49,10 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
 
     List<Resume> findAllByApplicantId(Long applicantId);
 
+    @Query("select r.applicant.id from Resume r where r.id = :resumeId")
+    Optional<Long> findOwnerIdByResumeId(@Param("resumeId") Long resumeId);
+
+//    List<Resume> getResumeById(Long id);
+
+    Resume getResumeById(Long id);
 }

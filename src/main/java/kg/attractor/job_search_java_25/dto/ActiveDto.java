@@ -1,6 +1,5 @@
 package kg.attractor.job_search_java_25.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ActiveDto {
 
-    @NotNull
-    private Boolean Active;
+    private Boolean active;
 }

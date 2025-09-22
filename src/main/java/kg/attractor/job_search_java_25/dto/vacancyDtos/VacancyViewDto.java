@@ -1,5 +1,6 @@
 package kg.attractor.job_search_java_25.dto.vacancyDtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,9 @@ public class VacancyViewDto {
     private Integer expFrom;
     private Integer expTo;
     private Boolean active;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updateTime;
 };

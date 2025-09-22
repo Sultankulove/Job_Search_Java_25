@@ -3,12 +3,17 @@ package kg.attractor.job_search_java_25.controller.api;
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.responseDto.RespondedApplicantDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoUpsertDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
 import kg.attractor.job_search_java_25.dto.userDtos.AvatarDto;
 import kg.attractor.job_search_java_25.dto.userDtos.EditProfileDto;
 import kg.attractor.job_search_java_25.dto.userDtos.UserProfileDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyListItemDto;
+import kg.attractor.job_search_java_25.service.EducationInfoService;
 import kg.attractor.job_search_java_25.service.ProfileService;
 import kg.attractor.job_search_java_25.service.UserService;
+import kg.attractor.job_search_java_25.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +29,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("api/profile")
-public class ApiProfileController {
+public class ProfileRestController {
+    private final EducationInfoService educationInfoService;
     private final ProfileService profileService;
     private final UserService userService;
+    private final WorkExperienceInfoService workExperienceInfoService;
 
     @GetMapping("resumes")
     public ResponseEntity<List<ResumeListItemDto>> myResumes(Authentication authentication) {

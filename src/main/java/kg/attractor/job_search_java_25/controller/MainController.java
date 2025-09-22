@@ -64,12 +64,14 @@ public class MainController {
         return "index";
     }
 
-    private void fillListModel(HttpServletRequest req, Model model, String title, Page<?> page, Long categoryId) {
+    private void fillListModel(HttpServletRequest req, Model model, String title, Page<?> page, Long categoryId, String type) {
 
         model.addAttribute("title", title);
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
 
         model.addAttribute("list", page);
+//        model.addAttribute("type", "resume");
+        model.addAttribute("type", type);
         model.addAttribute("currentPage", page.getNumber());
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());

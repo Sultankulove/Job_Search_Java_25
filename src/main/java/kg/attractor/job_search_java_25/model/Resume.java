@@ -31,7 +31,7 @@ public class Resume {
     @JoinColumn(name = "category_id")
     private Category category;;
 
-    @Column(name = "salary")
+    @Column(name = "salary", precision = 19, scale = 2)
     private BigDecimal salary;
 
     @Column(name = "is_active")

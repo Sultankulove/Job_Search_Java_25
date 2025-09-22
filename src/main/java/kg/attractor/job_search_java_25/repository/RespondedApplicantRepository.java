@@ -48,4 +48,12 @@ public interface RespondedApplicantRepository extends JpaRepository<RespondedApp
         if (vacancyIds == null || vacancyIds.isEmpty()) return List.of();
         return getRespondedApplicantsByVacancyIds(vacancyIds);
     }
+
+    List<RespondedApplicant> findAllByVacancy_Id(Long vacancyId);
+
+    List<RespondedApplicant> findAllByResume_Id(Long resumeId);
+
+    long countByVacancy_Author_Id(Long authorId);
+
+    long countByResume_Applicant_Id(Long applicantId);
 }

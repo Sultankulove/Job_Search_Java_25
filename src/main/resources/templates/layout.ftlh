@@ -32,7 +32,8 @@
                 <i class="bi bi-briefcase-fill"></i> JobSearch
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -51,12 +52,15 @@
 
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" id="langDropdown"
+                           data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-translate"></i> <@spring.message "layout.navbar.chng_lang"/>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
-                            <li><a class="dropdown-item" href="/?lang=en"><@spring.message "layout.navbar.chng_lang.en"/></a></li>
-                            <li><a class="dropdown-item" href="/?lang=ru"><@spring.message "layout.navbar.chng_lang.ru"/></a></li>
+                            <li><a class="dropdown-item"
+                                   href="/?lang=en"><@spring.message "layout.navbar.chng_lang.en"/></a></li>
+                            <li><a class="dropdown-item"
+                                   href="/?lang=ru"><@spring.message "layout.navbar.chng_lang.ru"/></a></li>
                         </ul>
                     </li>
 
@@ -115,6 +119,18 @@
 
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <#if _isAuth>
+                        <li class="nav-item position-relative">
+                            <a class="nav-link d-flex align-items-center gap-1" href="/chats"
+                               id="chatLink"
+                               data-role="${_isEmployer?then('EMPLOYER', _isApplicant?then('APPLICANT','GUEST'))}">
+                                <i class="bi bi-chat-dots"></i>
+                                <span id="chatBadge"
+                                      class="badge rounded-pill text-bg-danger ms-1"
+                                      style="display:none; min-width: 1.5rem; font-weight:600;">0</span>
+                            </a>
+                        </li>
+
+
                         <li class="nav-item">
                             <span class="nav-link disabled">${_accountTypeLabel}</span>
                         </li>
@@ -158,6 +174,57 @@
             <p class="mb-0">© ${.now?string("yyyy")} JobSearch</p>
         </div>
     </footer>
+    <script>
+        (function () {
+            const link  = document.getElementById('chatLink');
+            if (!link) return;
+
+            const badge = document.getElementById('chatBadge');
+            const role  = link.getAttribute('data-role') || 'GUEST';
+
+            const csrfToken  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+            // ---- Настрой здесь реальные эндпоинты своей бэкенд-логики ----
+            // Дай два счётчика: непрочитанные сообщения и число откликов/ответов
+            const ENDPOINTS = {
+                messages: '/api/chat/unread-count',                // для всех ролей
+                employerResponds: '/api/respond/pending-count',    // для EMPLOYER
+                applicantAnswers: '/api/respond/answers-count'     // для APPLICANT
+            };
+
+            function apiGet(url) {
+                const opt = { method: 'GET', headers: {} };
+                if (csrfHeader && csrfToken) opt.headers[csrfHeader] = csrfToken;
+                return fetch(url, opt).then(r => r.ok ? r.json() : { count: 0 })
+                    .catch(() => ({ count: 0 }));
+            }
+
+            Promise.all([
+                apiGet(ENDPOINTS.messages),
+                role === 'EMPLOYER'  ? apiGet(ENDPOINTS.employerResponds) :
+                    role === 'APPLICANT' ? apiGet(ENDPOINTS.applicantAnswers) :
+                        Promise.resolve({ count: 0 })
+            ]).then(([m, r]) => {
+                const mCount = Number(m.count || 0);
+                const rCount = Number(r.count || 0);
+                const total  = mCount + rCount;
+
+                if (total > 0) {
+                    badge.textContent = (total > 99 ? '99+' : String(total));
+                    badge.style.display = '';
+                    link.title = role === 'EMPLOYER'
+                        ? "Непрочитанные: " + mCount + ", отклики: " + rCount + ""
+                        : "Непрочитанные: " + mCount + ", ответы: " + rCount;
+
+
+                } else {
+                    badge.style.display = 'none';
+                    link.removeAttribute('title');
+                }
+            });
+        })();
+    </script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             crossorigin="anonymous"></script>

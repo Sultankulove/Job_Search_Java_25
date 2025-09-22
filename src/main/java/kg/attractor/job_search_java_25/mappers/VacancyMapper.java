@@ -56,7 +56,7 @@ public class VacancyMapper {
 
 
     public void applyActive(ActiveDto dto, Vacancy e) {
-        if (dto != null && dto.getActive() != null) e.setIsActive(dto.getActive());
+        if (dto != null) e.setIsActive(dto.getActive());
     }
 
     public List<VacancyListItemDto> toListItems(List<Vacancy> list) {

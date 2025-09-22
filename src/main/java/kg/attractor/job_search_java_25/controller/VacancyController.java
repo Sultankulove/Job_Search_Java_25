@@ -45,6 +45,7 @@ public class VacancyController {
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("filterAction", req.getRequestURI());
         model.addAttribute("list", vacancies);
+        model.addAttribute("type", "vacancy");
         model.addAttribute("currentPage", vacancies.getNumber());
         model.addAttribute("totalPages", vacancies.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());

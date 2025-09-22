@@ -5,6 +5,12 @@
 
     <head>
         <link rel="stylesheet" href="/static/styles/list.css">
+        <style>
+            .clickable-row {
+                cursor: pointer;
+            }
+
+        </style>
         <title></title>
     </head>
 
@@ -58,7 +64,7 @@
 
                     <tbody>
                     <#list list.content as item>
-                        <tr>
+                        <tr class="clickable-row" data-href="/${type}/${item.id}">
                             <td>${item.name!'-'}</td>
 
                             <td>${item.categoryName!'—'}</td>
@@ -118,4 +124,19 @@
             </div>
         </#if>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rows = document.querySelectorAll(".clickable-row");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    const href = row.getAttribute("data-href");
+                    if (href) {
+                        window.location.href = href;
+                    }
+                });
+            });
+        });
+    </script>
+
 </@l.layout>

@@ -8,7 +8,7 @@
                 <#list messages as m>
                     <div class="mb-2">
                         <div class="small text-muted">${m.timestamp?string("dd.MM.yyyy HH:mm")}</div>
-                        <div>${m.content?html}</div>
+                        <div>${m.content}</div>
                     </div>
                 </#list>
             </div>
