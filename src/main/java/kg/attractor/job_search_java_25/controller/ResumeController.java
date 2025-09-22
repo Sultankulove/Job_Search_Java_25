@@ -101,21 +101,11 @@ public class ResumeController {
                                Authentication auth,
                                Model model) {
 
-        dto.setWorkExperiences(dto.getWorkExperiences() == null ? List.of() :
-                dto.getWorkExperiences().stream()
-                        .filter(we -> we.getCompanyName() != null && !we.getCompanyName().isBlank())
-                        .toList());
-        dto.setEducationInfos(dto.getEducationInfos() == null ? List.of() :
-                dto.getEducationInfos().stream()
-                        .filter(edu -> edu.getInstitution() != null && !edu.getInstitution().isBlank())
-                        .toList());
-        dto.setContactInfos(dto.getContactInfos() == null ? List.of() :
-                dto.getContactInfos().stream()
-                        .filter(c -> c.getContactValue() != null && !c.getContactValue().isBlank())
-                        .toList());
-
         if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(err -> log.debug("Validation error: {}", err));
+            bindingResult.getAllErrors().forEach(
+                    err -> log.debug("Validation error: {}", err));
+            log.debug("Errors: {}", bindingResult.getAllErrors());
+            model.addAttribute("dto", dto);
             model.addAttribute("formAction", "/resume/new");
             model.addAttribute("formType", "resume");
             model.addAttribute("categories", categoryService.findAll());
@@ -123,9 +113,37 @@ public class ResumeController {
             return "resume_form";
         }
 
-        Long applicantId = userService.findUserIdByEmail(auth.getName());
-        resumeService.saveResume(applicantId, dto);
-        return "redirect:/profile";
+        dto.setWorkExperiences(dto.getWorkExperiences() == null ? List.of() :
+                dto.getWorkExperiences().stream()
+                        .filter(we -> we != null && we.getCompanyName() != null && !we.getCompanyName().isBlank())
+                        .toList());
+
+        dto.setEducationInfos(dto.getEducationInfos() == null ? List.of() :
+                dto.getEducationInfos().stream()
+                        .filter(edu -> edu != null && edu.getInstitution() != null && !edu.getInstitution().isBlank())
+                        .toList());
+
+        dto.setContactInfos(dto.getContactInfos() == null ? List.of() :
+                dto.getContactInfos().stream()
+                        .filter(c -> c != null && c.getContactValue() != null && !c.getContactValue().isBlank())
+                        .toList());
+
+
+
+        try {
+            Long applicantId = userService.findUserIdByEmail(auth.getName());
+            resumeService.saveResume(applicantId, dto);
+            return "redirect:/profile";
+        } catch (Exception ex) {
+            log.error("Failed to save resume", ex);
+            model.addAttribute("dto", dto);
+            model.addAttribute("globalError", "Не удалось сохранить резюме: " + ex.getMessage());
+            model.addAttribute("formAction", "/resume/new");
+            model.addAttribute("formType", "resume");
+            model.addAttribute("categories", categoryService.findAll());
+            model.addAttribute("contactTypes", contactTypeService.findAll());
+            return "resume_form";
+        }
     }
 
 
