@@ -101,8 +101,8 @@ public class ResumeMapper {
         e.setProgram(d.getProgram());
         e.setDegree(d.getDegree());
 
-        e.setStartDate(d.getStartDate() != null ? Date.valueOf(d.getStartDate()) : null);
-        e.setEndDate  (d.getEndDate()   != null ? Date.valueOf(d.getEndDate())   : null);
+        e.setStartDate(d.getStartDate() != null ? d.getStartDate() : null);
+        e.setEndDate  (d.getEndDate()   != null ? d.getEndDate()   : null);
         return e;
     }
 
