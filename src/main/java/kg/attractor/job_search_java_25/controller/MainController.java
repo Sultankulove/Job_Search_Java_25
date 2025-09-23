@@ -46,14 +46,14 @@ public class MainController {
 
         String role = auth.getAuthorities().iterator().next().getAuthority();
 
-        if ("ROLE_APPLICANT".equals(role)) {
+        if ("ROLE_EMPLOYER".equals(role)) {
             Page<ResumeListItemDto> resumes = (categoryId == null)
                     ? resumeService.getResumes(PageRequest.of(page, 15), salaryFrom, salaryTo)
                     : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
             fillListModel(req, model, "Список резюме", resumes, categoryId, "resume", salaryFrom, salaryTo);
 
-        } else if ("ROLE_EMPLOYER".equals(role)) {
+        } else if ("ROLE_APPLICANT".equals(role)) {
             Page<VacancyListItemDto> vacancies = (categoryId == null)
                     ? vacancyService.getVacancies(PageRequest.of(page, 15), salaryFrom, salaryTo)
                     : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
