@@ -18,6 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -34,12 +35,14 @@ public class VacancyController {
     @GetMapping("/vacancies")
     public String listVacancies(@RequestParam(defaultValue = "0") int page,
                                 @RequestParam(required = false) Long categoryId,
+                                @RequestParam(required=false) BigDecimal salaryFrom,
+                                @RequestParam(required=false) BigDecimal salaryTo,
                                 Model model,
                                 HttpServletRequest req) {
 
         Page<VacancyListItemDto> vacancies = (categoryId == null)
-                ? vacancyService.getVacancies(PageRequest.of(page, 15))
-                : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
+                ? vacancyService.getVacancies(PageRequest.of(page, 15), salaryFrom, salaryTo)
+                : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
         model.addAttribute("title", "Список вакансий");
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
@@ -47,6 +50,8 @@ public class VacancyController {
         model.addAttribute("list", vacancies);
         model.addAttribute("type", "vacancy");
         model.addAttribute("currentPage", vacancies.getNumber());
+        model.addAttribute("salaryFrom", salaryFrom);
+        model.addAttribute("salaryTo", salaryTo);
         model.addAttribute("totalPages", vacancies.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));

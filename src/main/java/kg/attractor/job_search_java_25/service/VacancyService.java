@@ -10,11 +10,16 @@ import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyViewDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface VacancyService {
 
     Page<VacancyListItemDto> getVacancies(Pageable pageable);
+
+    Page<VacancyListItemDto> getVacancies(Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo);
+
+    Page<VacancyListItemDto> getVacanciesByCategory(Long categoryId, Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo);
 
     Page<VacancyListItemDto> getVacanciesByCategory(Long categoryId, Pageable pageable);
 

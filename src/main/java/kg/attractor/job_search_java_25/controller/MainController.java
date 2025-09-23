@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -30,14 +31,16 @@ public class MainController {
     @GetMapping
     public String index(@RequestParam(defaultValue = "0") int page,
                         @RequestParam(required = false) Long categoryId,
+                        @RequestParam(required=false) BigDecimal salaryFrom,
+                        @RequestParam(required=false) BigDecimal salaryTo,
                         Model model, Authentication auth, HttpServletRequest req) {
 
         if (auth == null || auth.getAuthorities() == null || auth.getAuthorities().isEmpty()) {
             Page<VacancyListItemDto> vacancies = (categoryId == null)
-                    ? vacancyService.getVacancies(PageRequest.of(page, 15))
-                    : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
+                    ? vacancyService.getVacancies(PageRequest.of(page, 15), salaryFrom, salaryTo)
+                    : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
-            fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy");
+            fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy", salaryFrom,salaryTo);
             return "index";
         }
 
@@ -45,17 +48,17 @@ public class MainController {
 
         if ("ROLE_APPLICANT".equals(role)) {
             Page<ResumeListItemDto> resumes = (categoryId == null)
-                    ? resumeService.getResumes(PageRequest.of(page, 15))
-                    : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15));
+                    ? resumeService.getResumes(PageRequest.of(page, 15), salaryFrom, salaryTo)
+                    : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
-            fillListModel(req, model, "Список резюме", resumes, categoryId, "resume");
+            fillListModel(req, model, "Список резюме", resumes, categoryId, "resume", salaryFrom, salaryTo);
 
         } else if ("ROLE_EMPLOYER".equals(role)) {
             Page<VacancyListItemDto> vacancies = (categoryId == null)
-                    ? vacancyService.getVacancies(PageRequest.of(page, 15))
-                    : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
+                    ? vacancyService.getVacancies(PageRequest.of(page, 15), salaryFrom, salaryTo)
+                    : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
-            fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy");
+            fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy", salaryFrom, salaryTo);
 
         } else {
             log.warn("Unknown role: {}", role);
@@ -64,13 +67,14 @@ public class MainController {
         return "index";
     }
 
-    private void fillListModel(HttpServletRequest req, Model model, String title, Page<?> page, Long categoryId, String type) {
+    private void fillListModel(HttpServletRequest req, Model model, String title, Page<?> page, Long categoryId, String type, BigDecimal salaryFrom, BigDecimal salaryTo) {
 
         model.addAttribute("title", title);
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
 
         model.addAttribute("list", page);
-//        model.addAttribute("type", "resume");
+        model.addAttribute("salaryFrom", salaryFrom);
+        model.addAttribute("salaryTo", salaryTo);
         model.addAttribute("type", type);
         model.addAttribute("currentPage", page.getNumber());
         model.addAttribute("totalPages", page.getTotalPages());
@@ -78,5 +82,4 @@ public class MainController {
         model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
         model.addAttribute("filterAction", req.getRequestURI());
     }
-
 }

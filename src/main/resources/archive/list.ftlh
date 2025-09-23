@@ -23,36 +23,24 @@
                 <#assign selectedCategoryId = (params.categoryId!'')?string>
                 <#assign filterAction = (filterAction)!springMacroRequestContext.requestUri>
 
-                <form id="vacancy-filter" action="${filterAction}" class="row g-2 mb-3">
-                    <label for="categoryId" class="form-label"><@spring.message "list.filter.category"/></label>
+                <form method="get" action="${filterAction}" class="row g-2 align-items-center">
 
-                    <div class="col-sm-3">
+                    <div class="col-md-4">
+                        <label for="categoryId" class="form-label"><@spring.message "list.filter.category"/></label>
                         <select class="form-select" id="categoryId" name="categoryId">
                             <option value=""><@spring.message "list.filter.category.all"/></option>
                             <#list categories as c>
-                                <option value="${c.id}"
-                                        <#if selectedCategoryId == c.id?string>selected</#if>>${c.name}</option>
+                                <option value="${c.id}" <#if selectedCategoryId == c.id?string>selected</#if>>
+                                    ${c.name}
+                                </option>
                             </#list>
                         </select>
                     </div>
 
-                    <div class="col-sm-2">
-                        <input name="salaryFrom" type="number" min="0" class="form-control"
-                               placeholder="З/п от" value="${salaryFrom!}">
-                    </div>
-                    <div class="col-sm-2">
-                        <input name="salaryTo" type="number" min="0" class="form-control"
-                               placeholder="З/п до" value="${salaryTo!}">
-                    </div>
-
-                    <div class="col-12 d-flex gap-2">
-                        <div class="col-md-2 align-self-end">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-funnel-fill"></i> <@spring.message "list.filter.button"/>
-                            </button>
-                        </div>
-                        <button class="btn btn-outline-secondary" type="button" id="resetFilter">Сброс</button>
-                        <span class="ms-auto small text-bright">Показано: <b id="shownCount">${list.content?size}</b> из <b id="totalCount">${list.totalElements}</b></span>
+                    <div class="col-md-2 align-self-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-funnel-fill"></i> <@spring.message "list.filter.button"/>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -139,48 +127,14 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".clickable-row").forEach(row => {
+            const rows = document.querySelectorAll(".clickable-row");
+            rows.forEach(row => {
                 row.addEventListener("click", () => {
                     const href = row.getAttribute("data-href");
-                    if (href) window.location.href = href;
+                    if (href) {
+                        window.location.href = href;
+                    }
                 });
-            });
-
-            const form = document.getElementById("vacancy-filter");
-            const storageKey = "vacancyFilter";
-
-            const saved = localStorage.getItem(storageKey);
-            if (saved) {
-                const data = JSON.parse(saved);
-                for (const [k, v] of Object.entries(data)) {
-                    const el = form.elements.namedItem(k);
-                    if (!el) continue;
-
-                    if (el.type === "checkbox") {
-                        el.checked = v === true || v === "true";
-                    } else {
-                        el.value = v ?? "";
-                    }
-                }
-            }
-
-            form.addEventListener("submit", () => {
-                const data = {};
-                for (const el of form.elements) {
-                    if (!el.name) continue;
-                    if (el.type === "checkbox") {
-                        data[el.name] = el.checked;
-                    } else {
-                        data[el.name] = el.value;
-                    }
-                }
-                localStorage.setItem(storageKey, JSON.stringify(data));
-            });
-
-            document.getElementById("resetFilter").addEventListener("click", () => {
-                localStorage.removeItem(storageKey);
-                form.reset();
-                window.location = form.action;
             });
         });
     </script>

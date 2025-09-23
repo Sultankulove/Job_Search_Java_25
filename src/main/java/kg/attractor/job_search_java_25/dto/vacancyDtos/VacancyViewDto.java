@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,7 +20,7 @@ public class VacancyViewDto {
     private String categoryName;
     private String name;
     private String description;
-    private Float salary;
+    private BigDecimal salary;
     private Integer expFrom;
     private Integer expTo;
     private Boolean active;
