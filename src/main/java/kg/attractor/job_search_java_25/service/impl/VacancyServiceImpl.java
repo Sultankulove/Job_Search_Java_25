@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -38,10 +39,22 @@ public class VacancyServiceImpl implements VacancyService {
     private final VacancyMapper vacancyMapper;
     private final RespondedApplicantMapper respondedApplicantMapper;
 
+
     @Override
     public Page<VacancyListItemDto> getVacancies(Pageable pageable) {
         return vacancyRepository.findList(null, pageable);
     }
+
+    @Override
+    public Page<VacancyListItemDto> getVacancies(Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo) {
+        return vacancyRepository.findListWithSalary(salaryFrom, salaryTo, pageable);
+    }
+
+    @Override
+    public Page<VacancyListItemDto> getVacanciesByCategory(Long categoryId, Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo) {
+        return vacancyRepository.findByCategory_IdAndSalary(categoryId, salaryFrom, salaryTo, pageable);
+    }
+
 
     @Override
     public Page<VacancyListItemDto> getVacanciesByCategory(Long categoryId, Pageable pageable) {
@@ -201,4 +214,6 @@ public class VacancyServiceImpl implements VacancyService {
         if (ownerId == null) throw new NotFoundException("Vacancy not found");
         if (!ownerId.equals(authorId)) throw new ForbiddenException("Not your vacancy");
     }
+
+
 }

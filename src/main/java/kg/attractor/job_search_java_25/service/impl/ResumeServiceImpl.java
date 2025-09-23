@@ -1,8 +1,5 @@
 package kg.attractor.job_search_java_25.service.impl;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import kg.attractor.job_search_java_25.dto.ActiveDto;
 import kg.attractor.job_search_java_25.dto.CategoryDtos.CategoryDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeAllInfoDto;
@@ -10,7 +7,6 @@ import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeUpsertDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeViewDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoUpsertDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactInfoDto;
 import kg.attractor.job_search_java_25.dto.userDtos.AccountType;

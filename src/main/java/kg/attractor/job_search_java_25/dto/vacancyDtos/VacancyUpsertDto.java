@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,7 +26,7 @@ public class VacancyUpsertDto {
     private Long categoryId;
 
     @PositiveOrZero
-    private Float salary;
+    private BigDecimal salary;
 
     @PositiveOrZero
     private Integer expFrom;
