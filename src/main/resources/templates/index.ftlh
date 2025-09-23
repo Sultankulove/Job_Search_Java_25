@@ -2,6 +2,18 @@
 <#import "/spring.ftl" as spring>
 
 <@l.layout title="${title! 'Список'}">
+
+    <head>
+        <link rel="stylesheet" href="/static/styles/list.css">
+        <style>
+            .clickable-row {
+                cursor: pointer;
+            }
+
+        </style>
+        <title></title>
+    </head>
+
     <div class="container">
         <div class="row mb-4">
             <div class="col">
@@ -17,7 +29,8 @@
                         <select class="form-select" id="categoryId" name="categoryId">
                             <option value=""><@spring.message "list.filter.category.all"/></option>
                             <#list categories as c>
-                                <option value="${c.id}" <#if selectedCategoryId == c.id?string>selected</#if>>${c.name}</option>
+                                <option value="${c.id}"
+                                        <#if selectedCategoryId == c.id?string>selected</#if>>${c.name}</option>
                             </#list>
                         </select>
                     </div>
@@ -36,13 +49,16 @@
                 <table class="table table-dark table-striped table-hover align-middle">
                     <thead>
                     <tr>
-                        <#list headers as h><th class="text-start">${h}</th></#list>
+                        <#list headers as h>
+                            <th class="text-start">${h}</th></#list>
                     </tr>
                     </thead>
 
                     <tbody>
+
                     <#list list.content as item>
-                        <tr>
+                    <#--                         <tr> -->
+                        <tr class="clickable-row" data-href="/${type}/${item.id}">
                             <td>${item.name!'-'}</td>
                             <td>${item.categoryName!'—'}</td>
                             <td><#if item.salary??>${item.salary?string["#,##0"]} $<#else>—</#if></td>
@@ -75,7 +91,8 @@
                                     </a>
                                 </li>
                             </#if>
-                            <li class="page-item active"><span class="btn btn-primary disabled">${list.number + 1}</span></li>
+                            <li class="page-item active"><span
+                                        class="btn btn-primary disabled">${list.number + 1}</span></li>
                             <#if list.hasNext()>
                                 <li class="page-item">
                                     <a class="btn btn-outline-primary"
@@ -90,4 +107,18 @@
             </div>
         </#if>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rows = document.querySelectorAll(".clickable-row");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    const href = row.getAttribute("data-href");
+                    if (href) {
+                        window.location.href = href;
+                    }
+                });
+            });
+        });
+    </script>
 </@l.layout>

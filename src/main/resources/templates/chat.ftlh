@@ -41,7 +41,7 @@
             }
 
             const socket = new SockJS('/ws');
-            const stomp  = Stomp.over(socket);
+            const stomp = Stomp.over(socket);
 
 
             stomp.connect({}, function () {

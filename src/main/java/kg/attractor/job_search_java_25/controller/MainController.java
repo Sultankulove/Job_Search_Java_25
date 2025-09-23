@@ -37,7 +37,7 @@ public class MainController {
                     ? vacancyService.getVacancies(PageRequest.of(page, 15))
                     : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
 
-            fillListModel(req, model, "Список вакансий", vacancies, categoryId);
+            fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy");
             return "index";
         }
 
@@ -48,14 +48,14 @@ public class MainController {
                     ? resumeService.getResumes(PageRequest.of(page, 15))
                     : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15));
 
-            fillListModel(req, model, "Список резюме", resumes, categoryId);
+            fillListModel(req, model, "Список резюме", resumes, categoryId, "resume");
 
         } else if ("ROLE_EMPLOYER".equals(role)) {
             Page<VacancyListItemDto> vacancies = (categoryId == null)
                     ? vacancyService.getVacancies(PageRequest.of(page, 15))
                     : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
 
-            fillListModel(req, model, "Список вакансий", vacancies, categoryId);
+            fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy");
 
         } else {
             log.warn("Unknown role: {}", role);

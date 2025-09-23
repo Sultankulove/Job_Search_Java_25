@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.security.Principal;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,6 +68,17 @@ public class UserServiceImpl implements UserService {
         return Optional.ofNullable(getUserIdOrNull())
                 .orElseThrow(() -> new IllegalStateException("Пользователь не аутентифицирован"));
     }
+
+    @Override
+    public Long getRequiredUserId(Principal principal) {
+        String email = Optional.ofNullable(principal)
+                .map(Principal::getName)
+                .orElseThrow(() -> new IllegalStateException("Пользователь не аутентифицирован"));
+        return userRepository.findByEmail(email)
+                .map(User::getId)
+                .orElseThrow(() -> new IllegalStateException("Пользователь не найден: " + email));
+    }
+
 
 
     @Override

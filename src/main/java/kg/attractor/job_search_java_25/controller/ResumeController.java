@@ -74,6 +74,7 @@ public class ResumeController {
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", resumes);
         model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("type", "resume");
         model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
         model.addAttribute("currentPage", resumes.getNumber());
         model.addAttribute("totalPages", resumes.getTotalPages());

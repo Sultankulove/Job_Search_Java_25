@@ -68,6 +68,7 @@ public class VacancyController {
         model.addAttribute("title", "Мои вакансии");
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", vacancies);
+        model.addAttribute("type", "vacancy");
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
         model.addAttribute("currentPage", vacancies.getNumber());

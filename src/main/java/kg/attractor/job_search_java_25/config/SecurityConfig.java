@@ -39,13 +39,13 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/logout").authenticated()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/logout").authenticated()
 
                         .requestMatchers("/", "/auth/**", "/error", "/auth/reset-password").permitAll()
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/topic/**", "/app/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/vacancies/**").hasRole("EMPLOYER")
                         .requestMatchers(HttpMethod.PATCH, "/api/resumes/**").hasRole("APPLICANT")
@@ -59,10 +59,11 @@ public class SecurityConfig {
                         .requestMatchers("/profile/**").authenticated()
                         .requestMatchers("/api/profile/avatar").authenticated()
 
+                        .requestMatchers("/vacancies").permitAll()
                         .requestMatchers("/resumes/**", "/profile/vacancies", "/vacancy/*/edit","/vacancy/new", "/chat/start/*", "/chat/*", "vacancy/*/chat").hasRole("EMPLOYER")
+                        .requestMatchers("/vacancy/*").permitAll()
 
                         .requestMatchers("/vacancies/**", "/vacancy/**", "/profile/resumes", "/resumes/*/edit", "resume/new").hasRole("APPLICANT")
-
                         .anyRequest().authenticated()
                 );
 
