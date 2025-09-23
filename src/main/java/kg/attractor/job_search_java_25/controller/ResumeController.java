@@ -23,6 +23,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -40,11 +41,13 @@ public class ResumeController {
     public String listResumes(@RequestParam(defaultValue = "0") int page,
                               @RequestParam(required = false) Long categoryId,
                               Model model,
+                              @RequestParam(required=false) BigDecimal salaryFrom,
+                              @RequestParam(required=false) BigDecimal salaryTo,
                               HttpServletRequest req) {
 
         Page<ResumeListItemDto> resumes = (categoryId == null)
-                ? resumeService.getResumes(PageRequest.of(page, 15))
-                : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15));
+                ? resumeService.getResumes(PageRequest.of(page, 15), salaryFrom, salaryTo)
+                : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
         model.addAttribute("title", "Список резюме");
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
@@ -52,6 +55,8 @@ public class ResumeController {
         model.addAttribute("list", resumes);
         model.addAttribute("type", "resume");
         model.addAttribute("currentPage", resumes.getNumber());
+        model.addAttribute("salaryFrom", salaryFrom);
+        model.addAttribute("salaryTo", salaryTo);
         model.addAttribute("totalPages", resumes.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
@@ -63,18 +68,22 @@ public class ResumeController {
     public String myResumes(Authentication auth,
                             @RequestParam(defaultValue = "0") int page,
                             @RequestParam(required = false) Long categoryId,
+                            @RequestParam(required=false) BigDecimal salaryFrom,
+                            @RequestParam(required=false) BigDecimal salaryTo,
                             Model model) {
         Long userId = userService.findUserIdByEmail(auth.getName());
 
         Page<ResumeListItemDto> resumes = (categoryId == null)
-                ? resumeService.getResumesByAuthor(userId, PageRequest.of(page, 15))
-                : resumeService.getResumesByAuthorAndCategory(userId, categoryId, PageRequest.of(page, 15));
+                ? resumeService.getResumesByAuthor(userId, PageRequest.of(page, 15), salaryFrom, salaryTo)
+                : resumeService.getResumesByAuthorAndCategory(userId, categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
         model.addAttribute("title", "Мои резюме");
         model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
         model.addAttribute("list", resumes);
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("type", "resume");
+        model.addAttribute("salaryFrom", salaryFrom);
+        model.addAttribute("salaryTo", salaryTo);
         model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
         model.addAttribute("currentPage", resumes.getNumber());
         model.addAttribute("totalPages", resumes.getTotalPages());

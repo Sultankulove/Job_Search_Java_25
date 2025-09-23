@@ -142,10 +142,41 @@
                 });
             });
 
-            // Сброс фильтра
+            const form = document.getElementById("vacancy-filter");
+            const storageKey = "vacancyFilter";
+
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                const data = JSON.parse(saved);
+                for (const [k, v] of Object.entries(data)) {
+                    const el = form.elements.namedItem(k);
+                    if (!el) continue;
+
+                    if (el.type === "checkbox") {
+                        el.checked = v === true || v === "true";
+                    } else {
+                        el.value = v ?? "";
+                    }
+                }
+            }
+
+            form.addEventListener("submit", () => {
+                const data = {};
+                for (const el of form.elements) {
+                    if (!el.name) continue;
+                    if (el.type === "checkbox") {
+                        data[el.name] = el.checked;
+                    } else {
+                        data[el.name] = el.value;
+                    }
+                }
+                localStorage.setItem(storageKey, JSON.stringify(data));
+            });
+
             document.getElementById("resetFilter").addEventListener("click", () => {
-                document.getElementById("vacancy-filter").reset();
-                window.location = "${filterAction}";
+                localStorage.removeItem(storageKey);
+                form.reset();
+                window.location = form.action;
             });
         });
     </script>

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,4 +56,24 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
 //    List<Resume> getResumeById(Long id);
 
     Resume getResumeById(Long id);
+
+    @Query("""
+  select new kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto(
+    r.id, r.name, c.name, r.salary, r.isActive, r.updateTime
+  )
+  from Resume r
+  left join r.category c
+  where (:applicantId is null or r.applicant.id = :applicantId)
+    and (:categoryId  is null or r.category.id  = :categoryId)
+    and (:salaryFrom  is null or r.salary >= :salaryFrom)
+    and (:salaryTo    is null or r.salary <= :salaryTo)
+  order by r.updateTime desc
+""")
+    Page<ResumeListItemDto> findList(
+            @Param("applicantId") Long applicantId,
+            @Param("categoryId")  Long categoryId,
+            @Param("salaryFrom")  BigDecimal salaryFrom,
+            @Param("salaryTo") BigDecimal salaryTo,
+            Pageable pageable
+    );
 }

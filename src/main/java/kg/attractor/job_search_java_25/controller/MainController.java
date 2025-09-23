@@ -31,14 +31,14 @@ public class MainController {
     @GetMapping
     public String index(@RequestParam(defaultValue = "0") int page,
                         @RequestParam(required = false) Long categoryId,
-                        @RequestParam BigDecimal salaryFrom,
-                        @RequestParam BigDecimal salaryTo,
+                        @RequestParam(required=false) BigDecimal salaryFrom,
+                        @RequestParam(required=false) BigDecimal salaryTo,
                         Model model, Authentication auth, HttpServletRequest req) {
 
         if (auth == null || auth.getAuthorities() == null || auth.getAuthorities().isEmpty()) {
             Page<VacancyListItemDto> vacancies = (categoryId == null)
-                    ? vacancyService.getVacancies(PageRequest.of(page, 15))
-                    : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15));
+                    ? vacancyService.getVacancies(PageRequest.of(page, 15), salaryFrom, salaryTo)
+                    : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
             fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy", salaryFrom,salaryTo);
             return "index";
@@ -48,8 +48,8 @@ public class MainController {
 
         if ("ROLE_APPLICANT".equals(role)) {
             Page<ResumeListItemDto> resumes = (categoryId == null)
-                    ? resumeService.getResumes(PageRequest.of(page, 15))
-                    : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15));
+                    ? resumeService.getResumes(PageRequest.of(page, 15), salaryFrom, salaryTo)
+                    : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
             fillListModel(req, model, "Список резюме", resumes, categoryId, "resume", salaryFrom, salaryTo);
 

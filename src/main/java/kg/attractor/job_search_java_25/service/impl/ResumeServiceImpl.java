@@ -45,6 +45,53 @@ public class ResumeServiceImpl implements ResumeService {
     private final WorkExperienceInfoRepository workExperienceInfoRepository;
     private final ContactInfoRepository contactInfoRepository;
 
+
+    @Override
+    public Page<ResumeListItemDto> getResumesByAuthorAndCategory(
+            Long applicantId, Long categoryId, Pageable pageable,
+            BigDecimal salaryFrom, BigDecimal salaryTo) {
+
+        if (salaryFrom != null && salaryTo != null && salaryFrom.compareTo(salaryTo) > 0) {
+            var t = salaryFrom; salaryFrom = salaryTo; salaryTo = t;
+        }
+        return resumeRepository.findList(applicantId, categoryId, salaryFrom, salaryTo, pageable);
+    }
+    @Override
+    public Page<ResumeListItemDto> getResumesByAuthor(
+            Long applicantId, Pageable pageable,
+            BigDecimal salaryFrom, BigDecimal salaryTo) {
+
+        if (salaryFrom != null && salaryTo != null && salaryFrom.compareTo(salaryTo) > 0) {
+            var t = salaryFrom; salaryFrom = salaryTo; salaryTo = t;
+        }
+        return resumeRepository.findList(applicantId, null, salaryFrom, salaryTo, pageable);
+    }
+
+    @Override
+    public Page<ResumeListItemDto> getResumesByCategory(
+            Long categoryId, Pageable pageable,
+            BigDecimal salaryFrom, BigDecimal salaryTo) {
+
+        if (salaryFrom != null && salaryTo != null && salaryFrom.compareTo(salaryTo) > 0) {
+            var t = salaryFrom; salaryFrom = salaryTo; salaryTo = t;
+        }
+        return resumeRepository.findList(null, categoryId, salaryFrom, salaryTo, pageable);
+    }
+
+    @Override
+    public Page<ResumeListItemDto> getResumes(
+            Pageable pageable,
+            BigDecimal salaryFrom, BigDecimal salaryTo) {
+
+        if (salaryFrom != null && salaryTo != null && salaryFrom.compareTo(salaryTo) > 0) {
+            var t = salaryFrom; salaryFrom = salaryTo; salaryTo = t;
+        }
+        return resumeRepository.findList(null, null, salaryFrom, salaryTo, pageable);
+    }
+
+
+
+
     @Override
     @Transactional
     public void deleteOwned(Long resumeId, Long ownerId) {
@@ -53,7 +100,6 @@ public class ResumeServiceImpl implements ResumeService {
         if (!actualOwner.equals(ownerId)) throw new ForbiddenException("Not your resume");
         resumeRepository.deleteById(resumeId);
     }
-
 
     @Override
     public Page<ResumeListItemDto> getResumesByAuthorAndCategory(Long applicantId, Long categoryId, Pageable pageable) {
@@ -68,6 +114,10 @@ public class ResumeServiceImpl implements ResumeService {
         log.debug("getResumesByAuthor(applicantId={}, pageable={})", applicantId, pageable);
         return resumeRepository.findList(applicantId, pageable);
     }
+
+
+
+
 
     @Override
     public Page<ResumeListItemDto> getResumes(Pageable pageable) {

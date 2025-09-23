@@ -160,7 +160,7 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(Exception.class)
     public String handleAny(HttpServletRequest req, Model model, Exception ex) {
         model.addAttribute("status", 500);
-        model.addAttribute("reason", "Internal Server Error");
+        model.addAttribute("reason", "Ошибка какая-то");
         model.addAttribute("details", req);
         model.addAttribute("message", ex.getMessage());
         return "errors/error";
@@ -175,5 +175,14 @@ public class GlobalControllerAdvice {
         return "errors/error";
     }
 
+//    @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+//    public String handleMissingServlet(HttpServletRequest req, Model model, MissingServletRequestParameterException ex) {
+//
+//        model.addAttribute("status", 400);
+//        model.addAttribute("reason", HttpStatus.BAD_REQUEST.getReasonPhrase());
+//        model.addAttribute("details", req);
+//        model.addAttribute("message", ex.getMessage());
+//        return "errors/error";
+//    }
 
 }

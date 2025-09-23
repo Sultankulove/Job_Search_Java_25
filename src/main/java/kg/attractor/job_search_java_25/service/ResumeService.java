@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 
 public interface ResumeService {
 
@@ -18,6 +20,15 @@ public interface ResumeService {
 
 
     Page<ResumeListItemDto> getResumesByAuthor(Long applicantId, Pageable pageable);
+
+
+    Page<ResumeListItemDto> getResumesByAuthor(Long applicantId, Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo);
+
+    Page<ResumeListItemDto> getResumesByAuthorAndCategory(Long applicantId, Long categoryId, Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo);
+
+    Page<ResumeListItemDto> getResumesByCategory(Long categoryId, Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo);
+
+    Page<ResumeListItemDto> getResumes(Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo);
 
     Page<ResumeListItemDto> getResumes(Pageable pageable);
 
