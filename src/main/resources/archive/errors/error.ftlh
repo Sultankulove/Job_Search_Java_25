@@ -325,19 +325,16 @@
             </div>
             <div class="content">
                 <h1>${status}</h1>
-                <h2>
-                    <span><@spring.message 'error.uh_oh'/></span>!
-                    <span>${reason}</span>
-                </h2>
+                <h2><span data-l10n>UH OH</span>! <span data-l10n>${reason}</span></h2>
                 <!--        <p data-l10n>{{ description></p>-->
 
                 <#if details??>
                     <ul class="details">
                         <#if details.serverName??>
-                            <li><span><@spring.message 'error.details.host'/>:</span> <code>${details.serverName}</code></li>
+                            <li><span><span data-l10n>Host</span>:</span> <code>${details.serverName}</code></li>
                         </#if>
                         <#if details.requestURL??>
-                            <li><span><@spring.message 'error.details.original_uri'/>:</span> <code>${details.requestURL}</code></li>
+                            <li><span><span data-l10n>Original URI</span>:</span> <code>${details.requestURL}</code>
                             </li>
                         </#if>
                         <#--            <#if forwarded_for>-->
@@ -352,10 +349,10 @@
                         <#--                            <li><span><span data-l10n>Request ID</span>:</span> <code>${details.requestId}</code></li>-->
                         <#--                        </#if>-->
                         <#if details.serverPort??>
-                            <li><span><@spring.message 'error.details.service_port'/>:</span> <code>${details.serverPort?c}</code></li>
+                            <li><span><span data-l10n>Service port</span>:</span> <code>${details.serverPort?c}</code>
                             </li>
                         </#if>
-                        <li><span><@spring.message 'error.details.timestamp'/>:</span> <code>${.now}</code></li>
+                        <li><span><span data-l10n>Timestamp</span>:</span> <code>${.now}</code></li>
                     </ul>
                 </#if>
             </div>
@@ -426,4 +423,3 @@
         // {{ end }}
     </script>
 </@main.layout>
-

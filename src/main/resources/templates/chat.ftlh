@@ -26,8 +26,8 @@
         (function () {
             const responseId = ${responseId};
             const chatBox = document.getElementById('chatBox');
-            const input   = document.getElementById('msgInput');
-            const btn     = document.getElementById('sendBtn');
+            const input = document.getElementById('msgInput');
+            const btn = document.getElementById('sendBtn');
 
             function appendMsg(msg) {
                 const wrap = document.createElement('div');
@@ -35,7 +35,11 @@
                 const ts = new Date(msg.timestamp || Date.now());
                 wrap.innerHTML =
                     '<div class="small text-muted">' + ts.toLocaleString() + '</div>' +
-                    '<div>' + (msg.content || '').replace(/[<&>]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[s])) + '</div>';
+                    '<div>' + (msg.content || '').replace(/[<&>]/g, s => ({
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '&': '&amp;'
+                    }[s])) + '</div>';
                 chatBox.appendChild(wrap);
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
@@ -54,7 +58,7 @@
                 btn.addEventListener('click', function () {
                     const text = input.value.trim();
                     if (!text) return;
-                    stomp.send('/app/chat/' + responseId + '/send', {}, JSON.stringify({ content: text }));
+                    stomp.send('/app/chat/' + responseId + '/send', {}, JSON.stringify({content: text}));
                     input.value = '';
                     input.focus();
                 });

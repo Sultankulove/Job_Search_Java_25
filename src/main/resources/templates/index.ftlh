@@ -1,20 +1,13 @@
 <#import "layout.ftlh" as l>
 <#import "/spring.ftl" as spring>
 
-<@l.layout title="${title! 'Список'}">
+<@l.layout title="${title! springMacroRequestContext.getMessage('list.title')}">
 
     <head>
         <link rel="stylesheet" href="/static/styles/list.css">
         <style>
-            .clickable-row {
-                cursor: pointer;
-            }
-            .text-bright {
-                color: #fff !important;
-                font-weight: 600;
-            }
-
-
+            .clickable-row { cursor: pointer; }
+            .text-bright { color: #fff !important; font-weight: 600; }
         </style>
         <title></title>
     </head>
@@ -22,43 +15,50 @@
     <div class="container">
         <div class="row mb-4">
             <div class="col">
-                <h1 class="mb-3">${title! 'Список'}</h1>
+                <h1 class="mb-3">${title! springMacroRequestContext.getMessage('list.title')}</h1>
 
                 <#assign filterAction = (filterAction)!springMacroRequestContext.requestUri>
                 <#assign params = params!{'categoryId': ''}>
                 <#assign selectedCategoryId = (params.categoryId!'')?string>
 
-                    <form id="vacancy-filter" action="${filterAction}" class="row g-2 mb-3">
-                        <label for="categoryId" class="form-label"><@spring.message "list.filter.category"/></label>
+                <form id="vacancy-filter" action="${filterAction}" class="row g-2 mb-3">
+                    <label for="categoryId" class="form-label"><@spring.message "list.filter.category"/></label>
 
-                        <div class="col-sm-3">
-                            <select class="form-select" id="categoryId" name="categoryId">
-                                <option value=""><@spring.message "list.filter.category.all"/></option>
-                                <#list categories as c>
-                                    <option value="${c.id}"
-                                            <#if selectedCategoryId == c.id?string>selected</#if>>${c.name}</option>
-                                </#list>
-                            </select>
-                        </div>
-                        <div class="col-sm-2">
-                            <input name="salaryFrom" type="number" min="0" class="form-control"
-                                   placeholder="З/п от" value="${salaryFrom!}">
-                        </div>
-                        <div class="col-sm-2">
-                            <input name="salaryTo" type="number" min="0" class="form-control"
-                                   placeholder="З/п до" value="${salaryTo!}">
-                        </div>
+                    <div class="col-sm-3">
+                        <select class="form-select" id="categoryId" name="categoryId">
+                            <option value=""><@spring.message "list.filter.category.all"/></option>
+                            <#list categories as c>
+                                <option value="${c.id}"
+                                        <#if selectedCategoryId == c.id?string>selected</#if>>${c.name}</option>
+                            </#list>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <input name="salaryFrom" type="number" min="0" class="form-control"
+                               placeholder="<@spring.message 'list.filter.salaryFrom'/>" value="${salaryFrom!}">
+                    </div>
+                    <div class="col-sm-2">
+                        <input name="salaryTo" type="number" min="0" class="form-control"
+                               placeholder="<@spring.message 'list.filter.salaryTo'/>" value="${salaryTo!}">
+                    </div>
 
-                        <div class="col-12 d-flex gap-2">
-                            <div class="col-md-2 align-self-end">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="bi bi-funnel-fill"></i> <@spring.message "list.filter.button"/>
-                                </button>
-                            </div>
-                            <button class="btn btn-outline-secondary" type="button" id="resetFilter">Сброс</button>
-                            <span class="ms-auto small text-bright">Показано: <b id="shownCount">${list.content?size}</b> из <b id="totalCount">${list.totalElements}</b></span>
+                    <div class="col-12 d-flex gap-2">
+                        <div class="col-md-2 align-self-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-funnel-fill"></i> <@spring.message "list.filter.button"/>
+                            </button>
                         </div>
-                    </form>
+                        <button class="btn btn-outline-secondary" type="button" id="resetFilter">
+                            <@spring.message "list.filter.reset"/>
+                        </button>
+                        <span class="ms-auto small text-bright">
+                            <@spring.message "list.counter.shown"/>:
+                            <b id="shownCount">${list.content?size}</b>
+                            <@spring.message "list.counter.of"/>
+                            <b id="totalCount">${list.totalElements}</b>
+                        </span>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -68,14 +68,13 @@
                     <thead>
                     <tr>
                         <#list headers as h>
-                            <th class="text-start">${h}</th></#list>
+                            <th class="text-start">${h}</th>
+                        </#list>
                     </tr>
                     </thead>
 
                     <tbody>
-
                     <#list list.content as item>
-                    <#--                         <tr> -->
                         <tr class="clickable-row"
                             data-category-name="${(item.categoryName!'')?lower_case}"
                             data-salary="${item.salary!0}"
@@ -114,8 +113,9 @@
                                     </a>
                                 </li>
                             </#if>
-                            <li class="page-item active"><span
-                                        class="btn btn-primary disabled">${list.number + 1}</span></li>
+                            <li class="page-item active">
+                                <span class="btn btn-primary disabled">${list.number + 1}</span>
+                            </li>
                             <#if list.hasNext()>
                                 <li class="page-item">
                                     <a class="btn btn-outline-primary"
@@ -132,7 +132,6 @@
     </div>
 
     <script>
-
         document.addEventListener("DOMContentLoaded", function () {
             // Кликабельные строки
             document.querySelectorAll(".clickable-row").forEach(row => {

@@ -1,15 +1,12 @@
 <#import "layout.ftlh" as l>
 <#import "/spring.ftl" as spring>
 
-<@l.layout title="${title! 'Список'}">
+<@l.layout title="${title! springMacroRequestContext.getMessage('list.title')}">
 
     <head>
         <link rel="stylesheet" href="/static/styles/list.css">
         <style>
-            .clickable-row {
-                cursor: pointer;
-            }
-
+            .clickable-row { cursor: pointer; }
         </style>
         <title></title>
     </head>
@@ -17,7 +14,7 @@
     <div class="container">
         <div class="row mb-4">
             <div class="col">
-                <h1 class="mb-3">${title! 'Список'}</h1>
+                <h1 class="mb-3">${title! springMacroRequestContext.getMessage('list.title')}</h1>
 
                 <#assign params = params!{'categoryId': ''}>
                 <#assign selectedCategoryId = (params.categoryId!'')?string>
@@ -38,11 +35,11 @@
 
                     <div class="col-sm-2">
                         <input name="salaryFrom" type="number" min="0" class="form-control"
-                               placeholder="З/п от" value="${salaryFrom!}">
+                               placeholder="<@spring.message 'list.filter.salaryFrom'/>" value="${salaryFrom!}">
                     </div>
                     <div class="col-sm-2">
                         <input name="salaryTo" type="number" min="0" class="form-control"
-                               placeholder="З/п до" value="${salaryTo!}">
+                               placeholder="<@spring.message 'list.filter.salaryTo'/>" value="${salaryTo!}">
                     </div>
 
                     <div class="col-12 d-flex gap-2">
@@ -51,8 +48,15 @@
                                 <i class="bi bi-funnel-fill"></i> <@spring.message "list.filter.button"/>
                             </button>
                         </div>
-                        <button class="btn btn-outline-secondary" type="button" id="resetFilter">Сброс</button>
-                        <span class="ms-auto small text-bright">Показано: <b id="shownCount">${list.content?size}</b> из <b id="totalCount">${list.totalElements}</b></span>
+                        <button class="btn btn-outline-secondary" type="button" id="resetFilter">
+                            <@spring.message "list.filter.reset"/>
+                        </button>
+                        <span class="ms-auto small text-bright">
+                            <@spring.message "list.counter.shown"/>:
+                            <b id="shownCount">${list.content?size}</b>
+                            <@spring.message "list.counter.of"/>
+                            <b id="totalCount">${list.totalElements}</b>
+                        </span>
                     </div>
                 </form>
             </div>
@@ -81,7 +85,6 @@
 
                             <td>${item.categoryName!'—'}</td>
 
-
                             <td>
                                 <#if item.salary??>
                                     ${item.salary?string["#,##0"]} $
@@ -109,7 +112,7 @@
         <#if list.totalPages gt 1>
             <div class="row mt-4">
                 <div class="col">
-                    <nav aria-label="<@spring.message "pagination.label"/>">
+                    <nav aria-label="<@spring.message 'pagination.label'/>">
                         <ul class="pagination justify-content-center">
                             <#if list.hasPrevious()>
                                 <li class="page-item">

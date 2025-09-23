@@ -48,7 +48,11 @@
                 </#list>
                 <#assign _isApplicant = _roleNames?seq_contains('ROLE_APPLICANT')>
                 <#assign _isEmployer  = _roleNames?seq_contains('ROLE_EMPLOYER')>
-                <#assign _accountTypeLabel = _isApplicant?then('Соискатель', _isEmployer?then('Работодатель',''))>
+
+                <#-- локализованные подписи ролей -->
+                <#assign _appLabel = springMacroRequestContext.getMessage('layout.role.applicant')>
+                <#assign _empLabel = springMacroRequestContext.getMessage('layout.role.employer')>
+                <#assign _accountTypeLabel = _isApplicant?then(_appLabel, _isEmployer?then(_empLabel,''))>
 
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item dropdown">
@@ -73,7 +77,6 @@
                                 </a>
                             </li>
                         </#if>
-
 
                         <#if !_isEmployer>
                             <li class="nav-item">
@@ -130,7 +133,6 @@
                             </a>
                         </li>
 
-
                         <li class="nav-item">
                             <span class="nav-link disabled">${_accountTypeLabel}</span>
                         </li>
@@ -185,6 +187,13 @@
             const csrfToken  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
+            // ---- i18n для тултипа
+            const I18N = {
+                unread: "<@spring.message 'layout.chat.unread'/>",
+                responses: "<@spring.message 'layout.chat.responses'/>",
+                answers: "<@spring.message 'layout.chat.answers'/>"
+            };
+
             // ---- Настрой здесь реальные эндпоинты своей бэкенд-логики ----
             // Дай два счётчика: непрочитанные сообщения и число откликов/ответов
             const ENDPOINTS = {
@@ -214,9 +223,8 @@
                     badge.textContent = (total > 99 ? '99+' : String(total));
                     badge.style.display = '';
                     link.title = role === 'EMPLOYER'
-                        ? "Непрочитанные: " + mCount + ", отклики: " + rCount + ""
-                        : "Непрочитанные: " + mCount + ", ответы: " + rCount;
-
+                        ? I18N.unread + ': ' + mCount + ', ' + I18N.responses + ': ' + rCount
+                        : I18N.unread + ': ' + mCount + ', ' + I18N.answers + ': ' + rCount;
 
                 } else {
                     badge.style.display = 'none';

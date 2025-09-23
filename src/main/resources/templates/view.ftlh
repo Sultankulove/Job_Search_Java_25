@@ -85,7 +85,7 @@
                     </form>
                 </#if>
             <#elseif !auth>
-                <a href="/login" class="btn btn-warning">Войти, чтобы откликнуться</a>
+                <a href="/auth/login" class="btn btn-warning">Войти, чтобы откликнуться</a>
             </#if>
 
             <#if role == "ROLE_EMPLOYER" && responses??>
