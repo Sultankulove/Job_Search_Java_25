@@ -1,8 +1,5 @@
 package kg.attractor.job_search_java_25.dto.resumeDtos;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import kg.attractor.job_search_java_25.dto.CategoryDtos.CategoryDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
