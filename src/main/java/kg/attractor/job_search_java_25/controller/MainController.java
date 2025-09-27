@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,16 +32,27 @@ public class MainController {
     @GetMapping
     public String index(@RequestParam(defaultValue = "0") int page,
                         @RequestParam(required = false) Long categoryId,
-                        @RequestParam(required=false) BigDecimal salaryFrom,
-                        @RequestParam(required=false) BigDecimal salaryTo,
+                        @RequestParam(required = false) BigDecimal salaryFrom,
+                        @RequestParam(required = false) BigDecimal salaryTo,
+                        @RequestParam(required = false) String term,
+                        @RequestParam(required = false) String sort,
                         Model model, Authentication auth, HttpServletRequest req) {
 
-        if (auth == null || auth.getAuthorities() == null || auth.getAuthorities().isEmpty()) {
-            Page<VacancyListItemDto> vacancies = (categoryId == null)
-                    ? vacancyService.getVacancies(PageRequest.of(page, 15), salaryFrom, salaryTo)
-                    : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
+        String normalizedSort = (sort == null || sort.isBlank()) ? "-updateTime" : sort;
+        String normalizedTerm = (term == null || term.isBlank()) ? null : term.trim();
 
-            fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy", salaryFrom,salaryTo);
+        if (auth == null || auth.getAuthorities() == null || auth.getAuthorities().isEmpty()) {
+            Page<VacancyListItemDto> vacancies = vacancyService.findPublicVacancies(
+                    categoryId,
+                    salaryFrom,
+                    salaryTo,
+                    normalizedTerm,
+                    PageRequest.of(page, 15, vacancyService.resolveSort(normalizedSort))
+            );
+
+            fillListModel(req, model, "Список вакансий", vacancies,
+                    categoryId, "vacancy", salaryFrom, salaryTo,
+                    normalizedSort, normalizedTerm);
             return "index";
         }
 
@@ -51,14 +63,22 @@ public class MainController {
                     ? resumeService.getResumes(PageRequest.of(page, 15), salaryFrom, salaryTo)
                     : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
 
-            fillListModel(req, model, "Список резюме", resumes, categoryId, "resume", salaryFrom, salaryTo);
+            fillListModel(req, model, "Список резюме",
+                    resumes, categoryId, "resume",
+                    salaryFrom, salaryTo, null, null);
 
         } else if ("ROLE_APPLICANT".equals(role)) {
-            Page<VacancyListItemDto> vacancies = (categoryId == null)
-                    ? vacancyService.getVacancies(PageRequest.of(page, 15), salaryFrom, salaryTo)
-                    : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
+            Page<VacancyListItemDto> vacancies = vacancyService.findPublicVacancies(
+                    categoryId,
+                    salaryFrom,
+                    salaryTo,
+                    normalizedTerm,
+                    PageRequest.of(page, 15, vacancyService.resolveSort(normalizedSort))
+            );
 
-            fillListModel(req, model, "Список вакансий", vacancies, categoryId, "vacancy", salaryFrom, salaryTo);
+            fillListModel(req, model, "Список вакансий",
+                    vacancies, categoryId, "vacancy",
+                    salaryFrom, salaryTo, normalizedSort, normalizedTerm);
 
         } else {
             log.warn("Unknown role: {}", role);
@@ -67,10 +87,26 @@ public class MainController {
         return "index";
     }
 
-    private void fillListModel(HttpServletRequest req, Model model, String title, Page<?> page, Long categoryId, String type, BigDecimal salaryFrom, BigDecimal salaryTo) {
+
+
+    private void fillListModel(HttpServletRequest req,
+                               Model model,
+                               String title,
+                               Page<?> page,
+                               Long categoryId,
+                               String type,
+                               BigDecimal salaryFrom,
+                               BigDecimal salaryTo,
+                               String sort,
+                               String term) {
 
         model.addAttribute("title", title);
-        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("headers", List.of(
+                "Название",
+                "Категория",
+                "Зарплата",
+                "Дата обновления"
+        ));
 
         model.addAttribute("list", page);
         model.addAttribute("salaryFrom", salaryFrom);
@@ -79,7 +115,21 @@ public class MainController {
         model.addAttribute("currentPage", page.getNumber());
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("categoryId", categoryId == null ? "" : categoryId.toString());
+        if (term != null) {
+            params.put("term", term);
+        }
+        if (sort != null) {
+            params.put("sort", sort);
+        }
+
+        model.addAttribute("params", params);
+        model.addAttribute("currentSort", sort);
+        model.addAttribute("searchTerm", term == null ? "" : term);
         model.addAttribute("filterAction", req.getRequestURI());
     }
+
+
 }
