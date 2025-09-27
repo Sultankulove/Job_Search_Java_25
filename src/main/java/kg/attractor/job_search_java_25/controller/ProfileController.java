@@ -5,6 +5,7 @@ import kg.attractor.job_search_java_25.dto.ActiveDto;
 import kg.attractor.job_search_java_25.dto.userDtos.AvatarDto;
 import kg.attractor.job_search_java_25.dto.userDtos.EditProfileDto;
 import kg.attractor.job_search_java_25.service.ProfileService;
+import kg.attractor.job_search_java_25.service.PublicationService;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
@@ -30,6 +31,7 @@ public class ProfileController {
     private final ProfileService profileService;
     private final ResumeService resumeService;
     private final VacancyService vacancyService;
+    private final PublicationService publicationService;
 
     @GetMapping
     public String profile(Model model, Authentication auth) {
@@ -51,6 +53,7 @@ public class ProfileController {
         if (isApplicant) {
             model.addAttribute("myResumes", profileService.getMyShortResumes(userId));
         }
+        model.addAttribute("myPublications", publicationService.findRecentByAuthor(userId, 5));
         return "profile";
     }
 
