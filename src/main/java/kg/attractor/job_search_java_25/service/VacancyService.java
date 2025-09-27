@@ -9,6 +9,7 @@ import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyUpsertDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyViewDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,6 +30,14 @@ public interface VacancyService {
 
     List<VacancyListItemDto> search(VacancySearchDto c);
 
+    Page<VacancyListItemDto> findPublicVacancies(Long categoryId,
+                                                 BigDecimal salaryFrom,
+                                                 BigDecimal salaryTo,
+                                                 String term,
+                                                 Pageable pageable);
+
+    Sort resolveSort(String sort);
+
     Page<VacancyListItemDto> findList(Long authorId, Pageable pageable);
 
     void touchOwned(Long vacancyId, Long authorId);
@@ -47,4 +56,3 @@ public interface VacancyService {
     List<RespondedApplicantDto> getResponsesByVacancy(Long vacancyId, Long employerId);
 
 }
-
