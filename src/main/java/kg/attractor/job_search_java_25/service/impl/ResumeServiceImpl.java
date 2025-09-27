@@ -1,5 +1,18 @@
 package kg.attractor.job_search_java_25.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kg.attractor.job_search_java_25.dto.ActiveDto;
 import kg.attractor.job_search_java_25.dto.CategoryDtos.CategoryDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeAllInfoDto;
@@ -19,18 +32,6 @@ import kg.attractor.job_search_java_25.repository.*;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -272,80 +273,6 @@ public class ResumeServiceImpl implements ResumeService {
         if (salary == null || salary.signum() <= 0) return null;
         return salary.setScale(2, RoundingMode.DOWN);
     }
-
-
-//    @Transactional
-//    @Override
-//    public ResumeViewDto saveResume(Long applicantId, ResumeUpsertDto dto) {
-//        Category category = categoryRepository.findById(
-//                        Objects.requireNonNull(dto.getCategoryId(), "categoryId must not be null"))
-//                .orElseThrow(() -> new NotFoundException("Category not found"));
-//        User applicant = userRepository.findById(applicantId)
-//                .orElseThrow(() -> new NotFoundException("User not found"));
-//
-//        Resume resume = new Resume();
-//        resume.setName(dto.getName());
-//        resume.setSalary(dto.getSalary());
-//        resume.setActive(Boolean.TRUE.equals(dto.getActive()));
-//        resume.setCategory(category);
-//        resume.setApplicant(applicant);
-//
-//
-//        resume.setWorkExperiences(new ArrayList<>());
-//        if (dto.getWorkExperiences() != null) {
-//            for (WorkExperienceInfoDto w : dto.getWorkExperiences()) {
-//                if (w == null || w.getCompanyName() == null || w.getCompanyName().isBlank()) continue;
-//
-//                WorkExperienceInfo e = new WorkExperienceInfo();
-//                e.setCompanyName(w.getCompanyName());
-//                e.setPosition(w.getPosition());
-//                e.setYears(w.getYears());
-//                e.setResponsibilities(w.getResponsibilities());
-//                e.setResume(resume);
-//                resume.getWorkExperiences().add(e);
-//            }
-//        }
-//
-//
-//        resume.setEducationInfos(new ArrayList<>());
-//        if (dto.getEducationInfos() != null) {
-//            for (EducationInfoDto ed : dto.getEducationInfos()) {
-//                if (ed == null || ed.getInstitution() == null || ed.getInstitution().isBlank()) continue;
-//
-//                EducationInfo e = new EducationInfo();
-//                e.setInstitution(ed.getInstitution());
-//                e.setDegree(ed.getDegree());
-//                e.setProgram(ed.getProgram());
-//                if (ed.getStartDate() != null) e.setStartDate(Date.valueOf(ed.getStartDate()));
-//                if (ed.getEndDate() != null)   e.setEndDate(Date.valueOf(ed.getEndDate()));
-//                e.setResume(resume);
-//                resume.getEducationInfos().add(e);
-//            }
-//        }
-//
-//
-//        resume.setContactInfos(new ArrayList<>());
-//        if (dto.getContactInfos() != null) {
-//            for (ContactInfoDto c : dto.getContactInfos()) {
-//                if (c == null || c.getContactValue() == null || c.getContactValue().isBlank()) continue;
-//
-//                ContactInfo ci = new ContactInfo();
-//                ci.setContactValue(c.getContactValue());
-//                if (c.getTypeId() != null) {
-//                    ContactType type = contactTypeRepository.findById(c.getTypeId())
-//                            .orElseThrow(() -> new NotFoundException("ContactType not found"));
-//                    ci.setType(type);
-//                }
-//                ci.setResume(resume);
-//                resume.getContactInfos().add(ci);
-//            }
-//        }
-//
-//        resume = resumeRepository.save(resume);
-//
-//        return resumeMapper.toView(resume);
-//    }
-
 
 
     @Transactional
