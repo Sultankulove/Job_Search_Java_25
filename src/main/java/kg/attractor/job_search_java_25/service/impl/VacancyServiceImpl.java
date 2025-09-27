@@ -42,24 +42,23 @@ public class VacancyServiceImpl implements VacancyService {
 
     @Override
     public Page<VacancyListItemDto> getVacancies(Pageable pageable) {
-        return vacancyRepository.findList(null, pageable);
+        return findPublicVacancies(null, null, null, null, pageable);
     }
 
     @Override
     public Page<VacancyListItemDto> getVacancies(Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo) {
-        return vacancyRepository.findListWithSalary(salaryFrom, salaryTo, pageable);
+        return findPublicVacancies(null, salaryFrom, salaryTo, null, pageable);
     }
 
     @Override
     public Page<VacancyListItemDto> getVacanciesByCategory(Long categoryId, Pageable pageable, BigDecimal salaryFrom, BigDecimal salaryTo) {
-        return vacancyRepository.findByCategory_IdAndSalary(categoryId, salaryFrom, salaryTo, pageable);
+        return findPublicVacancies(categoryId, salaryFrom, salaryTo, null, pageable);
     }
 
 
     @Override
     public Page<VacancyListItemDto> getVacanciesByCategory(Long categoryId, Pageable pageable) {
-        return vacancyRepository.findByCategory_Id(categoryId, pageable)
-                .map(vacancyMapper::toListItem);
+        return findPublicVacancies(categoryId, null, null, null, pageable);
     }
 
     @Override
@@ -73,6 +72,24 @@ public class VacancyServiceImpl implements VacancyService {
                 .map(vacancyMapper::toListItem);
     }
 
+    @Override
+    public Page<VacancyListItemDto> findPublicVacancies(Long categoryId,
+                                                        BigDecimal salaryFrom,
+                                                        BigDecimal salaryTo,
+                                                        String term,
+                                                        Pageable pageable) {
+        var page = vacancyRepository.search(
+                categoryId,
+                Boolean.TRUE,
+                toFloat(salaryFrom),
+                toFloat(salaryTo),
+                null,
+                null,
+                normalize(term),
+                pageable
+        );
+        return page.map(vacancyMapper::toListItem);
+    }
     @Override
     public List<VacancyListItemDto> search(VacancySearchDto c) {
         if (c.getMinSalary()!=null && c.getMaxSalary()!=null && c.getMinSalary() > c.getMaxSalary())
@@ -99,7 +116,8 @@ public class VacancyServiceImpl implements VacancyService {
                 .getContent();
     }
 
-    private Sort resolveSort(String s) {
+    @Override
+    public Sort resolveSort(String s) {
         if (s == null || s.isBlank()) return Sort.by(Sort.Direction.DESC, "updateTime");
         boolean desc = s.startsWith("-");
         String field = desc ? s.substring(1) : s;
@@ -108,6 +126,11 @@ public class VacancyServiceImpl implements VacancyService {
             default -> Sort.by(Sort.Direction.DESC, "updateTime");
         };
     }
+
+    private Float toFloat(BigDecimal value) {
+        return value == null ? null : value.floatValue();
+    }
+
     private String normalize(String term) {
         return (term == null || term.isBlank()) ? null : term.trim();
     }
