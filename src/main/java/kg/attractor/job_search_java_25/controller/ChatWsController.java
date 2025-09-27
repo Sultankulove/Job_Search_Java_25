@@ -5,7 +5,6 @@ import kg.attractor.job_search_java_25.dto.messageDto.MessageDto;
 import kg.attractor.job_search_java_25.service.ChatService;
 import kg.attractor.job_search_java_25.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
