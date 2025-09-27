@@ -1,8 +1,6 @@
 package kg.attractor.job_search_java_25.controller;
 
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeAllInfoDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeViewDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactTypeDto;
 import kg.attractor.job_search_java_25.dto.vacancyDtos.VacancyViewDto;
 import kg.attractor.job_search_java_25.service.*;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.security.Principal;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
