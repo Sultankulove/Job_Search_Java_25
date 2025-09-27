@@ -17,8 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,22 +30,38 @@ public class VacancyController {
     private final UserService userService;
     private final CategoryService categoryService;
 
-
-
     @GetMapping("/vacancies")
     public String listVacancies(@RequestParam(defaultValue = "0") int page,
                                 @RequestParam(required = false) Long categoryId,
-                                @RequestParam(required=false) BigDecimal salaryFrom,
-                                @RequestParam(required=false) BigDecimal salaryTo,
+                                @RequestParam(required = false) BigDecimal salaryFrom,
+                                @RequestParam(required = false) BigDecimal salaryTo,
+                                @RequestParam(required = false) String term,
+                                @RequestParam(required = false) String sort,
                                 Model model,
                                 HttpServletRequest req) {
 
-        Page<VacancyListItemDto> vacancies = (categoryId == null)
-                ? vacancyService.getVacancies(PageRequest.of(page, 15), salaryFrom, salaryTo)
-                : vacancyService.getVacanciesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
+        String normalizedSort = (sort == null || sort.isBlank()) ? "-updateTime" : sort;
+        String normalizedTerm = (term == null || term.isBlank()) ? null : term.trim();
+
+        var pageable = PageRequest.of(page, 15, vacancyService.resolveSort(normalizedSort));
+        Page<VacancyListItemDto> vacancies = vacancyService.findPublicVacancies(
+                categoryId,
+                salaryFrom,
+                salaryTo,
+                normalizedTerm,
+                pageable);
+
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("categoryId", categoryId == null ? "" : categoryId.toString());
+        params.put("term", normalizedTerm == null ? "" : normalizedTerm);
+        params.put("sort", normalizedSort);
 
         model.addAttribute("title", "Список вакансий");
-        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("headers", List.of(
+                "Название",
+                "Категория",
+                "Зарплата",
+                "Обновлено"));
         model.addAttribute("filterAction", req.getRequestURI());
         model.addAttribute("list", vacancies);
         model.addAttribute("type", "vacancy");
@@ -54,7 +70,9 @@ public class VacancyController {
         model.addAttribute("salaryTo", salaryTo);
         model.addAttribute("totalPages", vacancies.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+        model.addAttribute("params", params);
+        model.addAttribute("currentSort", normalizedSort);
+        model.addAttribute("searchTerm", normalizedTerm == null ? "" : normalizedTerm);
         return "list";
     }
 
