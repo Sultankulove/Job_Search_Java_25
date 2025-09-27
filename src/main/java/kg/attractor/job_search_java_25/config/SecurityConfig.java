@@ -15,8 +15,7 @@ import javax.sql.DataSource;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final DataSource dataSource;
-    private final ApplicationConfig appConfig;
+    private final RoleBasedAuthenticationSuccessHandler authenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain SecurityFilterChain(HttpSecurity http) throws Exception {
@@ -30,7 +29,7 @@ public class SecurityConfig {
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/login")
                         .failureUrl("/auth/login?error=true")
-                        .defaultSuccessUrl("/")
+                        .successHandler(authenticationSuccessHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -58,6 +57,12 @@ public class SecurityConfig {
 
                         .requestMatchers("/profile/**").authenticated()
                         .requestMatchers("/api/profile/avatar").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/publications/new", "/publications/*/edit").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/publications", "/publications/", "/publications/*", "/publications/*/cover").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/publications/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT,  "/publications/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/publications/**").authenticated()
 
                         .requestMatchers("/vacancies").permitAll()
                         .requestMatchers("/resumes/**", "/profile/vacancies", "/vacancy/*/edit","/vacancy/new", "/chat/start/*", "/chat/*", "vacancy/*/chat").hasRole("EMPLOYER")
