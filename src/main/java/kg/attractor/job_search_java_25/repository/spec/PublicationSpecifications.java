@@ -28,4 +28,14 @@ public final class PublicationSpecifications {
                 cb.like(cb.lower(root.get("content")), like)
         );
     }
+
+    public static Specification<Publication> authorEquals(Long authorId) {
+        return (root, query, cb) -> {
+            if (authorId == null) {
+                return null;
+            }
+            return cb.equal(root.get("author").get("id"), authorId);
+        };
+    }
+
 }

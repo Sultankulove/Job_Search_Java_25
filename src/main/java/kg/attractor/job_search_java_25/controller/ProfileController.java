@@ -2,6 +2,7 @@ package kg.attractor.job_search_java_25.controller;
 
 import jakarta.validation.Valid;
 import kg.attractor.job_search_java_25.dto.ActiveDto;
+import kg.attractor.job_search_java_25.dto.publication.PublicationListItemDto;
 import kg.attractor.job_search_java_25.dto.userDtos.AvatarDto;
 import kg.attractor.job_search_java_25.dto.userDtos.EditProfileDto;
 import kg.attractor.job_search_java_25.service.ProfileService;
@@ -11,6 +12,8 @@ import kg.attractor.job_search_java_25.service.UserService;
 import kg.attractor.job_search_java_25.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,6 +35,25 @@ public class ProfileController {
     private final ResumeService resumeService;
     private final VacancyService vacancyService;
     private final PublicationService publicationService;
+
+
+    @GetMapping("/profile/publications")
+    public String myPublications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false, name = "q") String term,
+            Model model
+    ) {
+        Long userId = userService.getRequiredUserId();
+        Page<PublicationListItemDto> pubPage =
+                publicationService.findMyPublications(userId, PageRequest.of(page, size), sort, term);
+
+        model.addAttribute("page", pubPage);
+        model.addAttribute("q", term);
+        model.addAttribute("sort", sort);
+        return "profile/my-publications";
+    }
 
     @GetMapping
     public String profile(Model model, Authentication auth) {

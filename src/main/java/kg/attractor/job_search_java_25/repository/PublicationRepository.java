@@ -21,4 +21,7 @@ public interface PublicationRepository extends JpaRepository<Publication, Long>,
     List<Publication> findTop5ByAuthorIdAndDeletedAtIsNullOrderByUpdatedAtDesc(Long authorId);
 
     List<Publication> findByAuthorIdAndDeletedAtIsNullOrderByUpdatedAtDesc(Long authorId, PageRequest of);
+
+    Page<Publication> findByAuthorIdAndDeletedAtIsNull(Long authorId, Pageable pageable);
+
 }

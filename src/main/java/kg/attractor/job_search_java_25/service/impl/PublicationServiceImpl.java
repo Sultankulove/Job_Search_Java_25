@@ -202,6 +202,25 @@ public class PublicationServiceImpl implements PublicationService {
         return dto.isRemoveCover() ? "" : null;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PublicationListItemDto> findMyPublications(Long authorId, Pageable pageable, String sort, String term) {
+        Sort sortOrder = resolveSort(sort);
+        Pageable pr = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortOrder);
+
+        String normalizedTerm = (term == null || term.isBlank()) ? null : term.trim();
+
+        Specification<Publication> spec = Specification.allOf(
+                PublicationSpecifications.notDeleted(),
+                PublicationSpecifications.authorEquals(authorId),
+                PublicationSpecifications.matchesTerm(normalizedTerm)
+        );
+
+        return publicationRepository.findAll(spec, pr)
+                .map(pub -> publicationMapper.toListItem(pub, publicationMapper.countVisibleComments(pub)));
+
+    }
+
     private boolean isOwnerOrModerator(Publication publication, Long userId, boolean isModerator) {
         Long ownerId = publication.getAuthor() != null ? publication.getAuthor().getId() : null;
         return isModerator || Objects.equals(ownerId, userId);

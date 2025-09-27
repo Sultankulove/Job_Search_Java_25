@@ -74,6 +74,12 @@
                     </li>
 
                     <#if _isAuth>
+                        <li class="nav-item">
+
+                            <a class="nav-link" href="/profile/publications">
+                                <i class="bi bi-journal-text"></i> <@spring.message 'mypubs.menu'/>
+                            </a>
+                        </li>
                         <#if !_isApplicant>
                             <li class="nav-item">
                                 <a class="nav-link" href="/resumes">
@@ -182,13 +188,13 @@
     </footer>
     <script>
         (function () {
-            const link  = document.getElementById('chatLink');
+            const link = document.getElementById('chatLink');
             if (!link) return;
 
             const badge = document.getElementById('chatBadge');
-            const role  = link.getAttribute('data-role') || 'GUEST';
+            const role = link.getAttribute('data-role') || 'GUEST';
 
-            const csrfToken  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
             const I18N = {
@@ -204,21 +210,21 @@
             };
 
             function apiGet(url) {
-                const opt = { method: 'GET', headers: {} };
+                const opt = {method: 'GET', headers: {}};
                 if (csrfHeader && csrfToken) opt.headers[csrfHeader] = csrfToken;
-                return fetch(url, opt).then(r => r.ok ? r.json() : { count: 0 })
-                    .catch(() => ({ count: 0 }));
+                return fetch(url, opt).then(r => r.ok ? r.json() : {count: 0})
+                    .catch(() => ({count: 0}));
             }
 
             Promise.all([
                 apiGet(ENDPOINTS.messages),
-                role === 'EMPLOYER'  ? apiGet(ENDPOINTS.employerResponds) :
+                role === 'EMPLOYER' ? apiGet(ENDPOINTS.employerResponds) :
                     role === 'APPLICANT' ? apiGet(ENDPOINTS.applicantAnswers) :
-                        Promise.resolve({ count: 0 })
+                        Promise.resolve({count: 0})
             ]).then(([m, r]) => {
                 const mCount = Number(m.count || 0);
                 const rCount = Number(r.count || 0);
-                const total  = mCount + rCount;
+                const total = mCount + rCount;
 
                 if (total > 0) {
                     badge.textContent = (total > 99 ? '99+' : String(total));

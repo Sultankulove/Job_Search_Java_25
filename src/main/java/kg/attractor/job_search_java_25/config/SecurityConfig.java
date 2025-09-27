@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/chat/**", "/api/respond/**").authenticated()
                         .requestMatchers("/logout").authenticated()
                         .requestMatchers("/publications/*/comments/*/delete").permitAll()
+                        .requestMatchers("/profile/publications").authenticated()
 
                         .requestMatchers("/", "/auth/**", "/error", "/auth/reset-password").permitAll()
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()

@@ -33,4 +33,7 @@ public interface PublicationService {
     void deleteComment(Long commentId, Long requesterId, boolean requesterIsModerator);
 
     String storeCover(MultipartFile file);
+
+    Page<PublicationListItemDto> findMyPublications(Long authorId, Pageable pageable, String sort, String term);
+
 }
