@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,7 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerForm(Model model,
+                               MultipartFile avatarFile,
                                @RequestParam(required = false) String role) {
 
         RegistrationRequestDto dto = new RegistrationRequestDto();
@@ -59,16 +61,19 @@ public class AuthController {
 
         model.addAttribute("dto", dto);
         model.addAttribute("role", role);
+        dto.setAvatarFile(avatarFile);
         return "auth/register";
     }
 
     @PostMapping("/register")
     public String register(@Valid @ModelAttribute("dto") RegistrationRequestDto dto,
+                           @RequestPart MultipartFile avatarFile,
                            BindingResult bindingResult,
                            @RequestParam(required = false) String role,
                            Model model) {
 
         model.addAttribute("role", role);
+        dto.setAvatarFile(avatarFile);
         if (dto.getAccountType() == null && role != null) {
             if ("applicant".equalsIgnoreCase(role)) {
                 dto.setAccountType(AccountType.APPLICANT);
@@ -78,7 +83,7 @@ public class AuthController {
         }
 
         if (dto.getAccountType() == null) {
-            bindingResult.rejectValue("accountType", "invalid", "Не удалось определить тип аккаунта.");
+            bindingResult.rejectValue("accountType", "invalid", "Недопустимый тип аккаунта.");
         }
         if (bindingResult.hasErrors()) {
             return "auth/register";
