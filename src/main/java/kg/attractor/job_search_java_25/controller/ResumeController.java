@@ -1,31 +1,32 @@
 package kg.attractor.job_search_java_25.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeUpsertDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeViewDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactInfoDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
-import kg.attractor.job_search_java_25.service.CategoryService;
-import kg.attractor.job_search_java_25.service.ContactTypeService;
-import kg.attractor.job_search_java_25.service.ResumeService;
-import kg.attractor.job_search_java_25.service.UserService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
+import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeUpsertDto;
+import kg.attractor.job_search_java_25.service.CategoryService;
+import kg.attractor.job_search_java_25.service.ContactTypeService;
+import kg.attractor.job_search_java_25.service.ResumeService;
+import kg.attractor.job_search_java_25.service.UserService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
