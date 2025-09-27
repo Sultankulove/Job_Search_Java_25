@@ -21,7 +21,7 @@
                 <#assign params = params!{'categoryId': ''}>
                 <#assign selectedCategoryId = (params.categoryId!'')?string>
 
-                <form id="vacancy-filter" action="${filterAction}" class="row g-2 mb-3">
+                <form id="vacancy-filter" action="${filterAction}" class="row g-3 mb-3">
                     <label for="categoryId" class="form-label"><@spring.message "list.filter.category"/></label>
 
                     <div class="col-sm-3">
@@ -35,15 +35,35 @@
                     </div>
                     <div class="col-sm-2">
                         <input name="salaryFrom" type="number" min="0" class="form-control"
-                               placeholder="<@spring.message 'list.filter.salaryFrom'/>" value="${salaryFrom!}">
+                               placeholder="${springMacroRequestContext.getMessage('list.filter.salaryFrom')}" value="${salaryFrom!}">
                     </div>
                     <div class="col-sm-2">
                         <input name="salaryTo" type="number" min="0" class="form-control"
-                               placeholder="<@spring.message 'list.filter.salaryTo'/>" value="${salaryTo!}">
+                               placeholder="${springMacroRequestContext.getMessage('list.filter.salaryTo')}" value="${salaryTo!}">
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="search" class="form-control" id="term" name="term"
+                               placeholder="${springMacroRequestContext.getMessage('list.filter.term')}" value="${searchTerm!''}">
+                    </div>
+                    <div class="col-sm-2">
+                        <select class="form-select" id="sort" name="sort">
+                            <option value="-updateTime" <#if (currentSort!'-updateTime') == '-updateTime'>selected</#if>>
+                                <@spring.message 'list.sort.newest'/>
+                            </option>
+                            <option value="salary" <#if (currentSort!'') == 'salary'>selected</#if>>
+                                <@spring.message 'list.sort.salary.asc'/>
+                            </option>
+                            <option value="-salary" <#if (currentSort!'')=='-salary'>selected</#if>>
+                                <@spring.message 'list.sort.salary.desc'/>
+                            </option>
+                            <option value="name" <#if (currentSort!'')=='name'>selected</#if>>
+                                <@spring.message 'list.sort.name'/>
+                            </option>
+                        </select>
                     </div>
 
-                    <div class="col-12 d-flex gap-2">
-                        <div class="col-md-2 align-self-end">
+                    <div class="col-12 d-flex gap-2 align-items-end">
+                        <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-funnel-fill"></i> <@spring.message "list.filter.button"/>
                             </button>
@@ -64,7 +84,7 @@
 
         <div class="row">
             <div class="col">
-                <table class="table table-dark table-striped table-hover align-middle" id="vacancyTable">
+                <table class="table table-dark table-striped table-hover align-middle" id="vacancyTable" data-entity="${type}">
                     <thead>
                     <tr>
                         <#list headers as h>
@@ -133,33 +153,38 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Кликабельные строки
-            document.querySelectorAll(".clickable-row").forEach(row => {
-                row.addEventListener("click", () => {
-                    const href = row.getAttribute("data-href");
-                    if (href) window.location.href = href;
-                });
-            });
-
             const form = document.getElementById("vacancy-filter");
             const storageKey = "vacancyFilter";
 
-            const saved = localStorage.getItem(storageKey);
-            if (saved) {
-                const data = JSON.parse(saved);
-                for (const [k, v] of Object.entries(data)) {
-                    const el = form.elements.namedItem(k);
-                    if (!el) continue;
+            const bindRowClick = (root = document) => {
+                root.querySelectorAll(".clickable-row").forEach(row => {
+                    row.addEventListener("click", () => {
+                        const href = row.getAttribute("data-href");
+                        if (href) window.location.href = href;
+                    });
+                });
+            };
+            bindRowClick();
 
-                    if (el.type === "checkbox") {
-                        el.checked = v === true || v === "true";
-                    } else {
-                        el.value = v ?? "";
+            const saved = localStorage.getItem(storageKey);
+            if (saved && form) {
+                try {
+                    const data = JSON.parse(saved);
+                    for (const [k, v] of Object.entries(data)) {
+                        const el = form.elements.namedItem(k);
+                        if (!el) continue;
+                        if (el.type === "checkbox") {
+                            el.checked = v === true || v === "true";
+                        } else {
+                            el.value = v ?? "";
+                        }
                     }
+                } catch (e) {
+                    console.warn('Failed to parse saved filters', e);
                 }
             }
 
-            form.addEventListener("submit", () => {
+            form?.addEventListener("submit", () => {
                 const data = {};
                 for (const el of form.elements) {
                     if (!el.name) continue;
@@ -172,11 +197,74 @@
                 localStorage.setItem(storageKey, JSON.stringify(data));
             });
 
-            document.getElementById("resetFilter").addEventListener("click", () => {
+            const resetBtn = document.getElementById("resetFilter");
+            resetBtn?.addEventListener("click", () => {
                 localStorage.removeItem(storageKey);
-                form.reset();
-                window.location = form.action;
+                form?.reset();
+                window.location = form?.action || window.location.pathname;
             });
+
+            const table = document.getElementById("vacancyTable");
+            const entity = table?.dataset.entity;
+            if (entity === "vacancy" && form && table) {
+                const searchInput = document.getElementById("term");
+                const sortSelect = document.getElementById("sort");
+                const tbody = table.querySelector("tbody");
+                const shownCount = document.getElementById("shownCount");
+                const totalCount = document.getElementById("totalCount");
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+
+                const debounce = (fn, delay = 300) => {
+                    let timer;
+                    return (...args) => {
+                        clearTimeout(timer);
+                        timer = setTimeout(() => fn(...args), delay);
+                    };
+                };
+
+                const renderRows = items => {
+                    if (!tbody) return;
+                    tbody.innerHTML = '';
+                    items.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'clickable-row';
+                        tr.dataset.href = '/vacancy/' + item.id;
+                        const salary = item.salary != null ? new Intl.NumberFormat('ru-RU').format(item.salary) + ' $' : '—';
+                        const updated = item.updateTime ? String(item.updateTime).replace('T', ' ') : '';
+                        tr.innerHTML =
+                            '<td>' + item.name + '</td>' +
+                            '<td>' + item.categoryName + '</td>' +
+                            '<td>' + salary + '</td>' +
+                            '<td>' + updated + '</td>';
+                        tbody.appendChild(tr);
+                    });
+                    bindRowClick(tbody);
+                };
+
+                const performLiveSearch = () => {
+                    const params = new URLSearchParams(new FormData(form));
+                    if (searchInput) params.set('term', searchInput.value.trim());
+                    params.set('size', '20');
+                    params.set('activeOnly', 'true');
+                    const headers = {};
+                    if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+                    fetch('/api/vacancies/search?' + params.toString(), { headers })
+                        .then(resp => resp.ok ? resp.json() : [])
+                        .then(items => {
+                            renderRows(items);
+                            if (shownCount) shownCount.textContent = items.length;
+                            if (totalCount) totalCount.textContent = items.length;
+                        })
+                        .catch(err => console.error('Live search failed', err));
+                };
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', debounce(performLiveSearch));
+                }
+
+                sortSelect?.addEventListener('change', () => form.requestSubmit());
+            }
         });
     </script>
 </@l.layout>
