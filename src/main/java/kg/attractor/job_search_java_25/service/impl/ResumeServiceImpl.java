@@ -27,8 +27,19 @@ import kg.attractor.job_search_java_25.dto.userDtos.UserViewProfileDto;
 import kg.attractor.job_search_java_25.exceptions.types.ForbiddenException;
 import kg.attractor.job_search_java_25.exceptions.types.NotFoundException;
 import kg.attractor.job_search_java_25.mappers.ResumeMapper;
-import kg.attractor.job_search_java_25.model.*;
-import kg.attractor.job_search_java_25.repository.*;
+import kg.attractor.job_search_java_25.model.Category;
+import kg.attractor.job_search_java_25.model.ContactInfo;
+import kg.attractor.job_search_java_25.model.EducationInfo;
+import kg.attractor.job_search_java_25.model.Resume;
+import kg.attractor.job_search_java_25.model.User;
+import kg.attractor.job_search_java_25.model.WorkExperienceInfo;
+import kg.attractor.job_search_java_25.repository.CategoryRepository;
+import kg.attractor.job_search_java_25.repository.ContactInfoRepository;
+import kg.attractor.job_search_java_25.repository.ContactTypeRepository;
+import kg.attractor.job_search_java_25.repository.EducationInfoRepository;
+import kg.attractor.job_search_java_25.repository.ResumeRepository;
+import kg.attractor.job_search_java_25.repository.UserRepository;
+import kg.attractor.job_search_java_25.repository.WorkExperienceInfoRepository;
 import kg.attractor.job_search_java_25.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,21 +62,32 @@ public class ResumeServiceImpl implements ResumeService {
     public Page<ResumeListItemDto> getResumesByAuthorAndCategory(
             Long applicantId, Long categoryId, Pageable pageable,
             BigDecimal salaryFrom, BigDecimal salaryTo) {
-
         if (salaryFrom != null && salaryTo != null && salaryFrom.compareTo(salaryTo) > 0) {
-            var t = salaryFrom; salaryFrom = salaryTo; salaryTo = t;
+            var t = salaryFrom;
+            salaryFrom = salaryTo;
+            salaryTo = t;
         }
         return resumeRepository.findList(applicantId, categoryId, salaryFrom, salaryTo, pageable);
     }
-    @Override
-    public Page<ResumeListItemDto> getResumesByAuthor(
-            Long applicantId, Pageable pageable,
-            BigDecimal salaryFrom, BigDecimal salaryTo) {
 
+    @Override
+    public Page<ResumeListItemDto> getResumesByAuthor(Long applicantId, Pageable pageable,
+                                                      BigDecimal salaryFrom, BigDecimal salaryTo) {
         if (salaryFrom != null && salaryTo != null && salaryFrom.compareTo(salaryTo) > 0) {
-            var t = salaryFrom; salaryFrom = salaryTo; salaryTo = t;
+            var t = salaryFrom;
+            salaryFrom = salaryTo;
+            salaryTo = t;
         }
         return resumeRepository.findList(applicantId, null, salaryFrom, salaryTo, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResumeListItemDto> getActiveResumesByAuthor(Long applicantId) {
+        return resumeRepository.findAllByApplicantId(applicantId).stream()
+                .filter(Resume::getIsActive)
+                .map(resumeMapper::toListItem)
+                .toList();
     }
 
     @Override

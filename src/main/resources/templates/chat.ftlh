@@ -20,6 +20,7 @@
         </div>
     </div>
 
+
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script>
@@ -29,36 +30,49 @@
             const input = document.getElementById('msgInput');
             const btn = document.getElementById('sendBtn');
 
+            function escapeHtml(s) {
+                return (s || '').replace(/[<&>]/g, ch => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]));
+            }
             function appendMsg(msg) {
                 const wrap = document.createElement('div');
                 wrap.className = 'mb-2';
                 const ts = new Date(msg.timestamp || Date.now());
                 wrap.innerHTML =
                     '<div class="small text-muted">' + ts.toLocaleString() + '</div>' +
-                    '<div>' + (msg.content || '').replace(/[<&>]/g, s => ({
-                        '<': '&lt;',
-                        '>': '&gt;',
-                        '&': '&amp;'
-                    }[s])) + '</div>';
+                    '<div>' + escapeHtml(msg.content) + '</div>';
                 chatBox.appendChild(wrap);
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
 
             const socket = new SockJS('/ws');
             const stomp = Stomp.over(socket);
+            stomp.debug = console.log;
 
+            socket.onclose = function (e) {
+                console.warn('SockJS closed', e);
+            };
 
-            stomp.connect({}, function () {
+            stomp.connect({}, function onConnect() {
 
-                stomp.subscribe('/topic/chat.' + responseId, function (frame) {
-                    const msg = JSON.parse(frame.body);
-                    appendMsg(msg);
+                const dest = '/topic/chat.' + responseId;
+                stomp.subscribe(dest, function (frame) {
+                    try {
+                        const msg = JSON.parse(frame.body);
+                        appendMsg(msg);
+                    } catch (e) {
+                        console.error('Bad message', e, frame.body);
+                    }
                 });
 
                 btn.addEventListener('click', function () {
-                    const text = input.value.trim();
+                    const text = (input.value || '').trim();
                     if (!text) return;
-                    stomp.send('/app/chat/' + responseId + '/send', {}, JSON.stringify({content: text}));
+                    const payload = JSON.stringify({
+                        respondedApplicants: responseId,
+                        content: text });
+                    stomp.send('/app/chat/' + responseId + '/send',
+                        { 'content-type': 'application/json' },
+                        payload);
                     input.value = '';
                     input.focus();
                 });
@@ -66,6 +80,8 @@
                 input.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') btn.click();
                 });
+            }, function onError(error) {
+                console.error('STOMP connect error', error);
             });
         })();
     </script>

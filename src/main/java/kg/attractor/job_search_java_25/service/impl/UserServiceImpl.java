@@ -10,6 +10,7 @@ import kg.attractor.job_search_java_25.exceptions.types.UserNotFoundException;
 import kg.attractor.job_search_java_25.model.User;
 import kg.attractor.job_search_java_25.repository.UserRepository;
 import kg.attractor.job_search_java_25.service.UserService;
+import kg.attractor.job_search_java_25.util.FileUtil;
 import kg.attractor.job_search_java_25.util.Utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
@@ -32,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final ApplicationConfig applicationConfig;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private static final String AVATAR_DIR = "avatar";
 
     @Override
     public Long getUserIdOrNull() {
@@ -126,7 +129,14 @@ public class UserServiceImpl implements UserService {
         user.setEmail(rrd.getEmail());
         user.setPassword(applicationConfig.passwordEncoder().encode(rrd.getPassword()));
         user.setPhoneNumber(rrd.getPhoneNumber());
-        user.setAvatar(rrd.getAvatar());
+        MultipartFile avatarFile = rrd.getAvatarFile();
+        String avatarPath = null;
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            avatarPath = FileUtil.saveUploadedFile(avatarFile, AVATAR_DIR);
+        } else if (rrd.getAvatar() != null && !rrd.getAvatar().isBlank()) {
+            avatarPath = rrd.getAvatar();
+        }
+        user.setAvatar(avatarPath);
         user.setAccountType(String.valueOf(rrd.getAccountType()));
         user.setEnabled(true);
         userRepository.save(user);

@@ -21,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +60,12 @@ public class ProfileServiceImpl implements ProfileService {
     public ResponseEntity<?> findAvatarById(Long userId) {
         log.debug("Профиль: получение аватара userId={}", userId);
         String avatar = userRepository.findAvatarPathById(userId)
-                .orElseThrow(() -> new NotFoundException("Avatar for user id=" + userId));
+                .orElse(null);
+        if (avatar == null || avatar.isBlank()) {
+            return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                    .header(HttpHeaders.LOCATION, "/static/images/default-avatar.png")
+                    .build();
+        }
         return FileUtil.downloadImage(avatar, SUB_DIR);
     }
 

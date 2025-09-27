@@ -49,7 +49,6 @@
                 <#assign _isApplicant = _roleNames?seq_contains('ROLE_APPLICANT')>
                 <#assign _isEmployer  = _roleNames?seq_contains('ROLE_EMPLOYER')>
 
-                <#-- локализованные подписи ролей -->
                 <#assign _appLabel = springMacroRequestContext.getMessage('layout.role.applicant')>
                 <#assign _empLabel = springMacroRequestContext.getMessage('layout.role.employer')>
                 <#assign _accountTypeLabel = _isApplicant?then(_appLabel, _isEmployer?then(_empLabel,''))>
@@ -68,8 +67,13 @@
                         </ul>
                     </li>
 
-                    <#if _isAuth>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/publications">
+                            <i class="bi bi-journal-text"></i> <@spring.message "layout.publications"/>
+                        </a>
+                    </li>
 
+                    <#if _isAuth>
                         <#if !_isApplicant>
                             <li class="nav-item">
                                 <a class="nav-link" href="/resumes">
@@ -187,15 +191,12 @@
             const csrfToken  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
-            // ---- i18n для тултипа
             const I18N = {
                 unread: "<@spring.message 'layout.chat.unread'/>",
                 responses: "<@spring.message 'layout.chat.responses'/>",
                 answers: "<@spring.message 'layout.chat.answers'/>"
             };
 
-            // ---- Настрой здесь реальные эндпоинты своей бэкенд-логики ----
-            // Дай два счётчика: непрочитанные сообщения и число откликов/ответов
             const ENDPOINTS = {
                 messages: '/api/chat/unread-count',                // для всех ролей
                 employerResponds: '/api/respond/pending-count',    // для EMPLOYER

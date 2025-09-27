@@ -1,6 +1,7 @@
 package kg.attractor.job_search_java_25.controller;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,11 +48,11 @@ public class ResumeController {
                               HttpServletRequest req) {
 
         Page<ResumeListItemDto> resumes = (categoryId == null)
-                ? resumeService.getResumes(PageRequest.of(page, 15), salaryFrom, salaryTo)
-                : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
+                ? resumeService.getResumes(PageRequest.of(page, 20), salaryFrom, salaryTo)
+                : resumeService.getResumesByCategory(categoryId, PageRequest.of(page, 20), salaryFrom, salaryTo);
 
-        model.addAttribute("title", "Список резюме");
-        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("title", "Resumes");
+        model.addAttribute("headers", List.of("table.col.name", "table.col.category", "table.col.salary", "table.col.updated"));
         model.addAttribute("filterAction", req.getRequestURI());
         model.addAttribute("list", resumes);
         model.addAttribute("type", "resume");
@@ -60,7 +61,17 @@ public class ResumeController {
         model.addAttribute("salaryTo", salaryTo);
         model.addAttribute("totalPages", resumes.getTotalPages());
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+        Map<String, String> params = new LinkedHashMap<>();
+        if (categoryId != null) {
+            params.put("categoryId", categoryId.toString());
+        }
+        if (salaryFrom != null) {
+            params.put("salaryFrom", salaryFrom.toPlainString());
+        }
+        if (salaryTo != null) {
+            params.put("salaryTo", salaryTo.toPlainString());
+        }
+        model.addAttribute("params", params);
         return "list";
     }
 
@@ -75,17 +86,19 @@ public class ResumeController {
         Long userId = userService.findUserIdByEmail(auth.getName());
 
         Page<ResumeListItemDto> resumes = (categoryId == null)
-                ? resumeService.getResumesByAuthor(userId, PageRequest.of(page, 15), salaryFrom, salaryTo)
-                : resumeService.getResumesByAuthorAndCategory(userId, categoryId, PageRequest.of(page, 15), salaryFrom, salaryTo);
+                ? resumeService.getResumesByAuthor(userId, PageRequest.of(page, 20), salaryFrom, salaryTo)
+                : resumeService.getResumesByAuthorAndCategory(userId, categoryId, PageRequest.of(page, 20), salaryFrom, salaryTo);
 
-        model.addAttribute("title", "Мои резюме");
-        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("title", "My resumes");
+        model.addAttribute("headers", List.of("table.col.name", "table.col.category", "table.col.salary", "table.col.updated"));
         model.addAttribute("list", resumes);
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("type", "resume");
         model.addAttribute("salaryFrom", salaryFrom);
         model.addAttribute("salaryTo", salaryTo);
-        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("categoryId", categoryId == null ? "" : categoryId.toString());
+        model.addAttribute("params", params);
         model.addAttribute("currentPage", resumes.getNumber());
         model.addAttribute("totalPages", resumes.getTotalPages());
         return "list";
@@ -118,7 +131,7 @@ public class ResumeController {
 
         Long applicantId = userService.findUserIdByEmail(auth.getName());
         resumeService.saveResume(applicantId, dto);
-        ra.addFlashAttribute("success", "Резюме создано");
+        ra.addFlashAttribute("success", "resume.created");
         return "redirect:/profile/resumes";
     }
 

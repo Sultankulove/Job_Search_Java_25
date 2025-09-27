@@ -9,10 +9,12 @@
                 <div class="col-md-3 text-center">
                     <#if user?? && user.avatar?has_content>
                         <img src="/api/profile/avatar" class="rounded-circle border"
-                             style="width:160px;height:160px;object-fit:cover" alt="<@spring.message 'profile.avatar.alt'/>">
+                             style="width:160px;height:160px;object-fit:cover"
+                             alt="<@spring.message 'profile.avatar.alt'/>">
                     <#else>
                         <img src="/static/images/default-avatar.png" class="rounded-circle border"
-                             style="width:160px;height:160px;object-fit:cover" alt="<@spring.message 'profile.avatar.alt'/>">
+                             style="width:160px;height:160px;object-fit:cover"
+                             alt="<@spring.message 'profile.avatar.alt'/>">
                     </#if>
                 </div>
 
@@ -24,7 +26,8 @@
                         <i class="bi bi-cake2"></i> ${(user.age)!'—'}
                     </div>
 
-                    <button id="editProfileBtn" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <button id="editProfileBtn" class="btn btn-outline-light" data-bs-toggle="modal"
+                            data-bs-target="#editProfileModal">
                         <i class="bi bi-pencil"></i> <@spring.message 'profile.btn.edit'/>
                     </button>
 
@@ -121,7 +124,33 @@
                                     </a>
                                     <div class="form-check form-switch d-inline-block">
                                         <input class="form-check-input js-publish-resume" type="checkbox"
-                                               data-id="${r.id}" <#if r.active?? && r.active>checked</#if>>
+                                               data-id="${r.id}"
+                                               <#if r.active?? && r.active>checked</#if>       <#if myPublications?? && myPublications?size gt 0>
+                                            <div class="card bg-dark text-light border-0 rounded-4 shadow p-3 mb-4">
+                                                <h4 class="mb-3"><@spring.message 'profile.section.myPublications'/></h4>
+                                                <div class="list-group list-group-flush">
+                                                    <#list myPublications as p>
+                                                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-start bg-dark text-light"
+                                                           href="/publications/${p.id}">
+                                                            <div>
+                                                                <div class="fw-semibold">${p.title!'-'}</div>
+                                                                <div class="small text-secondary">
+                                                                    ${p.categoryName!'—'}
+                                                                    • <#if p.updatedAt??>${p.updatedAt?string("yyyy-MM-dd HH:mm")}<#else>-</#if>
+                                                                </div>
+                                                            </div>
+                                                            <span class="badge bg-secondary rounded-pill">
+                                <i class="bi bi-chat-dots"></i> ${p.commentCount}
+                            </span>
+                                                        </a>
+                                                    </#list>
+                                                </div>
+                                                <a class="btn btn-outline-light mt-3" href="/publications">
+                                                    <@spring.message 'profile.section.myPublications.more'/>
+                                                </a>
+                                            </div>
+                                        </#if>
+                                        >>
                                         <label class="form-check-label small"><@spring.message 'table.action.published'/></label>
                                     </div>
                                 </td>
@@ -139,7 +168,8 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content bg-dark text-light">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-person-lines-fill me-2"></i><@spring.message 'profile.modal.title'/></h5>
+                    <h5 class="modal-title"><i
+                                class="bi bi-person-lines-fill me-2"></i><@spring.message 'profile.modal.title'/></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -155,7 +185,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label"><@spring.message 'profile.form.email'/></label>
-                                <input type="email" class="form-control" name="email" id="f-email" maxlength="64" required>
+                                <input type="email" class="form-control" name="email" id="f-email" maxlength="64"
+                                       required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label"><@spring.message 'profile.form.phone'/></label>
@@ -175,7 +206,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal"><@spring.message 'common.cancel'/></button>
+                    <button class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"><@spring.message 'common.cancel'/></button>
                     <button class="btn btn-primary" id="saveProfileBtn">
                         <span class="spinner-border spinner-border-sm me-2 d-none" id="saveSpinner"></span>
                         <@spring.message 'common.save'/>
@@ -202,28 +234,28 @@
                 age: "${(user.age)!''?js_string}"
             };
 
-            const modalEl  = document.getElementById('editProfileModal');
-            const fName    = document.getElementById('f-name');
+            const modalEl = document.getElementById('editProfileModal');
+            const fName = document.getElementById('f-name');
             const fSurname = document.getElementById('f-surname');
-            const fEmail   = document.getElementById('f-email');
-            const fPhone   = document.getElementById('f-phone');
-            const fAge     = document.getElementById('f-age');
-            const fAvatar  = document.getElementById('f-avatar');
+            const fEmail = document.getElementById('f-email');
+            const fPhone = document.getElementById('f-phone');
+            const fAge = document.getElementById('f-age');
+            const fAvatar = document.getElementById('f-avatar');
 
             modalEl.addEventListener('show.bs.modal', () => {
-                fName.value    = user.name;
+                fName.value = user.name;
                 fSurname.value = user.surname;
-                fEmail.value   = user.email;
-                fPhone.value   = user.phone;
-                fAge.value     = user.age;
-                fAvatar.value  = "";
+                fEmail.value = user.email;
+                fPhone.value = user.phone;
+                fAge.value = user.age;
+                fAvatar.value = "";
             });
 
             const saveBtn = document.getElementById('saveProfileBtn');
             const spinner = document.getElementById('saveSpinner');
 
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-            const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
             const withCsrf = (init = {}) => {
                 init.headers = init.headers || {};
                 if (csrfHeader && csrfToken) init.headers[csrfHeader] = csrfToken;
@@ -231,7 +263,8 @@
             };
 
             saveBtn.addEventListener('click', async () => {
-                saveBtn.disabled = true; spinner.classList.remove('d-none');
+                saveBtn.disabled = true;
+                spinner.classList.remove('d-none');
                 try {
                     const form = new URLSearchParams();
                     form.append('name', fName.value || '');
@@ -242,7 +275,7 @@
 
                     let resp = await fetch('/profile/edit', withCsrf({
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
                         body: form
                     }));
                     if (!resp.ok) throw new Error(I18N.saveError);
@@ -264,7 +297,7 @@
                         modalEl.addEventListener('hidden.bs.modal', () => {
                             document.getElementById('editProfileBtn')?.focus();
                             location.reload();
-                        }, { once: true });
+                        }, {once: true});
 
                         modal.hide();
                     } else {
@@ -274,29 +307,30 @@
                     console.error(e);
                     alert(e.message || I18N.saveError);
                 } finally {
-                    saveBtn.disabled = false; spinner.classList.add('d-none');
+                    saveBtn.disabled = false;
+                    spinner.classList.add('d-none');
                 }
             });
 
             document.querySelectorAll('.js-touch-resume').forEach(btn => {
                 btn.addEventListener('click', async () => {
-                    const r = await fetch('/api/resumes/' + btn.dataset.id + `/touch`, withCsrf({ method: 'PATCH' }));
+                    const r = await fetch('/api/resumes/' + btn.dataset.id + `/touch`, withCsrf({method: 'PATCH'}));
                     if (r.ok) location.reload();
                 });
             });
             document.querySelectorAll('.js-touch-vacancy').forEach(btn => {
                 btn.addEventListener('click', async () => {
-                    const r = await fetch('/api/vacancies/' + btn.dataset.id + `/touch`, withCsrf({ method: 'PATCH' }));
+                    const r = await fetch('/api/vacancies/' + btn.dataset.id + `/touch`, withCsrf({method: 'PATCH'}));
                     if (r.ok) location.reload();
                 });
             });
 
             document.querySelectorAll('.js-publish-resume').forEach(sw => {
                 sw.addEventListener('change', async () => {
-                    const body = JSON.stringify({ active: sw.checked });
+                    const body = JSON.stringify({active: sw.checked});
                     const r = await fetch('/api/resumes/' + sw.dataset.id + '/status', withCsrf({
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {'Content-Type': 'application/json'},
                         body
                     }));
                     if (!r.ok) sw.checked = !sw.checked;
@@ -304,10 +338,10 @@
             });
             document.querySelectorAll('.js-publish-vacancy').forEach(sw => {
                 sw.addEventListener('change', async () => {
-                    const body = JSON.stringify({ active: sw.checked });
+                    const body = JSON.stringify({active: sw.checked});
                     const r = await fetch('/api/vacancies/' + sw.dataset.id + '/status', withCsrf({
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {'Content-Type': 'application/json'},
                         body
                     }));
                     if (!r.ok) sw.checked = !sw.checked;

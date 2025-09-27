@@ -85,7 +85,7 @@ public class PublicationController {
         }
         Long authorId = userService.getRequiredUserId();
         PublicationDetailDto detail = publicationService.createPublication(dto, authorId);
-        redirectAttributes.addFlashAttribute("success", "Успешно");
+        redirectAttributes.addFlashAttribute("success", "publication.created");
         return "redirect:/publications/" + detail.getId();
     }
 

@@ -1,18 +1,24 @@
 package kg.attractor.job_search_java_25.mappers;
 
+import java.util.List;
+import java.util.function.Function;
+
+import org.springframework.stereotype.Component;
+
 import kg.attractor.job_search_java_25.dto.ActiveDto;
-import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeListItemDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeUpsertDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.ResumeViewDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.EducationInfoDto;
 import kg.attractor.job_search_java_25.dto.resumeDtos.nested.WorkExperienceInfoDto;
-import kg.attractor.job_search_java_25.model.*;
-import org.springframework.stereotype.Component;
-
-import java.sql.Date;
-import java.util.List;
-import java.util.function.Function;
+import kg.attractor.job_search_java_25.dto.resumeDtos.nested.contactDtos.ContactInfoDto;
+import kg.attractor.job_search_java_25.model.Category;
+import kg.attractor.job_search_java_25.model.ContactInfo;
+import kg.attractor.job_search_java_25.model.ContactType;
+import kg.attractor.job_search_java_25.model.EducationInfo;
+import kg.attractor.job_search_java_25.model.Resume;
+import kg.attractor.job_search_java_25.model.User;
+import kg.attractor.job_search_java_25.model.WorkExperienceInfo;
 
 @Component
 public class ResumeMapper {

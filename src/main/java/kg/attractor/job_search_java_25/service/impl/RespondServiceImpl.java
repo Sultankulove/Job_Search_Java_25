@@ -29,52 +29,68 @@ public class RespondServiceImpl implements RespondService {
     private final UserRepository userRepository;
 
     @Override
+    public boolean userInResponse(Long userId, Long responseId) {
+        RespondedApplicant ra = respondedApplicantRepository.findById(responseId)
+                .orElseThrow(() -> new NotFoundException("Response not found"));
+        Long applicantId = ra.getResume().getApplicant().getId();
+        Long employerId  = ra.getVacancy().getAuthor().getId();
+        return userId.equals(applicantId) || userId.equals(employerId);
+    }
+
+    @Override
     public boolean alreadyResponded(Long userId, Long vacancyId) {
         return resumeRepository
                 .findFirstByApplicantIdAndIsActiveTrueOrderByUpdateTimeDesc(userId)
-                .map(r -> respondedApplicantRepository.findByVacancyIdAndResumeId(vacancyId, r.getId()).isPresent())
+                .map(resume -> respondedApplicantRepository
+                        .findByVacancyIdAndResumeId(vacancyId, resume.getId())
+                        .isPresent())
                 .orElse(false);
     }
 
     @Override
     @Transactional
-    public void respond(Long userId, Long vacancyId) {
-
+    public Long respond(Long userId, Long vacancyId, Long resumeId) {
         Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new NotFoundException("Вакансия не найдена"));
+                .orElseThrow(() -> new NotFoundException("Vacancy not found"));
 
         if (vacancy.getAuthor() != null && vacancy.getAuthor().getId().equals(userId)) {
-            throw new ForbiddenException("Нельзя откликаться на собственную вакансию");
+            throw new ForbiddenException("You cannot respond to your own vacancy");
         }
 
-
         User applicant = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
-        Resume resume = resumeRepository
-                .findFirstByApplicantIdAndIsActiveTrueOrderByUpdateTimeDesc(applicant.getId())
-                .orElseThrow(() -> new NotFoundException("У вас нет активного резюме"));
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new NotFoundException("Resume not found"));
 
+        if (!resume.getApplicant().getId().equals(applicant.getId())) {
+            throw new ForbiddenException("Not your resume");
+        }
+
+        if (!resume.getIsActive()) {
+            throw new ForbiddenException("Resume must be active to respond");
+        }
 
         respondedApplicantRepository.findByVacancyIdAndResumeId(vacancyId, resume.getId())
-                .ifPresent(ra -> { throw new ForbiddenException("Вы уже откликались на эту вакансию"); });
+                .ifPresent(ra -> {
+                    throw new ForbiddenException("You already responded to this vacancy");
+                });
 
+        RespondedApplicant entity = new RespondedApplicant();
+        entity.setVacancy(vacancy);
+        entity.setResume(resume);
+        entity.setConfirmation(null);
 
-        RespondedApplicant ra = new RespondedApplicant();
-        ra.setVacancy(vacancy);
-        ra.setResume(resume);
-        ra.setConfirmation(null);
-
-        respondedApplicantRepository.save(ra);
+        entity = respondedApplicantRepository.save(entity);
+        return entity.getId();
     }
 
     @Override
     public List<ResponseDto> listResponsesForVacancy(Long vacancyId) {
+        Vacancy vacancy = vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new NotFoundException("Vacancy not found"));
 
-        Vacancy v = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new NotFoundException("Вакансия не найдена"));
-
-        return respondedApplicantRepository.findAllByVacancyId(v.getId())
+        return respondedApplicantRepository.findAllByVacancyId(vacancy.getId())
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -83,31 +99,40 @@ public class RespondServiceImpl implements RespondService {
     @Override
     public List<ResponseDto> listResponsesForApplicant(Long userId) {
         List<Long> resumeIds = resumeRepository.findAllByApplicantId(userId)
-                .stream().map(Resume::getId).toList();
-
-        if (resumeIds.isEmpty()) return List.of();
-
+                .stream()
+                .map(Resume::getId)
+                .toList();
+        if (resumeIds.isEmpty()) {
+            return List.of();
+        }
         return respondedApplicantRepository.findAllByResumeIdIn(resumeIds)
                 .stream()
                 .map(this::toDto)
                 .toList();
     }
 
-    private ResponseDto toDto(RespondedApplicant ra) {
-        return ResponseDto.builder()
-                .id(ra.getId())
-                .resumeId(ra.getResume() != null ? ra.getResume().getId() : null)
-                .vacancyId(ra.getVacancy() != null ? ra.getVacancy().getId() : null)
-                .resumeName(ra.getResume() != null ? ra.getResume().getName() : null)
-                .vacancyName(ra.getVacancy() != null ? ra.getVacancy().getName() : null)
-                .applicantName(
-                        ra.getResume() != null && ra.getResume().getApplicant() != null
-                                ? ra.getResume().getApplicant().getName()
-                                : null
-                )
-                .confirmation(ra.getConfirmation())
-                .createdDate(ra.getCreatedDate())
-                .build();
+    @Override
+    public List<ResponseDto> listResponsesForEmployer(Long userId) {
+        return respondedApplicantRepository.findAllByVacancy_Author_Id(userId)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
+    private ResponseDto toDto(RespondedApplicant entity) {
+        return ResponseDto.builder()
+                .id(entity.getId())
+                .resumeId(entity.getResume() != null ? entity.getResume().getId() : null)
+                .vacancyId(entity.getVacancy() != null ? entity.getVacancy().getId() : null)
+                .resumeName(entity.getResume() != null ? entity.getResume().getName() : null)
+                .vacancyName(entity.getVacancy() != null ? entity.getVacancy().getName() : null)
+                .applicantName(
+                        entity.getResume() != null && entity.getResume().getApplicant() != null
+                                ? entity.getResume().getApplicant().getName()
+                                : null
+                )
+                .confirmation(entity.getConfirmation())
+                .createdDate(entity.getCreatedDate())
+                .build();
+    }
 }

@@ -55,12 +55,6 @@
                 </#list>
             </#list>
 
-        <#--            <#list r.-->
-        <#--             <p>Обновлено: -->
-        <#--                 <#if v.updateTime??> -->
-        <#--                         ${v.updateTime!''} -->
-        <#--                 <#else>-</#if> -->
-        <#--             </p> -->
 
         </#if>
 
@@ -72,21 +66,103 @@
             <p>Описание: ${v.description}</p>
             <p>Обновлено: ${v.updateTime}</p>
 
-            <#if auth && role == "ROLE_APPLICANT">
-                <#if responded?? && responded>
-                    <button class="btn btn-secondary" disabled>Вы уже откликнулись</button>
-                <#else>
-                    <form method="post" action="/vacancy/${v.id}/respond">
-                        <#if _csrf??>
-                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-                        </#if>
 
-                        <button class="btn btn-primary">Откликнуться</button>
-                    </form>
+            <#if auth && role == "ROLE_APPLICANT">
+                <#if respondSuccess??>
+                    <div class="alert alert-success mt-3"><@spring.message respondSuccess/></div>
                 </#if>
+                <#if respondError??>
+                    <div class="alert alert-danger mt-3"><@spring.message respondError/></div>
+                </#if>
+
+                <#if responded?? && responded>
+                    <div class="alert alert-info mt-3 d-flex align-items-center gap-2">
+                        <span><@spring.message "response.already.exists"/></span>
+                        <a class="btn btn-sm btn-outline-light" href="/chats">
+                            <i class="bi bi-chat-dots"></i> <@spring.message "response.open.chat"/>
+                        </a>
+                    </div>
+
+                <#else>
+                    <#if myResumes?? && myResumes?size gt 0>
+                        <button class="btn btn-primary mt-3"
+                                data-bs-toggle="modal" data-bs-target="#respondModal">
+                            <i class="bi bi-envelope-plus"></i> <@spring.message "response.respond.cta"/>
+                        </button>
+
+                        <div class="modal fade" id="respondModal" tabindex="-1"
+                             aria-labelledby="respondModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content text-dark">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="respondModalLabel">
+                                            <@spring.message "response.modal.title"/>
+                                        </h5>
+                                        <button type="button" class="btn-close"
+                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+
+                                    <form method="post" action="/vacancy/${v.id}/respond">
+                                        <div class="modal-body">
+                                            <#if _csrf??>
+                                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+                                            </#if>
+
+                                            <div class="mb-3">
+                                                <label class="form-label" for="resumeId">
+                                                    <@spring.message "response.modal.select"/>
+                                                </label>
+                                                <select id="resumeId" name="resumeId" class="form-select" required>
+                                                    <#list myResumes as r>
+                                                        <option value="${r.id}">
+                                                            ${r.name!'-'}
+                                                            <#if r.updateTime??>${r.updateTime}</#if>
+                                                        </option>
+                                                    </#list>
+                                                </select>
+                                            </div>
+
+                                            <div class="d-flex align-items-center gap-2">
+                                    <span class="small text-secondary">
+                                        <@spring.message "response.modal.or.create"/>
+                                    </span>
+                                                <a href="/resume/new" class="btn btn-outline-secondary btn-sm" target="_blank">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                    <@spring.message "response.create.resume"/>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                    data-bs-dismiss="modal">
+                                                <@spring.message "common.cancel"/>
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <@spring.message "response.modal.submit"/>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    <#else>
+                        <div class="alert alert-warning mt-3 d-flex align-items-center gap-2">
+                            <span><@spring.message "response.no.active.resume"/></span>
+                            <a class="btn btn-sm btn-outline-light" href="/resume/new" target="_blank">
+                                <i class="bi bi-plus-circle"></i> <@spring.message "response.create.resume"/>
+                            </a>
+                        </div>
+                    </#if>
+                </#if>
+
             <#elseif !auth>
-                <a href="/auth/login" class="btn btn-warning">Войти, чтобы откликнуться</a>
+                <a href="/auth/login" class="btn btn-warning">
+                    <@spring.message "response.login.to.apply"/>
+                </a>
             </#if>
+
 
             <#if role == "ROLE_EMPLOYER" && responses??>
                 <h4 class="mt-4">Отклики:</h4>

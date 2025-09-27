@@ -29,6 +29,7 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
               from Resume r
               left join r.category c
               where (:applicantId is null or r.applicant.id = :applicantId)
+                and (:applicantId is not null or r.isActive = true)
               order by r.updateTime desc
             """)
     Page<ResumeListItemDto> findList(@Param("applicantId") Long applicantId, Pageable pageable);
@@ -67,6 +68,7 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
     and (:categoryId  is null or r.category.id  = :categoryId)
     and (:salaryFrom  is null or r.salary >= :salaryFrom)
     and (:salaryTo    is null or r.salary <= :salaryTo)
+    and (:applicantId is not null or r.isActive = true)
   order by r.updateTime desc
 """)
     Page<ResumeListItemDto> findList(

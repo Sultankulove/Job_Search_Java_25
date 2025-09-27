@@ -43,7 +43,7 @@ public class VacancyController {
         String normalizedSort = (sort == null || sort.isBlank()) ? "-updateTime" : sort;
         String normalizedTerm = (term == null || term.isBlank()) ? null : term.trim();
 
-        var pageable = PageRequest.of(page, 15, vacancyService.resolveSort(normalizedSort));
+        var pageable = PageRequest.of(page, 20, vacancyService.resolveSort(normalizedSort));
         Page<VacancyListItemDto> vacancies = vacancyService.findPublicVacancies(
                 categoryId,
                 salaryFrom,
@@ -56,12 +56,9 @@ public class VacancyController {
         params.put("term", normalizedTerm == null ? "" : normalizedTerm);
         params.put("sort", normalizedSort);
 
-        model.addAttribute("title", "Список вакансий");
-        model.addAttribute("headers", List.of(
-                "Название",
-                "Категория",
-                "Зарплата",
-                "Обновлено"));
+        model.addAttribute("title", "Vacancies");
+        model.addAttribute("headers", List.of("table.col.name", "table.col.category", "table.col.salary", "table.col.updated"));
+
         model.addAttribute("filterAction", req.getRequestURI());
         model.addAttribute("list", vacancies);
         model.addAttribute("type", "vacancy");
@@ -85,15 +82,19 @@ public class VacancyController {
         Long employerId = userService.findUserIdByEmail(auth.getName());
 
         Page<VacancyListItemDto> vacancies = (categoryId == null)
-                ? vacancyService.findByEmployerId(employerId, PageRequest.of(page, 15))
-                : vacancyService.findByEmployerIdAndCategory(employerId, categoryId, PageRequest.of(page, 15));
+                ? vacancyService.findByEmployerId(employerId, PageRequest.of(page, 20))
+                : vacancyService.findByEmployerIdAndCategory(employerId, categoryId, PageRequest.of(page, 20));
 
-        model.addAttribute("title", "Мои вакансии");
-        model.addAttribute("headers", List.of("Название", "Категория", "Зарплата", "Обновлено"));
+        model.addAttribute("title", "My vacancies");
+        model.addAttribute("headers", List.of("table.col.name", "table.col.category", "table.col.salary", "table.col.updated"));
         model.addAttribute("list", vacancies);
         model.addAttribute("type", "vacancy");
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("params", Map.of("categoryId", categoryId == null ? "" : categoryId.toString()));
+        Map<String, String> params = new LinkedHashMap<>();
+
+        params.put("categoryId", categoryId == null ? "" : categoryId.toString());
+
+        model.addAttribute("params", params);
         model.addAttribute("currentPage", vacancies.getNumber());
         model.addAttribute("totalPages", vacancies.getTotalPages());
         return "list";

@@ -1,15 +1,15 @@
 package kg.attractor.job_search_java_25.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
-import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 
 @EnableMethodSecurity(prePostEnabled = true)
 @Configuration
@@ -22,9 +22,8 @@ public class SecurityConfig {
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
 //                .httpBasic(Customizer.withDefaults())
-//                .csrf(csrf -> csrf
-//                        .ignoringRequestMatchers("/ws/**", "/topic/**", "/app/**"));
-//                )
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/ws/**", "/topic/**", "/app/**"))
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/login")
@@ -40,7 +39,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/api/chat/**", "/api/respond/**").authenticated()
                         .requestMatchers("/logout").authenticated()
+                        .requestMatchers("/publications/*/comments/*/delete").permitAll()
 
                         .requestMatchers("/", "/auth/**", "/error", "/auth/reset-password").permitAll()
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
@@ -57,6 +58,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/profile/**").authenticated()
                         .requestMatchers("/api/profile/avatar").authenticated()
+                        .requestMatchers("/chats").authenticated()
 
                         .requestMatchers(HttpMethod.GET, "/publications/new", "/publications/*/edit").authenticated()
                         .requestMatchers(HttpMethod.GET, "/publications", "/publications/", "/publications/*", "/publications/*/cover").permitAll()
@@ -65,10 +67,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/publications/**").authenticated()
 
                         .requestMatchers("/vacancies").permitAll()
-                        .requestMatchers("/resumes/**", "/profile/vacancies", "/vacancy/*/edit","/vacancy/new", "/chat/start/*", "/chat/*", "vacancy/*/chat").hasRole("EMPLOYER")
+                        .requestMatchers("/resumes/**", "/profile/vacancies", "/vacancy/*/edit","/vacancy/new", "/chat/start/*", "vacancy/*/chat").hasRole("EMPLOYER")
                         .requestMatchers("/vacancy/*").permitAll()
+                        .requestMatchers("/vacancy/*/respond").hasRole("APPLICANT")
 
                         .requestMatchers("/vacancies/**", "/vacancy/**", "/profile/resumes", "/resumes/*/edit", "resume/new").hasRole("APPLICANT")
+                        .requestMatchers("chat/**").authenticated()
                         .anyRequest().authenticated()
                 );
 

@@ -6,13 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
@@ -52,7 +46,7 @@ public class ProfileRestController {
     @GetMapping
     public UserProfileDto getMyProfile(Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
-        log.debug("GET /api/profile/{} — получить профиль", authentication.getName());
+        log.debug("GET /api/profile/{} возвращен профиль", authentication.getName());
         return profileService.getMyProfile(authId);
     }
 
@@ -60,7 +54,7 @@ public class ProfileRestController {
     public ResponseEntity<UserProfileDto> editProfile(@RequestBody @Valid EditProfileDto epd,
                                                       Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
-        log.info("PUT /api/profile — редактирование профиля userId={}", authId);
+        log.info("PUT /api/profile редактирован профиль userId={}", authId);
         return ResponseEntity.ok(profileService.updateProfileByUserId(epd, authId));
     }
 
@@ -75,14 +69,21 @@ public class ProfileRestController {
     @GetMapping("avatar")
     public ResponseEntity<?> getAvatar(Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
-        log.debug("GET /api/profile/avatar — получение аватара userId={}", authId);
+        log.debug("GET /api/profile/avatar  аватар userId={}", authId);
         return profileService.findAvatarById(authId);
+    }
+
+    @GetMapping("/avatar/{id}")
+    public ResponseEntity<?> getAvatarById(Authentication authentication,
+                                           @PathVariable Long id) {
+        log.debug("GET /api/profile/avatar  аватар userId={}", id);
+        return profileService.findAvatarById(id);
     }
 
     @GetMapping("responses")
     public ResponseEntity<List<RespondedApplicantDto>> getMyResponses(Authentication authentication) {
         Long authId = userService.findUserIdByEmail(authentication.getName());
-        log.debug("GET /api/profile/responses — userId={}", authId);
+        log.debug("GET /api/profile/responses  userId={}", authId);
         return ResponseEntity.ok(profileService.getMyResponses(authId));
     }
 
@@ -90,7 +91,7 @@ public class ProfileRestController {
     public ResponseEntity<List<RespondedApplicantDto>> getVacancyResponses(Authentication authentication,
                                                                            Pageable p) {
         Long employerId = userService.findUserIdByEmail(authentication.getName());
-        log.debug("GET /api/profile/vacancy-responses — employerId={}", employerId);
+        log.debug("GET /api/profile/vacancy-responses  employerId={}", employerId);
         return ResponseEntity.ok(profileService.getMyVacanciesResponses(employerId, p));
     }
 }

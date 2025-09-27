@@ -62,15 +62,21 @@
         <section id="comments" class="mb-4">
             <h3 class="mb-3"><@spring.message 'publication.view.comments'/></h3>
 
-            <#if commentDto?? && (SPRING_SECURITY_CONTEXT.authentication.principal!'anonymousUser') != 'anonymousUser'>
+            <#assign _sec  = (Session.SPRING_SECURITY_CONTEXT)!''>
+            <#assign _auth = (_sec.authentication??
+            && _sec.authentication.principal??)>
+            <#assign _isAnon = (_auth?is_string) && (_auth == 'anonymousUser')>
+
+
+            <#if commentDto?? && !_isAnon>
                 <form method="post" action="/publications/${detail.id}/comments" class="mb-4">
                     <#if _csrf??>
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
                     </#if>
                     <div class="mb-2">
-                        <textarea class="form-control" name="content" rows="3"
-                                  placeholder="<@spring.message 'publication.comment.placeholder'/>"
-                                  required></textarea>
+            <textarea class="form-control" name="content" rows="3"
+                      placeholder="<@spring.message 'publication.comment.placeholder'/>"
+                      required></textarea>
                     </div>
                     <button class="btn btn-primary" type="submit">
                         <i class="bi bi-chat-text"></i> <@spring.message 'publication.comment.submit'/>
@@ -91,6 +97,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div class="fw-semibold">${comment.authorName!'—'}</div>
+                                    <img src="/api/profile/avatar/${comment.authorId}" alt="avatar" class="rounded" style="max-height:32px">
                                     <div class="text-secondary small">
                                         <#if comment.createdAt??>${comment.createdAt}<#else>-</#if>
                                     </div>
@@ -98,25 +105,25 @@
                                 <#if comment.canDelete>
                                     <form method="post"
                                           action="/publications/${detail.id}/comments/${comment.id}/delete"
-                                          onsubmit="return confirm('<@spring.message 'publication.comment.delete.confirm'/>)">
+                                          onsubmit="return confirm('удалить комментарий?');">
                                         <#if _csrf??>
                                             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
                                         </#if>
-                                        <button class="btn btn-sm btn-outline-danger" type="submit">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" title="Удалить">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
                                 </#if>
                             </div>
-                            <div class="mt-2">
+                            <div class="mt-2" style="color: white">
                                 <#if comment.deleted>
-                                    <span class="text-muted fst-italic">
-                                        <#if comment.deletedByModerator>
-                                            <@spring.message 'publication.comment.deleted.moderator'/>
-                                        <#else>
-                                            <@spring.message 'publication.comment.deleted.author'/>
-                                        </#if>
-                                    </span>
+                                    <span class="fst-italic" style="color: white">
+                                <#if comment.deletedByModerator>
+                                    <@spring.message 'publication.comment.deleted.moderator'/>
+                                <#else>
+                                    <@spring.message 'publication.comment.deleted.author'/>
+                                </#if>
+                            </span>
                                 <#else>
                                     ${comment.content!''}
                                 </#if>
@@ -126,5 +133,6 @@
                 </div>
             </#if>
         </section>
+
     </div>
 </@l.layout>

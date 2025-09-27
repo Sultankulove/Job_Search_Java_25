@@ -1,7 +1,7 @@
 <#import "layout.ftlh" as l>
 <#import "/spring.ftl" as spring>
 
-<@l.layout title="${title! springMacroRequestContext.getMessage('list.title')!'Лист'}">
+<@l.layout title="Лист">
 
     <head>
         <link rel="stylesheet" href="/static/styles/list.css">
@@ -35,16 +35,16 @@
 
                     <div class="col-sm-2">
                         <input name="salaryFrom" type="number" min="0" class="form-control"
-                               placeholder="${springMacroRequestContext.getMessage('list.filter.salaryFrom')!'З/п от'}" value="${salaryFrom!}">
+                               placeholder="<@spring.message 'list.filter.salaryFrom'/>" value="${salaryFrom!}">
                     </div>
                     <div class="col-sm-2">
                         <input name="salaryTo" type="number" min="0" class="form-control"
-                               placeholder="${springMacroRequestContext.getMessage('list.filter.salaryTo'!'З/п до')}" value="${salaryTo!}">
+                               placeholder="<@spring.message 'list.filter.salaryTo'/>" value="${salaryTo!}">
                     </div>
 
                     <div class="col-sm-3">
                         <input type="search" class="form-control" id="term" name="term"
-                               placeholder="${springMacroRequestContext.getMessage('list.filter.term')!'Поиск'}" value="${searchTerm!''}">
+                               placeholder="<@spring.message 'list.filter.term'/>" value="${searchTerm!''}">
                     </div>
 
                     <div class="col-sm-2">
@@ -52,13 +52,13 @@
                             <option value="-updateTime" <#if (currentSort!'-updateTime') == '-updateTime'>selected</#if>>
                                 <@spring.message 'list.sort.newest'/>
                             </option>
-                            <option value="salary" <#if currentSort=='salary'>selected</#if>>
+                            <option value="salary" <#if (currentSort!'')=='salary'>selected</#if>>
                                 <@spring.message 'list.sort.salary.asc'/>
                             </option>
-                            <option value="-salary" <#if currentSort=='-salary'>selected</#if>>
+                            <option value="-salary" <#if (currentSort!'')=='-salary'>selected</#if>>
                                 <@spring.message 'list.sort.salary.desc'/>
                             </option>
-                            <option value="name" <#if currentSort=='name'>selected</#if>>
+                            <option value="name" <#if (currentSort!'')=='name'>selected</#if>>
                                 <@spring.message 'list.sort.name'/>
                             </option>
                         </select>
@@ -84,13 +84,29 @@
             </div>
         </div>
 
+        <#assign queryPairs = []>
+        <#if params??>
+            <#list params?keys as key>
+                <#assign value = params[key]!''>
+                <#if value?has_content>
+                    <#assign queryPairs = queryPairs + [key + '=' + value?url]>
+                </#if>
+            </#list>
+        </#if>
+        <#assign queryBase = queryPairs?join('&')>
+        <#if queryBase?has_content>
+            <#assign queryBase = '?' + queryBase + '&'>
+        <#else>
+            <#assign queryBase = '?'>
+        </#if>
+
         <div class="row">
             <div class="col">
                 <table class="table table-dark table-striped table-hover align-middle" id="vacancyTable" data-entity="${type}">
                     <thead>
                     <tr>
                         <#list headers as h>
-                            <th class="text-start">${h}</th>
+                            <th class="text-start"><@spring.message h/></th>
                         </#list>
                     </tr>
                     </thead>
@@ -116,9 +132,9 @@
                             <td>
                                 <#if item.updateTime?has_content>
                                     <#if item.updateTime?is_date || item.updateTime?is_datetime>
-                                        ${item.updateTime}
+                                        ${item.updateTime?string("yyyy-MM-dd HH:mm")}
                                     <#elseif item.updateTime?is_string>
-                                        ${item.updateTime}
+                                        ${item.updateTime?replace("T", " ")}
                                     <#else>
                                         ${item.updateTime}
                                     </#if>
@@ -138,7 +154,7 @@
                         <ul class="pagination justify-content-center">
                             <#if list.hasPrevious()>
                                 <li class="page-item">
-                                    <a class="btn btn-outline-primary" href="?categoryId=${selectedCategoryId}&page=${list.number - 1}">
+                                    <a class="btn btn-outline-primary" href="${filterAction}${queryBase}page=${list.number - 1}">
                                         ← <@spring.message "pagination.previous"/>
                                     </a>
                                 </li>
@@ -150,7 +166,7 @@
 
                             <#if list.hasNext()>
                                 <li class="page-item">
-                                    <a class="btn btn-outline-primary" href="?categoryId=${selectedCategoryId}&page=${list.number + 1}">
+                                    <a class="btn btn-outline-primary" href="${filterAction}${queryBase}page=${list.number + 1}">
                                         <@spring.message "pagination.next"/> →
                                     </a>
                                 </li>
@@ -240,7 +256,7 @@
                     items.forEach(item => {
                         const tr = document.createElement('tr');
                         tr.className = 'clickable-row';
-                        tr.dataset.href = '/vacancy/'+ item.id;
+                        tr.dataset.href = '/vacancy/' + item.id;
                         const salary = item.salary != null ? new Intl.NumberFormat('ru-RU').format(item.salary) + ' $' : '—';
                         const updated = item.updateTime ? String(item.updateTime).replace('T', ' ') : '';
                         tr.innerHTML =
