@@ -62,13 +62,12 @@
         <section id="comments" class="mb-4">
             <h3 class="mb-3"><@spring.message 'publication.view.comments'/></h3>
 
-            <#assign _sec  = (Session.SPRING_SECURITY_CONTEXT)!''>
-            <#assign _auth = (_sec.authentication??
-            && _sec.authentication.principal??)>
-            <#assign _isAnon = (_auth?is_string) && (_auth == 'anonymousUser')>
+            <#assign _auth = (SPRING_SECURITY_CONTEXT.authentication)!>
+            <#assign _isAuth = (_auth?? && _auth.principal?has_content && _auth.principal != 'anonymousUser')>
 
 
-            <#if commentDto?? && !_isAnon>
+
+            <#if commentDto?? && _isAuth>
                 <form method="post" action="/publications/${detail.id}/comments" class="mb-4">
                     <#if _csrf??>
                         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
