@@ -1,4 +1,4 @@
-FROM openjdk:21
+FROM openjdk:21-ea-slim
 RUN mkdir /app
 COPY ./Job_Search*jar ./app/job_search.jar
 WORKDIR /app
