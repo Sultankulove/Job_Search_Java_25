@@ -1,6 +1,6 @@
 services:
   app:
-    image: job_search_java25_image:latest
+    image: ghcr.io/sultankulove/job_search_java25_image:latest
     container_name: job_search_container
     ports:
       - "8888:8888"

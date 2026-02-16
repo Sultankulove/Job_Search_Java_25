@@ -4,7 +4,7 @@ on:
   workflow_dispatch
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.actor }}/job_search_java25_image:latest
+#  IMAGE_NAME: ${{ github.actor }}/job_search_java25_image:latest
 
 jobs:
   build:
@@ -42,14 +42,17 @@ jobs:
         with:
           name: 'artifact'
 
-      - name: Login
+      - name: Set lowercase owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+      - name: Login GHCR
         run: |
           echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build and Publish
-        run: |
-          docker build . --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        run: |s
+          docker build . -t ghcr.io/${OWNER_LC}/job_search_java25_image:latest
+          docker push ghcr.io/${OWNER_LC}/job_search_java25_image:latest
 
   deploy:
     needs: publish
@@ -64,7 +67,7 @@ jobs:
           port: 22
           username: ${{ secrets.SSH_USER }}
           privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-          command:
+          command: |
             cd ${{ secrets.WORK_DIR }}
             docker compose pull
             docker compose up -d
