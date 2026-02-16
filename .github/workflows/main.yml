@@ -1,1 +1,71 @@
+name: Deploy Job Search
 
+on:
+  workflow_dispatch
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.actor }}/job_search_java25_image:latest
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.1
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: maven
+
+      - name: Start Maven Package
+        run: mvn clean package -DskipTests
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'artifact'
+          path: ./target/Job_Search*.jar
+          retention-days: 1
+
+  publish:
+    needs: build
+    name: Publish Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'artifact'
+
+      - name: Login
+        run: |
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --pasword-stdin
+
+      - name: Build and Publish
+        run: |
+          docker build . --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+  deploy:
+    needs: publish
+    name: Deploy Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Connect to server and pull docker image
+        user: tiyes/action-ssh@v1.0.1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: 22
+          username: ${{ secrets.SSH_USER }}
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
+          command:
+            cd ${{ secrets.WORK_DIR }}
+            docker compose pull
+            docker compose up -d
+            exit

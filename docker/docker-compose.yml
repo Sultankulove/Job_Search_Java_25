@@ -1,0 +1,10 @@
+services:
+  app:
+    image: job_search_java25_image:latest
+    container_name: job_search_container
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./db:/app/db
+      - ./logs:/app/logs
+      - ./data:/app/data
