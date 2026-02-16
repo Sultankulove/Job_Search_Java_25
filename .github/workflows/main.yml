@@ -44,7 +44,7 @@ jobs:
 
       - name: Login
         run: |
-          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --pasword-stdin
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build and Publish
         run: |
@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Connect to server and pull docker image
-        user: tiyes/action-ssh@v1.0.1
+        uses: tiyes/action-ssh@v1.0.1
         with:
           host: ${{ secrets.SSH_HOST }}
           port: 22
