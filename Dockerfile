@@ -6,7 +6,7 @@
 #EXPOSE 8888
 #CMD ["java", "-jar", "job_search.jar"]
 
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-jammy
 WORKDIR /app
 COPY Job_Search*.jar app.jar
 EXPOSE 8888
