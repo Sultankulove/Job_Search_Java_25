@@ -60,14 +60,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Connect to server and pull docker image
-        uses: tiyes/action-ssh@v1.0.1
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           port: 22
           username: ${{ secrets.SSH_USER }}
-          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-          command: |
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
             cd ${{ secrets.WORK_DIR }}
             docker compose pull
             docker compose up -d
